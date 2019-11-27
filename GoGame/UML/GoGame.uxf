@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>6</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>390</x>
+      <y>126</y>
+      <w>126</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Interface&gt;&gt;
+Player
+--
++makeMove(Move): bool
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>588</x>
+      <y>222</y>
+      <w>126</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>GameService
+--
+-skey: String
+-game: Game
+-clients: Socket[2]
+--
+#isGameRunning(): bool
+#createGame(): Game
++getName(): String
++getState(): String
++addPlayer(Player): bool
++getGameState(): String
++getServerStatus(): String
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>588</x>
+      <y>414</y>
+      <w>186</w>
+      <h>114</h>
+    </coordinates>
+    <panel_attributes>Server
+--
+-listener: ServerSocket
+-game_serves: List&lt;GameServer&gt;
+--
+#CreateGameServer(String skey): GameServer
++run(): bool
++stop(): bool
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>624</x>
+      <y>336</y>
+      <w>24</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=*
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>786</x>
+      <y>222</y>
+      <w>210</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>Game
+--
+-player1: Player
+-player2: Player
++mx: Mutex
+--
++makeMove(Int playerid, Move): bool
++getBoard(): String
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>708</x>
+      <y>240</y>
+      <w>90</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=1
+m2=1
+</panel_attributes>
+    <additional_attributes>10.0;20.0;130.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>510</x>
+      <y>138</y>
+      <w>324</w>
+      <h>96</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=2
+m2=1
+</panel_attributes>
+    <additional_attributes>10.0;20.0;510.0;20.0;510.0;140.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>366</x>
+      <y>414</y>
+      <w>132</w>
+      <h>126</h>
+    </coordinates>
+    <panel_attributes>Client
+--
+-socket: Socket
+--
++connect(IP): bool
++getPlayer(): Player
++showGameServers(): String
++addGameServe(String): String
++selectGame(String): bool
++showPlayer(): Pair&lt;String, int&gt;[]
++kickPlayer(int): void
++setRedy(bool): void;
++getConnectionStatus(): String
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>444</x>
+      <y>306</y>
+      <w>156</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=2
+m2=1</panel_attributes>
+    <additional_attributes>10.0;180.0;10.0;10.0;240.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>222</x>
+      <y>180</y>
+      <w>126</w>
+      <h>78</h>
+    </coordinates>
+    <panel_attributes>RemotePlayerRX
+--
+-id: int
+-game: Game
+-socket: Soket
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>288</x>
+      <y>162</y>
+      <w>114</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>170.0;10.0;10.0;10.0;10.0;30.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>270</x>
+      <y>438</y>
+      <w>108</w>
+      <h>66</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=1
+m2=1
+Have ^</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0;160.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>588</x>
+      <y>0</y>
+      <w>126</w>
+      <h>114</h>
+    </coordinates>
+    <panel_attributes>AIPlayer
+--
+-id: int
+-moves: List&lt;Move&gt;
+-game: Game
+--
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>450</x>
+      <y>54</y>
+      <w>150</w>
+      <h>84</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;120.0;10.0;10.0;230.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>798</x>
+      <y>354</y>
+      <w>126</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Board
+--
+-board: List&lt;int&gt;
+--
++changeState(int, int): void
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1014</x>
+      <y>114</y>
+      <w>126</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>GameLogic
+--
+-board: Board
+--
+-isValidMove(Move): bool</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>870</x>
+      <y>162</y>
+      <w>156</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=1
+m2=1
+</panel_attributes>
+    <additional_attributes>10.0;100.0;10.0;10.0;240.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>864</x>
+      <y>288</y>
+      <w>24</w>
+      <h>78</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=1
+m2=1
+</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>222</x>
+      <y>354</y>
+      <w>126</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>RemotePlayerTX
+--
+-moves: List&lt;Move&gt;
+-id: int
+-socket: Socket
+-skey: String
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>276</x>
+      <y>252</y>
+      <w>84</w>
+      <h>114</h>
+    </coordinates>
+    <panel_attributes>lt=-
+m1=1
+m2=1
+v Communicate ^ </panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;170.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>588</x>
+      <y>564</y>
+      <w>168</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Interface&gt;&gt;
+GameServerService
+--
++getAvaiableServersNames(): List&lt;String&gt;
++connect(String): bool
++getGameServerInfo(String): String
++addGameServe(String): bool</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>648</x>
+      <y>522</y>
+      <w>18</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>342</x>
+      <y>168</y>
+      <w>72</w>
+      <h>216</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>100.0;10.0;100.0;340.0;10.0;340.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>0</x>
+      <y>240</y>
+      <w>126</w>
+      <h>114</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Interface&gt;&gt;
+RemotePlayer
+--
++isConnected(): bool
++getStatus(): String
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>120</x>
+      <y>222</y>
+      <w>114</w>
+      <h>78</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;110.0;120.0;110.0;120.0;10.0;170.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>120</x>
+      <y>318</y>
+      <w>114</w>
+      <h>84</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;120.0;10.0;120.0;120.0;170.0;120.0</additional_attributes>
+  </element>
+</diagram>
