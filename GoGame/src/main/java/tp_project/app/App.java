@@ -1,13 +1,13 @@
 package tp_project.app;
 
-/**
- * Hello world!
- *
- */
+import tp_project.GUI.MainWindow;
+
 public class App 
 {
     public static void main( String[] args )
     {
-        System.out.println( "Hello World!" );
+        MainWindow main_window = new MainWindow();
+
+        main_window.exec();
     }
 }
