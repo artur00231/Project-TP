@@ -2,6 +2,9 @@ package tp_project.Network;
 
 public interface ICommand
 {
-    public String toString();
-    public void fromString(String data);
+    public String toText();
+
+    public void fromText(String text) throws IllegalArgumentException;
+
+    public String getCommandType();
 }
