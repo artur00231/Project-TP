@@ -7,7 +7,15 @@ import java.awt.event.*;
 
 public class MainMenu {
     private Container parent_component;
-    private JPanel main_menu_panel[] = { null, null };
+    private JPanel[] main_menu_panel = new JPanel[3];
+
+    // Connect menu
+    JTextField connect_ip;
+    JTextField connect_port;
+
+    // Start Server Menu
+    JTextField server_port;
+
     private ActionListener option_selected = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -15,8 +23,14 @@ public class MainMenu {
     };
 
     public enum Action {
-        EXIT, SINGLE, MUL_H, MUL_C
+        EXIT, SERVER, PLAY
     };
+
+    private enum Menu {
+        MainMenu,
+        ConnectMenu,
+        StartServerMenu
+    }
 
     public MainMenu() {
         createMenu();
@@ -24,40 +38,45 @@ public class MainMenu {
 
     public void show(Container container) {
         parent_component = container;
-        setMenu(0);
+        setMenu(Menu.MainMenu);
     }
 
-    public void setActionListener(ActionListener action_lstener) {
-        option_selected = action_lstener;
+    public void setActionListener(ActionListener action_listener) {
+        option_selected = action_listener;
     }
 
-    private void createMenu() {
-        main_menu_panel[0] = new JPanel();
-        main_menu_panel[0].setLayout(new BorderLayout());
-        JPanel plane1 = new JPanel();
-        plane1.setLayout(new GridLayout(0, 1));
-        JButton single_player_button = new JButton("Singleplayer");
-        single_player_button.addActionListener(new ActionListener() {
+    private JPanel createMainMenu() {
+        JPanel main_menu = new JPanel();
+        main_menu.setLayout(new BorderLayout());
+        JPanel plane = new JPanel();
+        plane.setLayout(new GridLayout(0, 1));
+
+        JButton play_button = new JButton("PLAY");
+        play_button.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                option_selected.actionPerformed(new ActionEvent(Action.SINGLE, 0, null));
+                setMenu(Menu.ConnectMenu);
+                option_selected.actionPerformed(new ActionEvent(Action.PLAY, 0, null));
             }
 
         });
-        single_player_button.setFocusable(false);
-        JButton multi_player_button = new JButton("Multiplayer");
-        multi_player_button.addActionListener(new ActionListener() {
+        play_button.setFocusable(false);
+
+        JButton server_button = new JButton("START SERVER");
+        server_button.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                setMenu(1);
+                setMenu(Menu.StartServerMenu);
             }
 
         });
-        multi_player_button.setFocusable(false);
-        plane1.add(single_player_button);
-        plane1.add(multi_player_button);
+        server_button.setFocusable(false);
+
+        plane.add(play_button);
+        plane.add(server_button);
+
         JButton exit1_button = new JButton("Exit");
         exit1_button.addActionListener(new ActionListener() {
 
@@ -68,54 +87,85 @@ public class MainMenu {
 
         });
         exit1_button.setFocusable(false);
-        main_menu_panel[0].add(plane1, BorderLayout.CENTER);
-        main_menu_panel[0].add(exit1_button, BorderLayout.PAGE_END);
 
-        //----------------------------------------
-
-        main_menu_panel[1] = new JPanel();
-        main_menu_panel[1].setLayout(new BorderLayout());
-        JPanel plane2 = new JPanel();
-        plane2.setLayout(new GridLayout(0, 1));
-        JButton host_player_button = new JButton("Create game");
-        host_player_button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                option_selected.actionPerformed(new ActionEvent(Action.MUL_H, 0, null));
-            }
-
-        });
-        host_player_button.setFocusable(false);
-        JButton client_player_button = new JButton("Connect");
-        client_player_button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                option_selected.actionPerformed(new ActionEvent(Action.MUL_C, 0, null));
-            }
-
-        });
-        client_player_button.setFocusable(false);
-        plane2.add(host_player_button);
-        plane2.add(client_player_button);
-        JButton exit2_button = new JButton("Return");
-        exit2_button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setMenu(0);
-            }
-
-        });
-        exit2_button.setFocusable(false);
-        main_menu_panel[1].add(plane2, BorderLayout.CENTER);
-        main_menu_panel[1].add(exit2_button, BorderLayout.PAGE_END);
+        main_menu.add(plane, BorderLayout.CENTER);
+        main_menu.add(exit1_button, BorderLayout.PAGE_END);
+        return main_menu;
     }
 
-    private void setMenu(int index)
+    private JPanel createConnectMenu() {
+        JPanel connect_menu = new JPanel();
+        connect_menu.setLayout(new BorderLayout());
+
+        JPanel plane = new JPanel();
+        plane.setLayout(new GridLayout(0, 1));
+
+        connect_ip = new JTextField();
+        connect_port = new JTextField();
+
+        plane.add(new JLabel("IP"));
+        plane.add(connect_ip);
+        plane.add(new JLabel("Port"));
+        plane.add(connect_port);
+
+        JButton return_button = new JButton("Return");
+
+        return_button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setMenu(Menu.MainMenu);
+                connect_ip.setText("");
+                connect_port.setText("");
+            }
+
+        });
+        return_button.setFocusable(false);
+        connect_menu.add(new JButton("connect"), BorderLayout.PAGE_START);
+        connect_menu.add(plane, BorderLayout.CENTER);
+        connect_menu.add(return_button, BorderLayout.PAGE_END);
+        return connect_menu;
+    }
+
+    private JPanel createStartServerMenu() {
+        final JPanel connect_menu = new JPanel();
+        connect_menu.setLayout(new BorderLayout());
+
+        JPanel plane = new JPanel();
+        plane.setLayout(new GridLayout(0, 1));
+
+        server_port = new JTextField();
+        plane.add(new JLabel("Port"));
+        plane.add(server_port);
+
+        JButton return_button = new JButton("Return");
+        return_button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                server_port.setText("");
+                setMenu(Menu.MainMenu);
+            }
+
+        });
+        return_button.setFocusable(false);
+        connect_menu.add(new JButton("connect"), BorderLayout.PAGE_START);
+        connect_menu.add(plane, BorderLayout.CENTER);
+        connect_menu.add(return_button, BorderLayout.PAGE_END);
+        return connect_menu;
+    }
+
+
+
+    private void createMenu() {
+        main_menu_panel[Menu.MainMenu.ordinal()] = createMainMenu();
+        main_menu_panel[Menu.ConnectMenu.ordinal()] = createConnectMenu();
+        main_menu_panel[Menu.StartServerMenu.ordinal()] = createStartServerMenu();
+    }
+
+    private void setMenu(Menu m)
     {
-        if (index < 0 || index > 1) return;
+        int index = m.ordinal();
+        if (index < 0 || index >= Menu.values().length) return;
         parent_component.removeAll();
 
         parent_component.setLayout(new BorderLayout());
