@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram program="umlet" version="14.3.0">
-  <zoom_level>6</zoom_level>
+  <zoom_level>3</zoom_level>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>390</x>
-      <y>138</y>
-      <w>126</w>
-      <h>48</h>
+      <x>684</x>
+      <y>63</y>
+      <w>63</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>&lt;&lt;Interface&gt;&gt;
 Player
@@ -19,10 +19,10 @@ Player
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>588</x>
-      <y>234</y>
-      <w>126</w>
-      <h>120</h>
+      <x>783</x>
+      <y>111</y>
+      <w>63</w>
+      <h>60</h>
     </coordinates>
     <panel_attributes>GameService
 --
@@ -43,10 +43,10 @@ Player
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>588</x>
-      <y>426</y>
-      <w>186</w>
-      <h>114</h>
+      <x>783</x>
+      <y>207</y>
+      <w>93</w>
+      <h>57</h>
     </coordinates>
     <panel_attributes>Server
 --
@@ -62,10 +62,10 @@ Player
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>624</x>
-      <y>348</y>
-      <w>24</w>
-      <h>90</h>
+      <x>801</x>
+      <y>168</y>
+      <w>12</w>
+      <h>45</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=*
@@ -75,10 +75,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>786</x>
-      <y>234</y>
-      <w>210</w>
-      <h>72</h>
+      <x>882</x>
+      <y>111</y>
+      <w>105</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>Game
 --
@@ -95,10 +95,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>708</x>
-      <y>252</y>
-      <w>90</w>
-      <h>30</h>
+      <x>843</x>
+      <y>120</y>
+      <w>45</w>
+      <h>15</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=1
@@ -109,10 +109,10 @@ m2=1
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>510</x>
-      <y>150</y>
-      <w>324</w>
-      <h>96</h>
+      <x>744</x>
+      <y>69</y>
+      <w>162</w>
+      <h>48</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=2
@@ -123,10 +123,10 @@ m2=1
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>366</x>
-      <y>426</y>
-      <w>132</w>
-      <h>126</h>
+      <x>672</x>
+      <y>207</y>
+      <w>66</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>Client
 --
@@ -148,10 +148,10 @@ m2=1
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>444</x>
-      <y>318</y>
-      <w>156</w>
-      <h>120</h>
+      <x>711</x>
+      <y>153</y>
+      <w>78</w>
+      <h>60</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=2
@@ -161,10 +161,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>222</x>
-      <y>192</y>
-      <w>126</w>
-      <h>78</h>
+      <x>600</x>
+      <y>90</y>
+      <w>63</w>
+      <h>39</h>
     </coordinates>
     <panel_attributes>RemotePlayerRX
 --
@@ -178,10 +178,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>288</x>
-      <y>174</y>
-      <w>114</w>
-      <h>30</h>
+      <x>633</x>
+      <y>81</y>
+      <w>57</w>
+      <h>15</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
     <additional_attributes>170.0;10.0;10.0;10.0;10.0;30.0</additional_attributes>
@@ -189,10 +189,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>270</x>
-      <y>450</y>
-      <w>108</w>
-      <h>66</h>
+      <x>624</x>
+      <y>219</y>
+      <w>54</w>
+      <h>33</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=1
@@ -203,10 +203,10 @@ Have ^</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>588</x>
-      <y>12</y>
-      <w>126</w>
-      <h>114</h>
+      <x>783</x>
+      <y>0</y>
+      <w>63</w>
+      <h>57</h>
     </coordinates>
     <panel_attributes>AIPlayer
 --
@@ -221,10 +221,10 @@ Have ^</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>450</x>
-      <y>66</y>
-      <w>150</w>
-      <h>84</h>
+      <x>714</x>
+      <y>27</y>
+      <w>75</w>
+      <h>42</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
     <additional_attributes>10.0;120.0;10.0;10.0;230.0;10.0</additional_attributes>
@@ -232,10 +232,10 @@ Have ^</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>798</x>
-      <y>366</y>
-      <w>126</w>
-      <h>48</h>
+      <x>888</x>
+      <y>177</y>
+      <w>63</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>Board
 --
@@ -248,10 +248,10 @@ Have ^</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1014</x>
-      <y>126</y>
-      <w>126</w>
-      <h>60</h>
+      <x>996</x>
+      <y>57</y>
+      <w>63</w>
+      <h>30</h>
     </coordinates>
     <panel_attributes>GameLogic
 --
@@ -263,10 +263,10 @@ Have ^</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>870</x>
-      <y>174</y>
-      <w>156</w>
-      <h>72</h>
+      <x>924</x>
+      <y>81</y>
+      <w>78</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=1
@@ -277,10 +277,10 @@ m2=1
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>864</x>
-      <y>300</y>
-      <w>24</w>
-      <h>78</h>
+      <x>921</x>
+      <y>144</y>
+      <w>12</w>
+      <h>39</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=1
@@ -291,10 +291,10 @@ m2=1
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>222</x>
-      <y>366</y>
-      <w>126</w>
-      <h>90</h>
+      <x>600</x>
+      <y>177</y>
+      <w>63</w>
+      <h>45</h>
     </coordinates>
     <panel_attributes>RemotePlayerTX
 --
@@ -309,10 +309,10 @@ m2=1
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>276</x>
-      <y>264</y>
-      <w>84</w>
-      <h>114</h>
+      <x>627</x>
+      <y>126</y>
+      <w>42</w>
+      <h>57</h>
     </coordinates>
     <panel_attributes>lt=-
 m1=1
@@ -323,10 +323,10 @@ v Communicate ^ </panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>588</x>
-      <y>576</y>
-      <w>168</w>
-      <h>72</h>
+      <x>783</x>
+      <y>282</y>
+      <w>84</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>&lt;&lt;Interface&gt;&gt;
 GameServerService
@@ -340,10 +340,10 @@ GameServerService
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>648</x>
-      <y>534</y>
-      <w>18</w>
-      <h>54</h>
+      <x>813</x>
+      <y>261</y>
+      <w>9</w>
+      <h>27</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
@@ -351,10 +351,10 @@ GameServerService
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>342</x>
-      <y>180</y>
-      <w>72</w>
-      <h>216</h>
+      <x>660</x>
+      <y>84</y>
+      <w>36</w>
+      <h>108</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
     <additional_attributes>100.0;10.0;100.0;340.0;10.0;340.0</additional_attributes>
@@ -362,10 +362,10 @@ GameServerService
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>0</x>
-      <y>252</y>
-      <w>126</w>
-      <h>114</h>
+      <x>489</x>
+      <y>120</y>
+      <w>63</w>
+      <h>57</h>
     </coordinates>
     <panel_attributes>&lt;&lt;Interface&gt;&gt;
 RemotePlayer
@@ -379,10 +379,10 @@ RemotePlayer
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>120</x>
-      <y>234</y>
-      <w>114</w>
-      <h>78</h>
+      <x>549</x>
+      <y>111</y>
+      <w>57</w>
+      <h>39</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
     <additional_attributes>10.0;110.0;120.0;110.0;120.0;10.0;170.0;10.0</additional_attributes>
@@ -390,10 +390,10 @@ RemotePlayer
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>120</x>
-      <y>330</y>
-      <w>114</w>
-      <h>84</h>
+      <x>549</x>
+      <y>159</y>
+      <w>57</w>
+      <h>42</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;120.0;10.0;120.0;120.0;170.0;120.0</additional_attributes>
