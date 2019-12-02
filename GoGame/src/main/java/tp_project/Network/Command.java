@@ -2,7 +2,7 @@ package tp_project.Network;
 
 public class Command
 {
-    public enum Type{ ServerRequest, ServerInfo };
+    public enum Type{ Text };
 
     private String content;
     private Type type;
@@ -27,6 +27,20 @@ public class Command
     
     public ICommand getCommand()
     {
-        return null;
+        if (!is_valid) return null;
+
+        ICommand command = CommandFactory.crateCommand(type);
+
+        try {
+            command.fromText(content);
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
+
+        return command;
+    }
+
+    public boolean isValid() {
+        return is_valid;
     }
 }
