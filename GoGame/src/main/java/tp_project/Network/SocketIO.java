@@ -78,6 +78,10 @@ public class SocketIO {
         commands.remove(0);
         return cmd;
     }
+    
+    public int getNuberOfCommands() {
+        return commands.size();
+    }
 
     public AVAILABILITY isAvaiable() {
         recive();
