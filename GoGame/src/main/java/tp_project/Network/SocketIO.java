@@ -14,7 +14,7 @@ public class SocketIO {
         boolean recived = true;
     }
 
-    enum AVAILABILITY { YES, NO, DISCONNECTED };
+    public enum AVAILABILITY { YES, NO, DISCONNECTED };
 
     private SocketChannel socket;
     private ConnectionStatus connection_status;
