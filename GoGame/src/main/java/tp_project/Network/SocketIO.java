@@ -9,9 +9,9 @@ import java.util.List;
 
 public class SocketIO {
     public class ConnectionStatus {
-        boolean is_connected = true;
-        boolean sended = true;
-        boolean recived = true;
+        public boolean is_connected = true;
+        public boolean sended = true;
+        public boolean recived = true;
     }
 
     public enum AVAILABILITY { YES, NO, DISCONNECTED };
@@ -93,12 +93,13 @@ public class SocketIO {
 
     private void recive() {
         boolean recived = false;
+        int num_of_bytes;
 
         try {
-            while (socket.read(byte_buffer) > 0) {
+            while ((num_of_bytes = socket.read(byte_buffer)) > 0) {
                 try {
                     byte_buffer.flip();
-                    buffer += new String(byte_buffer.array(), "ASCII");
+                    buffer += new String(byte_buffer.array(), 0, num_of_bytes, "ASCII");
                     recived = true;
                 } catch (UnsupportedEncodingException e) {
                     // Never throws eception
@@ -118,6 +119,7 @@ public class SocketIO {
         NetworkDataParser network_data_parser = NetworkDataParser.getNetworkDataParser();
 
         commands.addAll(network_data_parser.getCommands(buffer));
+        buffer = network_data_parser.removeCommand(buffer);
 
         if (buffer.length() > buffer_max_size) {
             //Reset buffer
