@@ -38,9 +38,13 @@ public class NetworkDataParser {
             commands.add(cmd);
         }
 
-        data.replaceAll(raw_pattern, "");
+        data = data.replaceAll(raw_pattern, "");
 
         return commands;
+    }
+
+    public String removeCommand(String data) {
+        return data.replaceAll(raw_pattern, "");
     }
 
     public byte[] getNetworkData(Command.Type type, String data) {

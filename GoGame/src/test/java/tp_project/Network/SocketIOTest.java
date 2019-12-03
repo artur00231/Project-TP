@@ -156,6 +156,7 @@ public class SocketIOTest {
 
         while(io.isAvaiable() == AVAILABILITY.NO) continue;
 
+        assertTrue(io.getNuberOfCommands() == 1);
         ((TextCommand) io.popCommand().getCommand()).getText().equals(txt.getText());
 
         t.join();
