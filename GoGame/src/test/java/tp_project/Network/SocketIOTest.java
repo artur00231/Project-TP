@@ -73,6 +73,38 @@ class TestServer_test2 implements Runnable {
     }
 }
 
+class TestServer_test3 implements Runnable {
+    ServerSocketChannel server;
+
+    public TestServer_test3() {
+        try {
+            server = ServerSocketChannel.open();
+            server.socket().bind(new InetSocketAddress(SocketIOTest.PORT));
+        } catch (IOException e) {
+            System.out.println("TestServer_test3 Constructor ERR");
+        }
+    }
+
+    @Override
+    public void run() {
+        try {
+            SocketChannel client = server.accept();
+
+            SocketIO io = new SocketIO(client);
+            io.send(new TextCommand("11"));
+            io.send(new TextCommand("22"));
+            io.send(new TextCommand("33"));
+            io.send(new TextCommand("44"));
+            io.send(new TextCommand("55"));
+            io.send(new TextCommand("66"));
+
+            server.close();
+        } catch (IOException exception) {
+            System.out.println("TestServer_test3 Run ERR");
+        }
+    }
+}
+
 public class SocketIOTest {
     public static final int PORT = 5102;
     public static final String IP = "127.0.0.1";
@@ -175,5 +207,31 @@ public class SocketIOTest {
         assertFalse(io.getSatus().is_connected);
         assertFalse(io.getSatus().sended);
         assertFalse(io.getSatus().recived);
+    }
+
+    @Test
+    public void Test5() throws UnknownHostException, IOException, InterruptedException 
+    {
+        Thread t = new Thread(new TestServer_test3());
+        t.start();
+
+        SocketChannel s = SocketChannel.open();
+        s.connect(new InetSocketAddress(IP, PORT));
+        SocketIO io = new SocketIO(s);
+        assertTrue(io.getSatus().is_connected);
+
+        Thread.sleep(100);
+
+        assertTrue(io.isAvaiable() == AVAILABILITY.YES);
+        assertTrue(io.getSatus().recived = true);
+        assertTrue(io.getNuberOfCommands() == 6);
+        assertTrue(((TextCommand) io.popCommand().getCommand()).getText().equals("11"));
+        assertTrue(((TextCommand) io.popCommand().getCommand()).getText().equals("22"));
+        assertTrue(((TextCommand) io.popCommand().getCommand()).getText().equals("33"));
+        assertTrue(((TextCommand) io.popCommand().getCommand()).getText().equals("44"));
+        assertTrue(((TextCommand) io.popCommand().getCommand()).getText().equals("55"));
+        assertTrue(((TextCommand) io.popCommand().getCommand()).getText().equals("66"));
+
+        t.join();
     }
 }
