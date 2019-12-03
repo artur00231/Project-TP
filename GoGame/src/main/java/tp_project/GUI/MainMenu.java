@@ -32,12 +32,14 @@ public class MainMenu {
         StartServerMenu
     }
 
-    public MainMenu() {
+    public MainMenu(Container parent) {
+        parent_component = parent;
         createMenu();
     }
 
-    public void show(Container container) {
-        parent_component = container;
+    //old
+    //public void show(Container container)
+    public void show() {
         setMenu(Menu.MainMenu);
     }
 
@@ -52,25 +54,14 @@ public class MainMenu {
         plane.setLayout(new GridLayout(0, 1));
 
         JButton play_button = new JButton("PLAY");
-        play_button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setMenu(Menu.ConnectMenu);
-                option_selected.actionPerformed(new ActionEvent(Action.PLAY, 0, null));
-            }
-
+        play_button.addActionListener(e -> {
+            setMenu(Menu.ConnectMenu);
         });
         play_button.setFocusable(false);
 
         JButton server_button = new JButton("START SERVER");
-        server_button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setMenu(Menu.StartServerMenu);
-            }
-
+        server_button.addActionListener(e -> {
+            setMenu(Menu.StartServerMenu);
         });
         server_button.setFocusable(false);
 
@@ -78,13 +69,8 @@ public class MainMenu {
         plane.add(server_button);
 
         JButton exit1_button = new JButton("Exit");
-        exit1_button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                option_selected.actionPerformed(new ActionEvent(Action.EXIT, 0, null));
-            }
-
+        exit1_button.addActionListener(e -> {
+            option_selected.actionPerformed(new ActionEvent(Action.EXIT, 0, null));
         });
         exit1_button.setFocusable(false);
 
@@ -109,18 +95,21 @@ public class MainMenu {
         plane.add(connect_port);
 
         JButton return_button = new JButton("Return");
+        JButton connect_button = new JButton("Connect");
 
-        return_button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setMenu(Menu.MainMenu);
-                connect_ip.setText("");
-                connect_port.setText("");
-            }
+        connect_button.addActionListener(e -> {
+            option_selected.actionPerformed(new ActionEvent(Action.PLAY, 0, null));
+        });
+        connect_button.setFocusable(false);
 
+        return_button.addActionListener(e -> {
+            setMenu(Menu.MainMenu);
+            connect_ip.setText("");
+            connect_port.setText("");
         });
         return_button.setFocusable(false);
-        connect_menu.add(new JButton("connect"), BorderLayout.PAGE_START);
+
+        connect_menu.add(connect_button, BorderLayout.PAGE_START);
         connect_menu.add(plane, BorderLayout.CENTER);
         connect_menu.add(return_button, BorderLayout.PAGE_END);
         return connect_menu;
@@ -138,17 +127,19 @@ public class MainMenu {
         plane.add(server_port);
 
         JButton return_button = new JButton("Return");
-        return_button.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                server_port.setText("");
-                setMenu(Menu.MainMenu);
-            }
-
+        return_button.addActionListener(e -> {
+            server_port.setText("");
+            setMenu(Menu.MainMenu);
         });
         return_button.setFocusable(false);
-        connect_menu.add(new JButton("connect"), BorderLayout.PAGE_START);
+
+        JButton start_button = new JButton("Start Server");
+        start_button.addActionListener(e -> {
+            option_selected.actionPerformed(new ActionEvent(Action.SERVER, 0, null));
+        });
+        start_button.setFocusable(false);
+
+        connect_menu.add(start_button, BorderLayout.PAGE_START);
         connect_menu.add(plane, BorderLayout.CENTER);
         connect_menu.add(return_button, BorderLayout.PAGE_END);
         return connect_menu;
