@@ -44,7 +44,6 @@ public class MainWindow
 
     public void showMainMenu() {
         window.setSize(new Dimension(300, 500));
-        //menu.show(window.getContentPane());
-        menu.show();
+        window.setContentPane(menu);
     }
 }

@@ -5,8 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class MainMenu {
-    private Container parent_component;
+public class MainMenu extends JPanel {
     private JPanel[] main_menu_panel = new JPanel[3];
 
     // Connect menu
@@ -33,13 +32,7 @@ public class MainMenu {
     }
 
     public MainMenu(Container parent) {
-        parent_component = parent;
         createMenu();
-    }
-
-    //old
-    //public void show(Container container)
-    public void show() {
         setMenu(Menu.MainMenu);
     }
 
@@ -157,12 +150,12 @@ public class MainMenu {
     {
         int index = m.ordinal();
         if (index < 0 || index >= Menu.values().length) return;
-        parent_component.removeAll();
+        removeAll();
 
-        parent_component.setLayout(new BorderLayout());
-        parent_component.add(main_menu_panel[index], BorderLayout.CENTER);
+        setLayout(new BorderLayout());
+        add(main_menu_panel[index], BorderLayout.CENTER);
 
-        parent_component.revalidate();
-        parent_component.repaint();
+        revalidate();
+        repaint();
     }
 }
