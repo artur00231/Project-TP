@@ -14,13 +14,10 @@ public class MainWindow
     public MainWindow() {
         window = new JFrame("GoGame");
         window.setBounds(new Rectangle(100, 100, 800, 800));
-        //window.setMaximumSize(new Dimension(800, 800));
-        //window.setMinimumSize(new Dimension(500, 0));
-        //window.setPreferredSize(new Dimension(500, 0));
 
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        menu = new MainMenu();
+        menu = new MainMenu(window.getContentPane());
         menu.setActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -47,6 +44,7 @@ public class MainWindow
 
     public void showMainMenu() {
         window.setSize(new Dimension(300, 500));
-        menu.show(window.getContentPane());
+        //menu.show(window.getContentPane());
+        menu.show();
     }
 }
