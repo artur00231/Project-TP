@@ -52,7 +52,6 @@ public class ServerView extends JPanel {
         });
 
         this.setLayout(new BorderLayout());
-        this.padd
         this.add(new RoomList(), BorderLayout.CENTER);
         this.add(return_button, BorderLayout.PAGE_END);
     }
