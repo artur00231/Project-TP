@@ -138,8 +138,6 @@ public class MainMenu extends JPanel {
         return connect_menu;
     }
 
-
-
     private void createMenu() {
         main_menu_panel[Menu.MainMenu.ordinal()] = createMainMenu();
         main_menu_panel[Menu.ConnectMenu.ordinal()] = createConnectMenu();
