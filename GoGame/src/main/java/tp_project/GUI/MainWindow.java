@@ -10,6 +10,7 @@ public class MainWindow
 {
     JFrame window;
     MainMenu menu;
+    ServerView server_view;
 
     public MainWindow() {
         window = new JFrame("GoGame");
@@ -26,12 +27,23 @@ public class MainWindow
                     case EXIT:
                         System.exit(0);
                     break;
+                    case PLAY:
+                        window.setContentPane(server_view);
+                        window.pack();
 
                     default:
                         System.out.println((MainMenu.Action) e.getSource());
                     break;
                 }
 			}
+        });
+
+        server_view = new ServerView(e -> {
+            switch ((ServerView.Action) e.getSource()) {
+                case RETURN:
+                    showMainMenu();
+                    break;
+            }
         });
     }
 
