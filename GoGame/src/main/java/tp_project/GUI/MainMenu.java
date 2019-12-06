@@ -91,7 +91,10 @@ public class MainMenu extends JPanel {
         JButton connect_button = new JButton("Connect");
 
         connect_button.addActionListener(e -> {
-            option_selected.actionPerformed(new ActionEvent(Action.PLAY, 0, null));
+            if (isValidIP(connect_ip.getText()) && isValidPort(connect_port.getText()))
+                option_selected.actionPerformed(new ActionEvent(Action.PLAY, 0, null));
+            else
+                JOptionPane.showMessageDialog(this, "Invalid input");
         });
         connect_button.setFocusable(false);
 
@@ -128,7 +131,10 @@ public class MainMenu extends JPanel {
 
         JButton start_button = new JButton("Start Server");
         start_button.addActionListener(e -> {
-            option_selected.actionPerformed(new ActionEvent(Action.SERVER, 0, null));
+            if (isValidPort(server_port.getText()))
+                option_selected.actionPerformed(new ActionEvent(Action.SERVER, 0, null));
+            else
+                JOptionPane.showMessageDialog(this, "Invalid port");
         });
         start_button.setFocusable(false);
 
@@ -155,5 +161,40 @@ public class MainMenu extends JPanel {
 
         revalidate();
         repaint();
+    }
+
+    static boolean isValidIP(String ip) {
+        String[] l = ip.split("\\.");
+        if (l.length != 4) return false;
+        for (String v : l) {
+            try {
+                int i = Integer.parseInt(v);
+                if (i < 0 || i > 255)
+                    return false;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static boolean isValidPort(String port) {
+        try {
+            int i = Integer.parseInt(port);
+                if (i < 0 || i > (1 << 16) - 1)
+                    return false;
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    static int parseIP(String ip) {
+        int a = 0;
+        for (String v : ip.split("\\.")) {
+            a *= 256;
+            a += Integer.parseInt(v);
+        }
+        return a;
     }
 }
