@@ -2,25 +2,19 @@ package tp_project.Network;
 
 public class Command
 {
-    public enum Type{ Text };
-
     private String content;
-    private Type type;
+    private String type;
     private boolean is_valid = true;
 
     public Command(String type, String raw_command)
     {
-        try {
-            this.type = Type.valueOf(type);
-        } catch (IllegalArgumentException exception)
-        {
-            is_valid = false;
-        }
+        is_valid = CommandFactory.isValidType(type);
+        this.type = type;
 
         content = raw_command;
     }
 
-    public Type getType()
+    public String getType()
     {
         return type;
     }
