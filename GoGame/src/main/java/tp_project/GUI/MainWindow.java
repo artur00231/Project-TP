@@ -29,6 +29,7 @@ public class MainWindow
                     break;
                     case PLAY:
                         window.setContentPane(server_view);
+                        server_view.refresh();
                         window.pack();
 
                     default:
@@ -42,6 +43,12 @@ public class MainWindow
             switch ((ServerView.Action) e.getSource()) {
                 case RETURN:
                     showMainMenu();
+                    break;
+                case CREATE:
+                    System.out.println("Create " + e.getID());
+                    break;
+                case JOIN:
+                    System.out.println("Join " + e.getActionCommand());
                     break;
             }
         });
