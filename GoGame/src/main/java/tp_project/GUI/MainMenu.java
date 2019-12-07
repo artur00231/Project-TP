@@ -22,7 +22,7 @@ public class MainMenu extends JPanel {
     };
 
     public enum Action {
-        EXIT, SERVER, PLAY
+        EXIT, SERVER, PLAY, tmp1, tmp2, tmp3
     };
 
     private enum Menu {
@@ -60,6 +60,18 @@ public class MainMenu extends JPanel {
 
         plane.add(play_button);
         plane.add(server_button);
+
+        //TODO Delete
+        JButton btn1 = new JButton("ServerView preview");
+        btn1.addActionListener(e -> option_selected.actionPerformed(new ActionEvent(Action.tmp1, 0, "")));
+        plane.add(btn1);
+        JButton btn2 = new JButton("RoomView preview");
+        btn2.addActionListener(e -> option_selected.actionPerformed(new ActionEvent(Action.tmp2, 0, "")));
+        plane.add(btn2);
+        JButton btn3 = new JButton("host RoomView preview");
+        btn3.addActionListener(e -> option_selected.actionPerformed(new ActionEvent(Action.tmp3, 0, "")));
+        plane.add(btn3);
+        //
 
         JButton exit1_button = new JButton("Exit");
         exit1_button.addActionListener(e -> {

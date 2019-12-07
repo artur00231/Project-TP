@@ -3,6 +3,8 @@ package tp_project.GUI;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.*;
 
@@ -11,6 +13,7 @@ public class MainWindow
     JFrame window;
     MainMenu menu;
     ServerView server_view;
+    RoomView room_view;
 
     public MainWindow() {
         window = new JFrame("GoGame");
@@ -31,7 +34,23 @@ public class MainWindow
                         window.setContentPane(server_view);
                         server_view.refresh();
                         window.pack();
-
+                        break;
+                    case tmp1:
+                        server_view.refresh();
+                        window.setContentPane(server_view);
+                        window.pack();
+                        break;
+                    case tmp2:
+                        room_view.setRoomInfo(new RoomView.RoomInfo("roomID", Arrays.asList(new RoomView.Player[]{new RoomView.Player("p0", true), new RoomView.Player("p1", false)}), false));
+                        window.setContentPane(room_view);
+                        window.pack();
+                        window.repaint();
+                        break;
+                    case tmp3:
+                        room_view.setRoomInfo(new RoomView.RoomInfo("roomID", Arrays.asList(new RoomView.Player[]{new RoomView.Player("p1", false), new RoomView.Player("p2", false)}), true));
+                        window.setContentPane(room_view);
+                        window.pack();
+                        break;
                     default:
                         System.out.println((MainMenu.Action) e.getSource());
                     break;
@@ -49,6 +68,15 @@ public class MainWindow
                     break;
                 case JOIN:
                     System.out.println("Join " + e.getActionCommand());
+                    break;
+            }
+        });
+
+        room_view = new RoomView("p1");
+        room_view.setActionListener(e -> {
+            switch ((RoomView.Action) e.getSource()) {
+                case LEAVE:
+                    showMainMenu();
                     break;
             }
         });
