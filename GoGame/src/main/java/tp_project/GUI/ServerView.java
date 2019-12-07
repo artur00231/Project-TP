@@ -56,7 +56,7 @@ public class ServerView extends JPanel {
         room_list.set();
     }
 
-    class RoomCreate extends JDialog {
+    private class RoomCreate extends JDialog {
         JComboBox values = new JComboBox(new Integer[] {13, 15, 19});
         RoomCreate(JPanel owner) {
             super((JFrame) SwingUtilities.getWindowAncestor(owner), true);
@@ -80,7 +80,7 @@ public class ServerView extends JPanel {
         }
     }
 
-    class RoomItem extends JPanel {
+    private class RoomItem extends JPanel {
         JPanel room_info = new JPanel();
 
         RoomItem(String name, int players, int max_players) {
@@ -91,7 +91,6 @@ public class ServerView extends JPanel {
                 action_listener.actionPerformed(new ActionEvent(Action.JOIN, 0, name));
             });
             join_button.setEnabled(players < max_players);
-            join_button.setSize(50, 20);
 
             room_info.setLayout(new GridLayout(0, 2, 2, 5));
             room_info.add(new JLabel("ID:", JLabel.TRAILING));
@@ -114,7 +113,7 @@ public class ServerView extends JPanel {
         }
     }
 
-    class RoomList extends JPanel {
+    private class RoomList extends JPanel {
         public RoomList() {
             this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         }
