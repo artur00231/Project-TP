@@ -51,7 +51,7 @@ public class SocketIO {
         
         if (!network_data_parser.isValid(data)) return false;
 
-        byte[] raw_data = network_data_parser.getNetworkData(Command.Type.valueOf(iCommand.getCommandType()), data);
+        byte[] raw_data = network_data_parser.getNetworkData(iCommand.getCommandType(), data);
 
         try {
             ByteBuffer to_send = ByteBuffer.wrap(raw_data);

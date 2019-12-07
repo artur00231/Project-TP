@@ -120,11 +120,11 @@ public class SocketIOTest {
         SocketIO io = new SocketIO(s);
         assertTrue(io.getSatus().is_connected);
 
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         assertTrue(io.isAvaiable() == AVAILABILITY.YES);
         assertTrue(io.getSatus().recived = true);
-        assertTrue(io.getCommand().getType() == Command.Type.Text);
+        assertTrue(io.getCommand().getType().equals("Text"));
         assertTrue(((TextCommand) io.getCommand().getCommand()).getText().equals("Server HI"));
 
         t.join();
@@ -145,7 +145,7 @@ public class SocketIOTest {
 
         assertTrue(io.isAvaiable() == AVAILABILITY.YES);
         assertTrue(io.getSatus().recived = true);
-        assertTrue(io.getCommand().getType() == Command.Type.Text);
+        assertTrue(io.getCommand().getType().equals("Text"));
         assertTrue(io.isAvaiable() == AVAILABILITY.YES);
         assertTrue(((TextCommand) io.popCommand().getCommand()).getText().equals("Server HI"));
         assertTrue(io.isAvaiable() == AVAILABILITY.NO);
@@ -191,7 +191,7 @@ public class SocketIOTest {
 
         assertTrue(io.isAvaiable() == AVAILABILITY.YES);
         assertTrue(io.getSatus().recived = true);
-        assertTrue(io.getCommand().getType() == Command.Type.Text);
+        assertTrue(io.getCommand().getType().equals("Text"));
         assertTrue(((TextCommand) io.popCommand().getCommand()).getText().equals("Server HI"));
 
         t.join();
