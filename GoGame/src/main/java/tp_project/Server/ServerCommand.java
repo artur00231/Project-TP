@@ -36,7 +36,8 @@ public class ServerCommand implements ICommand
 
     @Override
     public String toText() {
-        String text = Integer.toString(data.size()) + ";";
+        String text = Integer.toString(code) + ";";
+        text += Integer.toString(data.size()) + ";";
 
         for (String property : data.keySet()) {
             text += property + ";" + data.get(property) + ";";
@@ -49,14 +50,15 @@ public class ServerCommand implements ICommand
     public void fromText(String text) {
         String[] raw_data = text.split(";");
 
-        if (raw_data.length < 1) throw new IllegalArgumentException();
+        if (raw_data.length < 2) throw new IllegalArgumentException();
 
         try {
-            int size = Integer.valueOf(raw_data[0]);
+            code = Integer.valueOf(raw_data[0]);
+            int size = Integer.valueOf(raw_data[1]);
             data.clear();
 
             for (int i = 0; i < size; i++) {
-                data.put(raw_data[1 + i * 2], raw_data[2 + i * 2]);
+                data.put(raw_data[2 + i * 2], raw_data[3 + i * 2]);
             }
 
         } catch (Exception exception) {
