@@ -14,6 +14,7 @@ public class MainWindow
     MainMenu menu;
     ServerView server_view;
     RoomView room_view;
+    GameView game_view;
 
     public MainWindow() {
         window = new JFrame("GoGame");
@@ -35,6 +36,7 @@ public class MainWindow
                         server_view.refresh();
                         window.pack();
                         break;
+                    //TODO DELETE
                     case tmp1:
                         server_view.refresh();
                         window.setContentPane(server_view);
@@ -51,6 +53,10 @@ public class MainWindow
                         window.setContentPane(room_view);
                         window.pack();
                         break;
+                    case tmp4:
+                        window.setContentPane(game_view);
+                        window.pack();
+                    //
                     default:
                         System.out.println((MainMenu.Action) e.getSource());
                     break;
@@ -80,6 +86,8 @@ public class MainWindow
                     break;
             }
         });
+
+        game_view = new GameView(19, GameView.PlayerColor.BLACK);
     }
 
     public int exec() {
