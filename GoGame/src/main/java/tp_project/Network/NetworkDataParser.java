@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class NetworkDataParser {
     private static NetworkDataParser network_data_parser = null;
     private Pattern pattern;
-    private String raw_data_pattern = "[A-Za-z0-9\\s=,\\.\\[\\]{}();]";
+    private String raw_data_pattern = "[A-Za-z0-9\\s=,\\.\\[\\]{}()-;]";
     private String raw_pattern = "TBEGIN>>>\"([a-zA-Z]*)\"<<<\\[("+ raw_data_pattern +"*)\\]>>>\"[a-zA-Z]*\"<<<TEND";
 
     private NetworkDataParser() {
@@ -47,8 +47,8 @@ public class NetworkDataParser {
         return data.replaceAll(raw_pattern, "");
     }
 
-    public byte[] getNetworkData(Command.Type type, String data) {
-        return ("TBEGIN>>>\"" + type.name() + "\"<<<[" + data + "]>>>\"" + type.name() + "\"<<<TEND").getBytes();
+    public byte[] getNetworkData(String type, String data) {
+        return ("TBEGIN>>>\"" + type + "\"<<<[" + data + "]>>>\"" + type + "\"<<<TEND").getBytes();
     }
 
     public boolean isValid(String data) {
