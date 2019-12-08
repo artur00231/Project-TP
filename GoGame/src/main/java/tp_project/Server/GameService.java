@@ -47,7 +47,9 @@ public abstract class GameService {
 
     public GameServiceInfo getInfo() {
         GameServiceInfo info = new GameServiceInfo();
-        info.host = host;
+        info.ID = ID;
+        info.host_id = host_id;
+        info.max_players = getMaxPlayersCount();
         info.players = new HashMap<>();
 
         for (Map.Entry<String, Client> player: players.entrySet()) {
@@ -58,6 +60,7 @@ public abstract class GameService {
     }
 
     public boolean addPlayer(String player_name, String player_id, SocketIO socketIO) {
+        if (players.size() == getMaxPlayersCount()) return false;
         if (players.get(player_id) != null) {
             return false;
         }
@@ -93,7 +96,7 @@ public abstract class GameService {
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("kicked", host);
-        cmd.setCode(404);
+        cmd.setCode(301);
         players.get(player_id).socketIO.send(cmd);
 
         return removePlayer(player_id);
@@ -129,6 +132,15 @@ public abstract class GameService {
         } else if (cmd.getValue("exit") != null) {
             removePlayer(player_id);
             sendCode(200, socketIO);
+        } else if (cmd.getValue("kick") != null) {
+            if (!checkSKey(cmd.getValue("sKey"))) { sendCode(403, socketIO); }
+            if (kickPlayer(cmd.getValue("kick"))) {
+                sendCode(200, socketIO);
+            } else {
+                sendCode(400, socketIO);
+            }
+        } else if (cmd.getValue("getServiceInfo") != null) {
+            socketIO.send(getInfo());
         }
     }
 

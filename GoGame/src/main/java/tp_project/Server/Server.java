@@ -106,11 +106,26 @@ public class Server implements Runnable, GameServiceMenager {
                 game_services_to_delete.clear();
             }
         }
+
+        if (socket_server.isOpen()) {
+            try {
+                socket_server.close();
+            } catch (IOException e) {
+                // Server is being deleted, so its ok
+            }
+        }
+
+        if (selector.isOpen()) {
+            try {
+                selector.close();
+            } catch (IOException e) {
+                // Server is being deleted, so its ok
+            }
+        }
     }
 
     private void removeGameService(String ID) {
         game_services.remove(ID);
-        System.err.println("DELETE SERVICE:" + ID);
     }
 
     private boolean setup() {
@@ -157,7 +172,6 @@ public class Server implements Runnable, GameServiceMenager {
                 } else if (key.isReadable()) {
                     SocketChannel incoming = ((SocketChannel) key.channel());
                     Client client = clients.get(incoming);
-                    System.err.println("Message:" + client.ID);
 
                     AVAILABILITY data_status = client.socketIO.isAvaiable();
                     if (data_status == SocketIO.AVAILABILITY.YES) {
@@ -168,7 +182,6 @@ public class Server implements Runnable, GameServiceMenager {
                         }
                     } else if (data_status == AVAILABILITY.DISCONNECTED) {
                         removeClient(incoming);
-                        System.err.println("Disconnected:" + client.ID);
                     }
                 }
 
@@ -196,8 +209,6 @@ public class Server implements Runnable, GameServiceMenager {
             server_command.addValue("ID", ID);
             new_connection.send(server_command);
 
-            System.err.println("Connected:" + ID);
-
         } catch (IOException exception) {
             return false;
         }
@@ -211,7 +222,7 @@ public class Server implements Runnable, GameServiceMenager {
             return false;
         if (client.game_ID != null) {
             GameService gs = game_services.get(client.game_ID);
-            if (gs != null && gs.getInfo().host.equals(client.ID)) {
+            if (gs != null && gs.getInfo().host_id.equals(client.ID)) {
                 removeGameService(client.game_ID);
             }
         }
@@ -251,6 +262,20 @@ public class Server implements Runnable, GameServiceMenager {
             message.addValue("ID", game_service_id);
             message.addValue("sKey", sKey);
             client.socketIO.send(message);
+        } else if (cmd.getValue("action").equals("connect")) {
+            cmd = (ServerCommand) client.socketIO.popCommand().getCommand();
+            if (cmd.getValue("game") == null) { sendError(client.socketIO); return; }
+            if (cmd.getValue("name") == null) { sendError(client.socketIO); return; }
+            if (game_services.get(cmd.getValue("game")) == null) { sendError(client.socketIO); return; }
+
+            GameService service = game_services.get(cmd.getValue("game"));
+            if (!service.addPlayer(cmd.getValue("name"), client.ID, client.socketIO)) { sendError(client.socketIO); return; }
+            client.game_ID = cmd.getValue("game");
+
+            ServerCommand message = new ServerCommand();
+            message.setCode(200);
+            client.socketIO.send(message);
+
         } else {
             client.socketIO.popCommand();
         }
