@@ -8,7 +8,7 @@ public class GameServicesInfoTest {
     @Test
     public void test1() {
         GameServiceInfo inf1 = new GameServiceInfo();
-        inf1.host = "h1";
+        inf1.host_id = "h1";
         inf1.ID = "id1";
         inf1.max_players = 4;
         inf1.players.put("A1", "A1");
@@ -16,7 +16,7 @@ public class GameServicesInfoTest {
         inf1.players.put("C1", "C1");
 
         GameServiceInfo inf2 = new GameServiceInfo();
-        inf2.host = "h2";
+        inf2.host_id = "h2";
         inf2.ID = "id2";
         inf2.max_players = 4;
         inf2.players.put("A2", "A2");
@@ -24,7 +24,7 @@ public class GameServicesInfoTest {
         inf2.players.put("C2", "C2");
 
         GameServiceInfo inf3 = new GameServiceInfo();
-        inf3.host = "h3";
+        inf3.host_id = "h3";
         inf3.ID = "id3";
         inf3.max_players = 4;
         inf3.players.put("A3", "A3");
@@ -45,7 +45,7 @@ public class GameServicesInfoTest {
         assertEquals(3, game_services_info2.game_services.size());
         assertEquals("GameServicesInfo", game_services_info2.getCommandType());
 
-        assertEquals("h1", game_services_info2.game_services.get(0).host);
+        assertEquals("h1", game_services_info2.game_services.get(0).host_id);
         assertEquals("id1", game_services_info2.game_services.get(0).ID);
         assertEquals(4, game_services_info2.game_services.get(0).max_players);
         assertEquals(3, game_services_info2.game_services.get(0).players.size());
@@ -53,7 +53,7 @@ public class GameServicesInfoTest {
         assertEquals("B1", game_services_info2.game_services.get(0).players.get("B1"));
         assertEquals("C1", game_services_info2.game_services.get(0).players.get("C1"));
 
-        assertEquals("h2", game_services_info2.game_services.get(1).host);
+        assertEquals("h2", game_services_info2.game_services.get(1).host_id);
         assertEquals("id2", game_services_info2.game_services.get(1).ID);
         assertEquals(4, game_services_info2.game_services.get(1).max_players);
         assertEquals(3, game_services_info2.game_services.get(1).players.size());
@@ -61,7 +61,7 @@ public class GameServicesInfoTest {
         assertEquals("B2", game_services_info2.game_services.get(1).players.get("B2"));
         assertEquals("C2", game_services_info2.game_services.get(1).players.get("C2"));
 
-        assertEquals("h3", game_services_info2.game_services.get(2).host);
+        assertEquals("h3", game_services_info2.game_services.get(2).host_id);
         assertEquals("id3", game_services_info2.game_services.get(2).ID);
         assertEquals(4, game_services_info2.game_services.get(2).max_players);
         assertEquals(3, game_services_info2.game_services.get(2).players.size());

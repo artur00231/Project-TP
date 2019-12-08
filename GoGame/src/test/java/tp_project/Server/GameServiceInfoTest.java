@@ -8,12 +8,12 @@ public class GameServiceInfoTest {
     @Test
     public void test1() {
         GameServiceInfo inf = new GameServiceInfo();
-        assertEquals("", inf.host);
+        assertEquals("", inf.host_id);
         assertEquals("", inf.ID);
         assertEquals(0, inf.max_players);
         assertEquals(0, inf.players.size());
 
-        inf.host = "AA";
+        inf.host_id = "AA";
         inf.ID = "uid";
         inf.max_players = 4;
         inf.players.put("Aid", "A");
@@ -31,7 +31,7 @@ public class GameServiceInfoTest {
 
         inf.fromText("uid;4;AA;3;Aid;A;Bid;B;Cid;C;");
 
-        assertEquals("AA", inf.host);
+        assertEquals("AA", inf.host_id);
         assertEquals("uid", inf.ID);
         assertEquals(4, inf.max_players);
         assertEquals(3, inf.players.size());
