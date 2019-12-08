@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import tp_project.Network.Command;
-import tp_project.Network.ICommand;
 import tp_project.Network.SocketIO;
 
 public abstract class GameService {
@@ -27,18 +26,15 @@ public abstract class GameService {
     protected abstract boolean isGameRedy();
     protected abstract void startGame();
 
-    public GameService(String ID, String host, SocketIO host_socketIO, String host_id, GameServiceMenager meanager) {
+    public GameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id, GameServiceMenager meanager) {
         this.ID = ID;
         this.host = host;
         this.host_id = host_id;
         menager = meanager;
+        this.sKey = sKey;
 
         players = new HashMap<String, Client>();
         players.put(host_id, new Client(host, host_socketIO));
-
-        if (isGameRedy()) {
-            startGame();
-        }
     }
 
     public String getID() {
@@ -75,13 +71,32 @@ public abstract class GameService {
         return players.get(player_id) != null;
     }
 
-    public boolean removePlayer(String player_id, String sKey) {
-        if (!checkSKey(sKey)) return false;
+    public boolean removePlayer(String player_id) {
         if (!checkPlayer(player_id)) return false;
+
+        if (player_id.equals(host_id)) {
+            menager.deleteLater(ID);
+
+            for (String player : players.keySet()) {
+                kickPlayer(player);
+            }
+        }
 
         players.remove(player_id);
         menager.playerRemoved(player_id);
         return true;
+    }
+
+    public boolean kickPlayer(String player_id) {
+        if (!checkPlayer(player_id)) return false;
+        if (player_id.equals(host_id)) return false;
+
+        ServerCommand cmd = new ServerCommand();
+        cmd.addValue("kicked", host);
+        cmd.setCode(404);
+        players.get(player_id).socketIO.send(cmd);
+
+        return removePlayer(player_id);
     }
 
     public void setReady(String player_id, boolean ready, String sKey) {
@@ -96,13 +111,30 @@ public abstract class GameService {
         }
     }
 
-    public void update(SocketIO socketIO) {
+    public void update(String player_id) {
+        Client client = players.get(player_id);
+        if (client == null) return;
+
+        SocketIO socketIO = client.socketIO;
         Command command = socketIO.getCommand();
 
         if (command == null) return;
         if (!(command.getCommand().getCommandType().equals("ServerCommand"))) return;
+        socketIO.popCommand();
 
         ServerCommand cmd = (ServerCommand)command.getCommand();
-        System.out.println("Game_Service" + cmd.getCode());
+        if (cmd.getValue("ready") != null) {
+            setPlayerReady(player_id, Boolean.valueOf(cmd.getValue("ready")));
+            sendCode(200, socketIO);
+        } else if (cmd.getValue("exit") != null) {
+            removePlayer(player_id);
+            sendCode(200, socketIO);
+        }
+    }
+
+    protected void sendCode(int code, SocketIO socketIO) {
+        ServerCommand cmd = new ServerCommand();
+        cmd.setCode(code);
+        socketIO.send(cmd);
     }
 }
