@@ -57,7 +57,7 @@ public class ServerView extends JPanel {
     }
 
     private class RoomCreate extends JDialog {
-        JComboBox values = new JComboBox(new Integer[] {13, 15, 19});
+        JComboBox values = new JComboBox(new Integer[] {9, 13, 19});
         RoomCreate(JPanel owner) {
             super((JFrame) SwingUtilities.getWindowAncestor(owner), true);
             this.getContentPane().setLayout(new BoxLayout(this.getContentPane(), BoxLayout.PAGE_AXIS));
