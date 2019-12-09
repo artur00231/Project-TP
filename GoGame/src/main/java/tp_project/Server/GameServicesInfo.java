@@ -6,17 +6,17 @@ import java.util.ArrayList;
 import tp_project.Network.ICommand;
 
 public class GameServicesInfo implements ICommand {
-    public ArrayList<GameServiceInfo> game_services = new ArrayList<GameServiceInfo>();
+    public ArrayList<GameServiceInfo> game_services = new ArrayList<>();
 
     @Override
     public String toText() {
-        String data =  Integer.toString(game_services.size()) + ",";
+        StringBuilder data = new StringBuilder(game_services.size() + ",");
 
         for (GameServiceInfo game_service : game_services) {
-            data += game_service.toText() + ",";
+            data.append(game_service.toText()).append(",");
         }
 
-        return data;
+        return data.toString();
     }
 
     @Override
@@ -26,7 +26,7 @@ public class GameServicesInfo implements ICommand {
         if (data.length < 1) throw new IllegalArgumentException();
 
         try {
-            int size = Integer.valueOf(data[0]);
+            int size = Integer.parseInt(data[0]);
 
             game_services.clear();
 

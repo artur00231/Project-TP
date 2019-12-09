@@ -1,6 +1,6 @@
 package tp_project.Server;
 
-public interface GameServiceMenager {
+public interface GameServiceManager {
     public void playerRemoved(String ID);
     public void unregisterPlayer(String ID);
     public void registerPlayer(String ID);

@@ -23,7 +23,7 @@ public class CommandFactory {
     }
 
     public static boolean isValidType(String type) {
-        ArrayList<String> types_names = new ArrayList<String>();
+        ArrayList<String> types_names = new ArrayList<>();
         types_names.add("Text");
         types_names.add("ServerCommand");
         types_names.add("GameServiceInfo");

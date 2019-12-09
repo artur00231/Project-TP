@@ -9,11 +9,11 @@ public class MainMenu extends JPanel {
     private JPanel[] main_menu_panel = new JPanel[3];
 
     // Connect menu
-    JTextField connect_ip;
-    JTextField connect_port;
+    private JTextField connect_ip;
+    private JTextField connect_port;
 
     // Start Server Menu
-    JTextField server_port;
+    private JTextField server_port;
 
     private ActionListener option_selected = new ActionListener() {
         @Override
@@ -23,7 +23,7 @@ public class MainMenu extends JPanel {
 
     public enum Action {
         EXIT, SERVER, PLAY, tmp1, tmp2, tmp3, tmp4
-    };
+    }
 
     private enum Menu {
         MainMenu,
@@ -168,7 +168,7 @@ public class MainMenu extends JPanel {
     private void setMenu(Menu m)
     {
         int index = m.ordinal();
-        if (index < 0 || index >= Menu.values().length) return;
+        if (index >= Menu.values().length) return;
         removeAll();
 
         setLayout(new BorderLayout());

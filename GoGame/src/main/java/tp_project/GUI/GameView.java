@@ -1,6 +1,7 @@
 package tp_project.GUI;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -11,15 +12,16 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 public class GameView extends JPanel {
-    public enum PlayerColor {WHITE, BLACK};
-    public enum CellState {EMPTY, WHITE, BLACK};
+    public enum PlayerColor {WHITE, BLACK}
+    public enum CellState {EMPTY, WHITE, BLACK}
 
-    PlayerColor player_color;
+    private PlayerColor player_color;
 
-    Board board;
-    JButton pass_button = new JButton("Pass");
-    JButton give_up_button = new JButton("Give up");
-    ControlPanel control_panel = new ControlPanel();
+    private Board board;
+    private JButton pass_button = new JButton("Pass");
+    private JButton give_up_button = new JButton("Give up");
+    private ControlPanel control_panel = new ControlPanel();
+
     public GameView(int size, PlayerColor player_color) {
         board = new Board(size);
         this.player_color = player_color;
@@ -40,6 +42,8 @@ public class GameView extends JPanel {
 
             inner_panel.setLayout(new GridLayout(size, size));
             inner_panel.setBackground(Color.GRAY);
+            this.setBorder(new EmptyBorder(0,0,0,0));
+            this.setBackground(Color.BLACK);
             this.add(inner_panel);
             for (int y = 0; y < size; ++y) {
                 for (int x = 0; x < size; ++x) {
@@ -51,7 +55,7 @@ public class GameView extends JPanel {
                 @Override
                 public void componentResized(ComponentEvent e) {
                     Dimension d = e.getComponent().getSize();
-                    int m = Math.min(d.width, d.height) - 5;
+                    int m = Math.min(d.width, d.height) - 10;
                     m = m - m % size;
                     inner_panel.setPreferredSize(new Dimension(m, m));
                 }

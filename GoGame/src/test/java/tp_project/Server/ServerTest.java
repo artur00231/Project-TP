@@ -40,7 +40,7 @@ public class ServerTest {
         assertTrue(io.getSatus().is_connected);
 
         Thread.sleep(1000);
-        assertEquals(AVAILABILITY.YES, io.isAvaiable());
+        assertEquals(AVAILABILITY.YES, io.isAvailable());
         assertEquals("ServerCommand", io.getCommand().getType());
 
         server.kill();
@@ -59,14 +59,14 @@ public class ServerTest {
         SocketIO io = new SocketIO(s);
         assertTrue(io.getSatus().is_connected);
 
-        while(io.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("ServerCommand", io.popCommand().getType());
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("action", "getServicesInfo");
         io.send(cmd);
 
-        while(io.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("GameServicesInfo", io.getCommand().getType());
         assertEquals(0, ((GameServicesInfo) io.popCommand().getCommand()).game_services.size());
 
@@ -86,14 +86,14 @@ public class ServerTest {
         SocketIO io = new SocketIO(s);
         assertTrue(io.getSatus().is_connected);
 
-        while(io.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("ServerCommand", io.popCommand().getType());
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("action", "getServicesInfo");
         io.send(cmd);
 
-        while(io.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("GameServicesInfo", io.getCommand().getType());
         assertEquals(0, ((GameServicesInfo) io.popCommand().getCommand()).game_services.size());
 
@@ -102,7 +102,7 @@ public class ServerTest {
         cmd.addValue("filter", "xx");
         io.send(cmd);
 
-        while(io.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("GameServicesInfo", io.getCommand().getType());
         assertEquals(0, ((GameServicesInfo) io.popCommand().getCommand()).game_services.size());
 
@@ -122,25 +122,25 @@ public class ServerTest {
         SocketIO io = new SocketIO(s);
         assertTrue(io.getSatus().is_connected);
 
-        while(io.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("ServerCommand", io.popCommand().getType());
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("action", "create");
         io.send(cmd);
-        while(io.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("ServerCommand", io.getCommand().getType());
         assertEquals(400, ((ServerCommand) io.popCommand().getCommand()).getCode());
 
         cmd.addValue("type", "GoGame");
         io.send(cmd);
-        while(io.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("ServerCommand", io.getCommand().getType());
         assertEquals(400, ((ServerCommand) io.popCommand().getCommand()).getCode());
 
         cmd.addValue("name", "Art");
         io.send(cmd);
-        while(io.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("ServerCommand", io.getCommand().getType());
         assertEquals(201, ((ServerCommand) io.popCommand().getCommand()).getCode());
 
@@ -150,14 +150,14 @@ public class ServerTest {
         SocketIO io2 = new SocketIO(s2);
         assertTrue(io2.getSatus().is_connected);
 
-        while(io2.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io2.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("ServerCommand", io2.popCommand().getType());
 
         cmd = new ServerCommand();
         cmd.addValue("action", "getServicesInfo");
         io2.send(cmd);
 
-        while(io2.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io2.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("GameServicesInfo", io2.getCommand().getType());
         assertEquals(1, ((GameServicesInfo) io2.popCommand().getCommand()).game_services.size());
 
@@ -166,7 +166,7 @@ public class ServerTest {
         cmd.addValue("filter", "xx");
         io2.send(cmd);
 
-        while(io2.isAvaiable() != AVAILABILITY.YES) continue;
+        while(io2.isAvailable() != AVAILABILITY.YES) continue;
         assertEquals("GameServicesInfo", io2.getCommand().getType());
         assertEquals(0, ((GameServicesInfo) io2.popCommand().getCommand()).game_services.size());
 

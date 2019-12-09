@@ -18,7 +18,7 @@ import java.util.UUID;
 import tp_project.Network.SocketIO;
 import tp_project.Network.SocketIO.AVAILABILITY;
 
-public class Server implements Runnable, GameServiceMenager {
+public class Server implements Runnable, GameServiceManager {
     private class Client {
         public String ID;
         public String game_ID;
@@ -30,7 +30,7 @@ public class Server implements Runnable, GameServiceMenager {
         }
     }
 
-    private boolean is_runnig = false;
+    private boolean is_running = false;
     private boolean is_valid = false;
     private boolean kill = false;
     private ServerSocketChannel socket_server;
@@ -42,8 +42,8 @@ public class Server implements Runnable, GameServiceMenager {
 
     public Server(int port) {
         this.port = port;
-        clients = new HashMap<SocketChannel, Client>();
-        game_services = new HashMap<String, GameService>();
+        clients = new HashMap<>();
+        game_services = new HashMap<>();
         game_services_to_delete = new ArrayList<>();
 
         setup();
@@ -73,7 +73,7 @@ public class Server implements Runnable, GameServiceMenager {
     }
 
     public boolean isRunnig() {
-        return is_runnig;
+        return is_running;
     }
 
     public void kill() {
@@ -84,16 +84,16 @@ public class Server implements Runnable, GameServiceMenager {
     public void run() {
         if (!is_valid)
             return;
-        is_runnig = true;
+        is_running = true;
 
-        while (is_runnig) {
+        while (is_running) {
             if (kill) {
-                is_runnig = false;
+                is_running = false;
                 continue;
             }
 
             if (!checkSelector()) {
-                is_runnig = false;
+                is_running = false;
                 is_valid = false;
                 continue;
             }
@@ -150,9 +150,7 @@ public class Server implements Runnable, GameServiceMenager {
         int num_of_channels;
         try {
             num_of_channels = selector.select(100);
-        } catch (IOException exception) {
-            return false;
-        } catch (ClosedSelectorException exception) {
+        } catch (IOException | ClosedSelectorException exception) {
             return false;
         }
 
@@ -167,13 +165,11 @@ public class Server implements Runnable, GameServiceMenager {
 
                 if (key.isAcceptable()) {
                     acceptNewConnection();
-                } else if (key.isConnectable()) {
-
                 } else if (key.isReadable()) {
                     SocketChannel incoming = ((SocketChannel) key.channel());
                     Client client = clients.get(incoming);
 
-                    AVAILABILITY data_status = client.socketIO.isAvaiable();
+                    AVAILABILITY data_status = client.socketIO.isAvailable();
                     if (data_status == SocketIO.AVAILABILITY.YES) {
                         if (client.game_ID == null) {
                             handleIncomingCommand(client);
@@ -193,7 +189,7 @@ public class Server implements Runnable, GameServiceMenager {
     }
 
     private boolean acceptNewConnection() {
-        SocketChannel sc = null;
+        SocketChannel sc;
 
         try {
             sc = socket_server.accept();
@@ -241,43 +237,71 @@ public class Server implements Runnable, GameServiceMenager {
         ServerCommand cmd = (ServerCommand) client.socketIO.getCommand().getCommand();
         if (cmd.getValue("action") == null) sendError(client.socketIO);
 
-        if (cmd.getValue("action").equals("getServicesInfo")) {
-            client.socketIO.popCommand();
-            client.socketIO.send(getGameServcesInfo(cmd.getValue("filter")));
-        } else if (cmd.getValue("action").equals("create")) {
-            cmd = (ServerCommand) client.socketIO.popCommand().getCommand();
-            if (cmd.getValue("type") == null) { sendError(client.socketIO); return; }
-            if (cmd.getValue("name") == null) { sendError(client.socketIO); return; }
-            String game_service_id = UUID.randomUUID().toString();
-            String sKey = UUID.randomUUID().toString();
+        switch (cmd.getValue("action")) {
+            case "getServicesInfo":
+                client.socketIO.popCommand();
+                client.socketIO.send(getGameServcesInfo(cmd.getValue("filter")));
+                break;
+            case "create": {
+                cmd = (ServerCommand) client.socketIO.popCommand().getCommand();
+                if (cmd.getValue("type") == null) {
+                    sendError(client.socketIO);
+                    return;
+                }
+                if (cmd.getValue("name") == null) {
+                    sendError(client.socketIO);
+                    return;
+                }
+                String game_service_id = UUID.randomUUID().toString();
+                String sKey = UUID.randomUUID().toString();
 
-            GameService new_game_service = GameServiceFactory.getGameService(cmd.getValue("type"), game_service_id, sKey, cmd.getValue("name"), client.socketIO, client.ID, this);
-            if (new_game_service == null) { sendError(client.socketIO); return; }
+                GameService new_game_service = GameServiceFactory.getGameService(cmd.getValue("type"), game_service_id, sKey, cmd.getValue("name"), client.socketIO, client.ID, this);
+                if (new_game_service == null) {
+                    sendError(client.socketIO);
+                    return;
+                }
 
-            game_services.put(game_service_id, new_game_service);
-            client.game_ID = game_service_id;
+                game_services.put(game_service_id, new_game_service);
+                client.game_ID = game_service_id;
 
-            ServerCommand message = new ServerCommand();
-            message.setCode(201);
-            message.addValue("ID", game_service_id);
-            message.addValue("sKey", sKey);
-            client.socketIO.send(message);
-        } else if (cmd.getValue("action").equals("connect")) {
-            cmd = (ServerCommand) client.socketIO.popCommand().getCommand();
-            if (cmd.getValue("game") == null) { sendError(client.socketIO); return; }
-            if (cmd.getValue("name") == null) { sendError(client.socketIO); return; }
-            if (game_services.get(cmd.getValue("game")) == null) { sendError(client.socketIO); return; }
+                ServerCommand message = new ServerCommand();
+                message.setCode(201);
+                message.addValue("ID", game_service_id);
+                message.addValue("sKey", sKey);
+                client.socketIO.send(message);
+                break;
+            }
+            case "connect": {
+                cmd = (ServerCommand) client.socketIO.popCommand().getCommand();
+                if (cmd.getValue("game") == null) {
+                    sendError(client.socketIO);
+                    return;
+                }
+                if (cmd.getValue("name") == null) {
+                    sendError(client.socketIO);
+                    return;
+                }
+                if (game_services.get(cmd.getValue("game")) == null) {
+                    sendError(client.socketIO);
+                    return;
+                }
 
-            GameService service = game_services.get(cmd.getValue("game"));
-            if (!service.addPlayer(cmd.getValue("name"), client.ID, client.socketIO)) { sendError(client.socketIO); return; }
-            client.game_ID = cmd.getValue("game");
+                GameService service = game_services.get(cmd.getValue("game"));
+                if (!service.addPlayer(cmd.getValue("name"), client.ID, client.socketIO)) {
+                    sendError(client.socketIO);
+                    return;
+                }
+                client.game_ID = cmd.getValue("game");
 
-            ServerCommand message = new ServerCommand();
-            message.setCode(200);
-            client.socketIO.send(message);
+                ServerCommand message = new ServerCommand();
+                message.setCode(200);
+                client.socketIO.send(message);
 
-        } else {
-            client.socketIO.popCommand();
+                break;
+            }
+            default:
+                client.socketIO.popCommand();
+                break;
         }
 
     }

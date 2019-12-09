@@ -36,14 +36,14 @@ public class ServerCommand implements ICommand
 
     @Override
     public String toText() {
-        String text = Integer.toString(code) + ";";
-        text += Integer.toString(data.size()) + ";";
+        StringBuilder text = new StringBuilder(code + ";");
+        text.append(data.size()).append(";");
 
         for (String property : data.keySet()) {
-            text += property + ";" + data.get(property) + ";";
+            text.append(property).append(";").append(data.get(property)).append(";");
         }
 
-        return text;
+        return text.toString();
     }
 
     @Override
@@ -53,8 +53,8 @@ public class ServerCommand implements ICommand
         if (raw_data.length < 2) throw new IllegalArgumentException();
 
         try {
-            code = Integer.valueOf(raw_data[0]);
-            int size = Integer.valueOf(raw_data[1]);
+            code = Integer.parseInt(raw_data[0]);
+            int size = Integer.parseInt(raw_data[1]);
             data.clear();
 
             for (int i = 0; i < size; i++) {
