@@ -1,5 +1,6 @@
 package tp_project.Server;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ import tp_project.Network.Command;
 import tp_project.Network.SocketIO;
 
 public abstract class GameService {
-    private class Client {
+    private static class Client {
         public String name;
         public SocketIO socketIO;
         public Client(String name, SocketIO socketIO) { this.name = name; this.socketIO = socketIO; };
@@ -17,23 +18,23 @@ public abstract class GameService {
     private String sKey;
     private Map<String, Client> players;
     private String ID;
-    private GameServiceMenager menager;
+    private GameServiceManager manager;
 
     public abstract int getMaxPlayersCount();
     public abstract String getGameName();
     protected abstract boolean isPlayerReady(String player_id);
     protected abstract void setPlayerReady(String player_id, boolean ready);
-    protected abstract boolean isGameRedy();
+    protected abstract boolean isGameReady();
     protected abstract void startGame();
 
-    public GameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id, GameServiceMenager meanager) {
+    public GameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id, GameServiceManager meanager) {
         this.ID = ID;
         this.host = host;
         this.host_id = host_id;
-        menager = meanager;
+        manager = meanager;
         this.sKey = sKey;
 
-        players = new HashMap<String, Client>();
+        players = new HashMap<>();
         players.put(host_id, new Client(host, host_socketIO));
     }
 
@@ -78,15 +79,20 @@ public abstract class GameService {
         if (!checkPlayer(player_id)) return false;
 
         if (player_id.equals(host_id)) {
-            menager.deleteLater(ID);
+            manager.deleteLater(ID);
+
+            ArrayList<String> to_kick = new ArrayList<>();
 
             for (String player : players.keySet()) {
+                to_kick.add(player);
+            }
+            for (String player : to_kick) {
                 kickPlayer(player);
             }
         }
 
         players.remove(player_id);
-        menager.playerRemoved(player_id);
+        manager.playerRemoved(player_id);
         return true;
     }
 
@@ -103,13 +109,13 @@ public abstract class GameService {
     }
 
     public void setReady(String player_id, boolean ready, String sKey) {
-        if (player_id == host_id && checkSKey(sKey)) {
+        if (player_id.equals(host_id) && checkSKey(sKey)) {
             setPlayerReady(player_id, ready);
-        } else if (player_id != host_id) {
+        } else if (player_id.equals(host_id)) {
             setPlayerReady(player_id, ready);
         }
 
-        if (isGameRedy()) {
+        if (isGameReady()) {
             startGame();
         }
     }
@@ -127,7 +133,7 @@ public abstract class GameService {
 
         ServerCommand cmd = (ServerCommand)command.getCommand();
         if (cmd.getValue("ready") != null) {
-            setPlayerReady(player_id, Boolean.valueOf(cmd.getValue("ready")));
+            setPlayerReady(player_id, Boolean.parseBoolean(cmd.getValue("ready")));
             sendCode(200, socketIO);
         } else if (cmd.getValue("exit") != null) {
             removePlayer(player_id);

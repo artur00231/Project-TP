@@ -3,18 +3,17 @@ package tp_project.GUI;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.*;
 
 public class MainWindow
 {
-    JFrame window;
-    MainMenu menu;
-    ServerView server_view;
-    RoomView room_view;
-    GameView game_view;
+    private JFrame window;
+    private MainMenu menu;
+    private ServerView server_view;
+    private RoomView room_view;
+    private GameView game_view;
 
     public MainWindow() {
         window = new JFrame("GoGame");
@@ -43,13 +42,13 @@ public class MainWindow
                         window.pack();
                         break;
                     case tmp2:
-                        room_view.setRoomInfo(new RoomView.RoomInfo("roomID", Arrays.asList(new RoomView.Player[]{new RoomView.Player("p0", true), new RoomView.Player("p1", false)}), false));
+                        room_view.setRoomInfo(new RoomView.RoomInfo("roomID", Arrays.asList(new RoomView.Player("p0", true), new RoomView.Player("p1", false)), false));
                         window.setContentPane(room_view);
                         window.pack();
                         window.repaint();
                         break;
                     case tmp3:
-                        room_view.setRoomInfo(new RoomView.RoomInfo("roomID", Arrays.asList(new RoomView.Player[]{new RoomView.Player("p1", false), new RoomView.Player("p2", false)}), true));
+                        room_view.setRoomInfo(new RoomView.RoomInfo("roomID", Arrays.asList(new RoomView.Player("p1", false), new RoomView.Player("p2", false)), true));
                         window.setContentPane(room_view);
                         window.pack();
                         break;
@@ -58,7 +57,7 @@ public class MainWindow
                         window.pack();
                     //
                     default:
-                        System.out.println((MainMenu.Action) e.getSource());
+                        System.out.println(e.getSource());
                     break;
                 }
 			}
@@ -87,7 +86,7 @@ public class MainWindow
             }
         });
 
-        game_view = new GameView(19, GameView.PlayerColor.BLACK);
+        game_view = new GameView(19, GameView.PlayerColor.WHITE);
     }
 
     public int exec() {

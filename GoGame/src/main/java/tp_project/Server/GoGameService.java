@@ -11,10 +11,10 @@ public class GoGameService extends GameService {
     }
     private HashMap<String, PlayerInfo> players_info;
 
-    public GoGameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id, GameServiceMenager meanager) {
-        super(ID, sKey, host, host_socketIO, host_id, meanager);
+    public GoGameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id, GameServiceManager manager) {
+        super(ID, sKey, host, host_socketIO, host_id, manager);
 
-        players_info = new HashMap<String, PlayerInfo>();
+        players_info = new HashMap<>();
         PlayerInfo player_info = new PlayerInfo();
         player_info.colour = 0;
         players_info.put(host_id, player_info);
@@ -44,7 +44,7 @@ public class GoGameService extends GameService {
     }
 
     @Override
-    protected boolean isGameRedy() {
+    protected boolean isGameReady() {
         if (players_info.size() != 2) return false;
 
         boolean ready = true;
@@ -58,7 +58,7 @@ public class GoGameService extends GameService {
 
     @Override
     protected void startGame() {
-        // TODO implament
+        // TODO implement
     }
 
     @Override

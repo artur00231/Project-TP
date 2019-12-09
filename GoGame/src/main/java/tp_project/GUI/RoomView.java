@@ -92,7 +92,7 @@ public class RoomView extends JPanel {
             l.setForeground(p.is_ready ? Color.GREEN : Color.RED);
             this.add(l);
             this.add(Box.createGlue());
-            if (room_info.host && p.id != player_id) {
+            if (room_info.host && p.id.equals(player_id)) {
                 JButton kick_button = new JButton("Kick");
                 kick_button.addActionListener(e -> {
                     action_listener.actionPerformed(new ActionEvent(Action.KICK, 0, p.id));
@@ -140,7 +140,7 @@ public class RoomView extends JPanel {
         }
     }
 
-    private class NameLabel extends JLabel {
+    private static class NameLabel extends JLabel {
         @Override
         public Dimension getPreferredSize() {
             Dimension d = super.getPreferredSize();

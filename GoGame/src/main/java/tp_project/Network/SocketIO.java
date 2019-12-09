@@ -8,19 +8,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SocketIO {
-    public class ConnectionStatus {
+    public static class ConnectionStatus {
         public boolean is_connected = true;
-        public boolean sended = true;
-        public boolean recived = true;
+        public boolean sent = true;
+        public boolean received = true;
     }
 
-    public enum AVAILABILITY { YES, NO, DISCONNECTED };
+    public enum AVAILABILITY { YES, NO, DISCONNECTED }
 
     private SocketChannel socket;
     private ConnectionStatus connection_status;
     private ByteBuffer byte_buffer;
-    private String buffer = new String();
-    private int buffer_max_size = 1 * 1024;
+    private String buffer = "";
+    private int buffer_max_size = 1024;
     private List<Command> commands;
 
     public SocketIO(SocketChannel socket) throws IOException {
@@ -57,11 +57,11 @@ public class SocketIO {
             ByteBuffer to_send = ByteBuffer.wrap(raw_data);
             socket.write(to_send);
         } catch (IOException e) {
-            connection_status.sended = false;
+            connection_status.sent = false;
             return false;
         }
 
-        connection_status.sended = true;
+        connection_status.sent = true;
         return true;
     }
 
@@ -79,14 +79,14 @@ public class SocketIO {
         return cmd;
     }
     
-    public int getNuberOfCommands() {
+    public int getNumberOfCommands() {
         return commands.size();
     }
 
-    public AVAILABILITY isAvaiable() {
+    public AVAILABILITY isAvailable() {
         recive();
 
-        if (!connection_status.recived) return AVAILABILITY.DISCONNECTED;
+        if (!connection_status.received) return AVAILABILITY.DISCONNECTED;
 
         return commands.size() > 0 ? AVAILABILITY.YES : AVAILABILITY.NO;
     }
@@ -102,12 +102,12 @@ public class SocketIO {
                     buffer += new String(byte_buffer.array(), 0, num_of_bytes, "ASCII");
                     recived = true;
                 } catch (UnsupportedEncodingException e) {
-                    // Never throws eception
+                    // Never throws en exception
                     // I hope
                 }
             }
         } catch (IOException e) {
-            connection_status.recived = false;
+            connection_status.received = false;
             connection_status.is_connected = false;
             return;
         }
@@ -123,7 +123,7 @@ public class SocketIO {
 
         if (buffer.length() > buffer_max_size) {
             //Reset buffer
-            buffer = new String();
+            buffer = "";
         }
 
     }

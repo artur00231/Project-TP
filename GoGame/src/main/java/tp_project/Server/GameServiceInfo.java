@@ -8,21 +8,21 @@ import tp_project.Network.ICommand;
 public class GameServiceInfo implements ICommand {
     public int max_players = 0;
     public String host_id = "";
-    public Map<String, String> players = new HashMap<String, String>();
+    public Map<String, String> players = new HashMap<>();
     public String ID = "";
 
     @Override
     public String toText() {
-        String data =  ID + ";";
-        data += Integer.toString(max_players) + ";";
-        data += host_id + ";";
-        data += players.size() + ";";
+        StringBuilder data = new StringBuilder(ID + ";");
+        data.append(max_players).append(";");
+        data.append(host_id).append(";");
+        data.append(players.size()).append(";");
 
         for (String player_id : players.keySet()) {
-            data += player_id + ";" + players.get(player_id) + ";";
+            data.append(player_id).append(";").append(players.get(player_id)).append(";");
         }
 
-        return data;
+        return data.toString();
     }
 
     @Override
@@ -33,10 +33,10 @@ public class GameServiceInfo implements ICommand {
 
         try {
             ID = data[0];
-            max_players = Integer.valueOf(data[1]);
+            max_players = Integer.parseInt(data[1]);
             host_id = data[2];
 
-            int size = Integer.valueOf(data[3]);
+            int size = Integer.parseInt(data[3]);
             players.clear();
 
             for (int i = 0; i < size; i++) {

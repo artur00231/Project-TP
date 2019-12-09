@@ -12,7 +12,7 @@ public class ServerView extends JPanel {
         RETURN,
         CREATE,
         JOIN
-    };
+    }
 
     private ActionListener action_listener;
     private JButton return_button = new JButton("Return");
@@ -93,7 +93,7 @@ public class ServerView extends JPanel {
             join_button.setEnabled(players < max_players);
 
             room_info.setLayout(new GridLayout(0, 2, 2, 5));
-            room_info.add(new JLabel("ID:", JLabel.TRAILING));
+            room_info.add(new JLabel("Host name:", JLabel.TRAILING));
             room_info.add(new JLabel(name));
             room_info.add(new JLabel("Players:", JLabel.TRAILING));
             room_info.add(new JLabel(players + "/" + max_players));
