@@ -1,5 +1,7 @@
 package tp_project.GUI;
 
+import tp_project.GoGameLogic.GoGame;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -12,19 +14,22 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 public class GameView extends JPanel {
-    public enum PlayerColor {WHITE, BLACK}
-    public enum CellState {EMPTY, WHITE, BLACK}
+    private GoGame.Player player_color;
 
-    private PlayerColor player_color;
-
+    private GoGame go_game;
     private Board board;
+    private int size;
     private JButton pass_button = new JButton("Pass");
     private JButton give_up_button = new JButton("Give up");
     private ControlPanel control_panel = new ControlPanel();
 
-    public GameView(int size, PlayerColor player_color) {
-        board = new Board(size);
+    public GameView(int size, GoGame.Player player_color) {
+        go_game = new GoGame(size);
+        this.size = size;
         this.player_color = player_color;
+
+        board = new Board();
+        board.set(go_game.getBoard());
 
         this.setLayout(new BorderLayout());
         this.add(board, BorderLayout.CENTER);
@@ -32,19 +37,17 @@ public class GameView extends JPanel {
     }
 
     private class Board extends JPanel{
-        Cell[][] board;
-        int size;
         JPanel inner_panel = new JPanel();
+        Cell[][] board;
 
-        public Board(int size) {
-            this.size = size;
-            board = new Cell[size][size];
-
+        public Board() {
             inner_panel.setLayout(new GridLayout(size, size));
             inner_panel.setBackground(Color.GRAY);
             this.setBorder(new EmptyBorder(0,0,0,0));
             this.setBackground(Color.BLACK);
             this.add(inner_panel);
+
+            board = new Cell[size][size];
             for (int y = 0; y < size; ++y) {
                 for (int x = 0; x < size; ++x) {
                     board[y][x] = new Cell(x, y);
@@ -62,24 +65,30 @@ public class GameView extends JPanel {
             });
         }
 
+        public void set(GoGame.Cell[][] board) {
+            for (int i = 0; i < size; ++i) {
+                for (int j = 0; j < size; ++j) {
+                    this.board[i][j].cell_state = board[i][j];
+                }
+            }
+            repaint();
+        }
+
         private class Cell extends JPanel{
             int x, y;
             boolean paint_preview;
-            CellState cell_state;
+            GoGame.Cell cell_state;
 
             public Cell(int x, int y) {
                 this.x = x;
                 this.y = y;
                 this.setOpaque(false);
-                //TODO remove rand
-                cell_state = (Math.random() < 0.75 ? CellState.EMPTY : Math.random() < 0.5 ? CellState.BLACK : CellState.WHITE);
-                //cell_state = CellState.EMPTY;
                 paint_preview = false;
 
                 this.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseEntered(MouseEvent e) {
-                        if (isLegal(x, y)) paint_preview = true;
+                        if (go_game.isLegal(new GoGame.Move(x, y, player_color))) paint_preview = true;
                         repaint();
                     }
 
@@ -87,6 +96,15 @@ public class GameView extends JPanel {
                     public void mouseExited(MouseEvent e) {
                         paint_preview = false;
                         repaint();
+                    }
+
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (go_game.makeMove(new GoGame.Move(x, y, player_color))) {
+                            player_color = player_color.getOpponent();
+                            set(go_game.getBoard());
+                            paint_preview = false;
+                        }
                     }
                 });
             }
@@ -96,8 +114,8 @@ public class GameView extends JPanel {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
-                if (!this.cell_state.equals(CellState.EMPTY)) {
-                    if (this.cell_state.equals(CellState.WHITE))
+                if (!this.cell_state.equals(GoGame.Cell.EMPTY)) {
+                    if (this.cell_state.equals(GoGame.Cell.WHITE))
                         g2d.setColor(Color.WHITE);
                     else
                         g2d.setColor(Color.BLACK);
@@ -112,17 +130,13 @@ public class GameView extends JPanel {
                 }
 
                 if (this.paint_preview) {
-                    if (player_color.equals(PlayerColor.BLACK))
+                    if (player_color.equals(GoGame.Player.BLACK))
                         g2d.setColor(new Color(0, 0, 0, 127));
                     else
                         g2d.setColor(new Color(255, 255, 255, 127));
                     g2d.fill(new Ellipse2D.Double(0, 0, this.getWidth(), this.getHeight()));
                 }
             }
-        }
-        boolean isLegal(int x, int y) {
-            //TODO
-            return board[y][x].cell_state.equals(CellState.EMPTY);
         }
     }
 
