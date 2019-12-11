@@ -101,6 +101,10 @@ public class GameServiceTest {
         cmd.addValue("game", game_id);
         io2.send(cmd);
         while(io2.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
+        assertEquals(302, ((ServerCommand)io2.popCommand().getCommand()).getCode());
+        while(io1.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
+        assertEquals(302, ((ServerCommand)io1.popCommand().getCommand()).getCode());
+        while(io2.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
         assertEquals(200, ((ServerCommand)io2.popCommand().getCommand()).getCode());
 
         io3.send(cmd);
@@ -118,6 +122,8 @@ public class GameServiceTest {
         cmd.addValue("name", "test");
         cmd.addValue("game", game_id);
         io3.send(cmd);
+        while(io3.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
+        assertEquals(302, ((ServerCommand)io3.popCommand().getCommand()).getCode());
         while(io3.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
         assertEquals(200, ((ServerCommand)io3.popCommand().getCommand()).getCode());
 
@@ -162,6 +168,10 @@ public class GameServiceTest {
         cmd.addValue("name", "test");
         cmd.addValue("game", ((GameServicesInfo) io2.popCommand().getCommand()).game_services.get(0).ID);
         io2.send(cmd);
+        while(io2.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
+        assertEquals(302, ((ServerCommand)io2.popCommand().getCommand()).getCode());
+        while(io1.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
+        assertEquals(302, ((ServerCommand)io1.popCommand().getCommand()).getCode());
         while(io2.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
         assertEquals(200, ((ServerCommand)io2.popCommand().getCommand()).getCode());
 
@@ -215,6 +225,10 @@ public class GameServiceTest {
         cmd.addValue("game", ((GameServicesInfo) io2.popCommand().getCommand()).game_services.get(0).ID);
 
         io2.send(cmd);
+        while(io2.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
+        assertEquals(302, ((ServerCommand)io2.popCommand().getCommand()).getCode());
+        while(io1.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
+        assertEquals(302, ((ServerCommand)io1.popCommand().getCommand()).getCode());
         while(io2.isAvailable() != SocketIO.AVAILABILITY.YES) continue;
         assertEquals(200, ((ServerCommand)io2.popCommand().getCommand()).getCode());
 

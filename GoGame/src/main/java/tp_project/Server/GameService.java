@@ -26,6 +26,7 @@ public abstract class GameService {
     protected abstract void setPlayerReady(String player_id, boolean ready);
     protected abstract boolean isGameReady();
     protected abstract void startGame();
+    protected abstract boolean handleExtendetCommands(String client, ServerCommand command, SocketIO socketIO);
 
     public GameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id, GameServiceManager meanager) {
         this.ID = ID;
@@ -67,6 +68,7 @@ public abstract class GameService {
         }
 
         players.put(player_id, new Client(player_name, socketIO));
+        updatePlayers();
 
         return true;
     }
@@ -122,6 +124,7 @@ public abstract class GameService {
 
     public void update(String player_id) {
         Client client = players.get(player_id);
+        boolean updated = false;
         if (client == null) return;
 
         SocketIO socketIO = client.socketIO;
@@ -135,25 +138,36 @@ public abstract class GameService {
         if (cmd.getValue("ready") != null) {
             setPlayerReady(player_id, Boolean.parseBoolean(cmd.getValue("ready")));
             sendCode(200, socketIO);
+            updated = true;
         } else if (cmd.getValue("exit") != null) {
             removePlayer(player_id);
             sendCode(200, socketIO);
+            updated = true;
         } else if (cmd.getValue("kick") != null) {
-            if (!checkSKey(cmd.getValue("sKey"))) { sendCode(403, socketIO); }
+            if (!checkSKey(cmd.getValue("sKey"))) { sendCode(400, socketIO); return; }
             if (kickPlayer(cmd.getValue("kick"))) {
                 sendCode(200, socketIO);
+                updated = true;
             } else {
                 sendCode(400, socketIO);
             }
         } else if (cmd.getValue("getServiceInfo") != null) {
             socketIO.send(getInfo());
         } else if (cmd.getValue("ping") != null) {
-            client.socketIO.popCommand();;
             ServerCommand ping = new ServerCommand();
             ping.setCode(1);
             ping.addValue("ping", "0");
 
             client.socketIO.send(ping);
+        } else if (cmd.getValue("ready") != null) {
+            setPlayerReady(player_id, Boolean.parseBoolean(cmd.getValue("ready")));
+            updated = true;
+        } else {
+            updated = updated || handleExtendetCommands(player_id, cmd, socketIO);
+        }
+
+        if (updated) {
+            updatePlayers();
         }
     }
 
@@ -161,5 +175,11 @@ public abstract class GameService {
         ServerCommand cmd = new ServerCommand();
         cmd.setCode(code);
         socketIO.send(cmd);
+    }
+
+    protected void updatePlayers() {
+        for (Map.Entry<String, Client> pair : players.entrySet()) {
+            sendCode(302, pair.getValue().socketIO);
+        }
     }
 }
