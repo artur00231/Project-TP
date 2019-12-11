@@ -147,6 +147,13 @@ public abstract class GameService {
             }
         } else if (cmd.getValue("getServiceInfo") != null) {
             socketIO.send(getInfo());
+        } else if (cmd.getValue("ping") != null) {
+            client.socketIO.popCommand();;
+            ServerCommand ping = new ServerCommand();
+            ping.setCode(1);
+            ping.addValue("ping", "0");
+
+            client.socketIO.send(ping);
         }
     }
 
