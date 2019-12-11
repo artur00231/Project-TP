@@ -228,6 +228,16 @@ public class Server implements Runnable, GameServiceManager {
         return true;
     }
 
+    private boolean removeClient(String client_id) {
+        for (Map.Entry<SocketChannel, Client> pair : clients.entrySet()) {
+            if (pair.getValue().ID.equals(client_id)) {
+                return removeClient(pair.getKey());
+            }
+        }
+
+        return false;
+    }
+
     private void handleIncomingCommand(Client client) {
         if (client.socketIO.getCommand() == null)
             return;
@@ -235,7 +245,17 @@ public class Server implements Runnable, GameServiceManager {
             return;
 
         ServerCommand cmd = (ServerCommand) client.socketIO.getCommand().getCommand();
-        if (cmd.getValue("action") == null) sendError(client.socketIO);
+        if (cmd.getValue("ping") != null) {
+            client.socketIO.popCommand();;
+            ServerCommand ping = new ServerCommand();
+            ping.setCode(0);
+            ping.addValue("ping", "0");
+
+            client.socketIO.send(ping);
+            return;
+        }
+
+        if (cmd.getValue("action") == null) sendCode(client.socketIO, 400);
 
         switch (cmd.getValue("action")) {
             case "getServicesInfo":
@@ -245,11 +265,11 @@ public class Server implements Runnable, GameServiceManager {
             case "create": {
                 cmd = (ServerCommand) client.socketIO.popCommand().getCommand();
                 if (cmd.getValue("type") == null) {
-                    sendError(client.socketIO);
+                    sendCode(client.socketIO, 400);
                     return;
                 }
                 if (cmd.getValue("name") == null) {
-                    sendError(client.socketIO);
+                    sendCode(client.socketIO, 400);
                     return;
                 }
                 String game_service_id = UUID.randomUUID().toString();
@@ -257,7 +277,7 @@ public class Server implements Runnable, GameServiceManager {
 
                 GameService new_game_service = GameServiceFactory.getGameService(cmd.getValue("type"), game_service_id, sKey, cmd.getValue("name"), client.socketIO, client.ID, this);
                 if (new_game_service == null) {
-                    sendError(client.socketIO);
+                    sendCode(client.socketIO, 400);
                     return;
                 }
 
@@ -274,21 +294,21 @@ public class Server implements Runnable, GameServiceManager {
             case "connect": {
                 cmd = (ServerCommand) client.socketIO.popCommand().getCommand();
                 if (cmd.getValue("game") == null) {
-                    sendError(client.socketIO);
+                    sendCode(client.socketIO, 400);
                     return;
                 }
                 if (cmd.getValue("name") == null) {
-                    sendError(client.socketIO);
+                    sendCode(client.socketIO, 400);
                     return;
                 }
                 if (game_services.get(cmd.getValue("game")) == null) {
-                    sendError(client.socketIO);
+                    sendCode(client.socketIO, 400);
                     return;
                 }
 
                 GameService service = game_services.get(cmd.getValue("game"));
                 if (!service.addPlayer(cmd.getValue("name"), client.ID, client.socketIO)) {
-                    sendError(client.socketIO);
+                    sendCode(client.socketIO, 400);
                     return;
                 }
                 client.game_ID = cmd.getValue("game");
@@ -299,6 +319,9 @@ public class Server implements Runnable, GameServiceManager {
 
                 break;
             }
+            case "exit": {
+                removeClient(client.ID);
+            }
             default:
                 client.socketIO.popCommand();
                 break;
@@ -306,7 +329,7 @@ public class Server implements Runnable, GameServiceManager {
 
     }
 
-    private void sendError(SocketIO socketIO) {
+    private void sendCode(SocketIO socketIO, int code) {
         ServerCommand message = new ServerCommand();
         message.setCode(400);
         socketIO.send(message);

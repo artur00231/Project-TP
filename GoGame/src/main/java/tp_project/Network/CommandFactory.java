@@ -2,6 +2,7 @@ package tp_project.Network;
 
 import java.util.ArrayList;
 
+import tp_project.GoGame.GoGameServiceInfo;
 import tp_project.Server.GameServiceInfo;
 import tp_project.Server.GameServicesInfo;
 import tp_project.Server.ServerCommand;
@@ -17,6 +18,8 @@ public class CommandFactory {
             return new GameServicesInfo();
         } else if (type.equals("ServerCommand")) {
             return new ServerCommand();
+        } else if (type.equals("GoGameServiceInfo")) {
+            return new GoGameServiceInfo();
         }
         
         return null;
@@ -28,6 +31,7 @@ public class CommandFactory {
         types_names.add("ServerCommand");
         types_names.add("GameServiceInfo");
         types_names.add("GameServicesInfo");
+        types_names.add("GoGameServiceInfo");
         return types_names.contains(type);
     }
 }

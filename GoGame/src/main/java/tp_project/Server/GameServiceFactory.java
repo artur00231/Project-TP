@@ -1,5 +1,6 @@
 package tp_project.Server;
 
+import tp_project.GoGame.GoGameService;
 import tp_project.Network.SocketIO;
 
 public class GameServiceFactory {
