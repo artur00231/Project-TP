@@ -4,19 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.channels.SocketChannel;
 
 import org.junit.Test;
 
+import tp_project.GoGame.GoClient;
 import tp_project.Network.ICommand;
-import tp_project.Network.SocketIO;
-import tp_project.Network.SocketIO.AVAILABILITY;
 import tp_project.Server.Client.POSITION;
 
 class ClientAdapter implements ClientListener {
     public ICommand last_command = null;
-    public int last_code = 0;
+    public boolean error = false;
     public String last_request = "";
     public boolean updated = false;
     public boolean pos_changed = false;
@@ -41,8 +38,8 @@ class ClientAdapter implements ClientListener {
     }
 
     @Override
-    public void recived(int code, String request) {
-        last_code = code;
+    public void error(String request) {
+        error = true;
         last_request = request;
         return;
     }
@@ -60,12 +57,7 @@ public class ClientTest {
         Thread t = new Thread(server);
         t.start();
 
-        SocketChannel s = SocketChannel.open();
-        s.connect(new InetSocketAddress(IP, PORT));
-        SocketIO io = new SocketIO(s);
-        assertTrue(io.getSatus().is_connected);
-        while (io.isAvailable() != AVAILABILITY.YES) continue;
-        Client client = new GoClient(io);
+        Client client = GoClient.create(IP, PORT, "test").get();
         ClientAdapter clientAdapter = new ClientAdapter();
         client.setClientListener(clientAdapter);
 
@@ -81,15 +73,6 @@ public class ClientTest {
         t.join();
     }
 
-    private SocketIO getNewSocketIO() throws IOException {
-        SocketChannel s = SocketChannel.open();
-        s.connect(new InetSocketAddress(IP, PORT));
-        SocketIO io = new SocketIO(s);
-        assertTrue(io.getSatus().is_connected);
-
-        return io;
-    }
-
     @Test(timeout = 3000)
     public void test2() throws IOException, InterruptedException {
         Server server = new Server(PORT);
@@ -97,14 +80,11 @@ public class ClientTest {
         Thread t = new Thread(server);
         t.start();
 
-        SocketIO io1 = getNewSocketIO();
-        SocketIO io2 = getNewSocketIO();
-
-        Client c1 = new GoClient(io1);
+        Client c1 = GoClient.create(IP, PORT, "test").get();
         ClientAdapter a1 = new ClientAdapter();
         c1.setClientListener(a1);
         assertEquals(Client.POSITION.SERVER, c1.getPosition());
-        Client c2 = new GoClient(io2);
+        Client c2 = GoClient.create(IP, PORT, "test").get();
         ClientAdapter a2 = new ClientAdapter();
         c2.setClientListener(a2);
         assertEquals(Client.POSITION.SERVER, c2.getPosition());
@@ -137,8 +117,7 @@ public class ClientTest {
 
         a2.pos_changed = false;
         c1.kick(player_to_kick);
-        while(a1.last_code == 0) c1.update();
-        assertEquals(200, a1.last_code);
+        while(a1.updated == false) c1.update();;
 
         while(a2.pos_changed == false) c2.update();
         assertEquals(Client.POSITION.SERVER, c2.getPosition());

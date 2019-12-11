@@ -9,5 +9,5 @@ public interface ClientListener {
 
     public void recived(ICommand command, String request);
 
-    public void recived(int code, String request);
+    public void error(String request);
 }
