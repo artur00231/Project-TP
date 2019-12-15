@@ -13,16 +13,22 @@ public class GoGameService extends GameService {
         public boolean ready = false;
         public int colour;
     }
+
     private HashMap<String, PlayerInfo> players_info;
     private int enemy_colour = 1;
+    private GoGame game;
+    private Thread game_thread;
+    private String host_id;
 
-    public GoGameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id, GameServiceManager manager) {
+    public GoGameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id,
+            GameServiceManager manager) {
         super(ID, sKey, host, host_socketIO, host_id, manager);
 
         players_info = new HashMap<>();
         PlayerInfo player_info = new PlayerInfo();
         player_info.colour = 0;
         players_info.put(host_id, player_info);
+        this.host_id = host_id;
     }
 
     @Override
@@ -38,19 +44,22 @@ public class GoGameService extends GameService {
     @Override
     protected boolean isPlayerReady(String player_id) {
         PlayerInfo player_info = players_info.get(player_id);
-        if (player_info != null) return player_info.ready;
+        if (player_info != null)
+            return player_info.ready;
         return false;
     }
 
     @Override
     protected void setPlayerReady(String player_id, boolean ready) {
         PlayerInfo player_info = players_info.get(player_id);
-        if (player_info != null) player_info.ready = true;
+        if (player_info != null)
+            player_info.ready = true;
     }
 
     @Override
     protected boolean isGameReady() {
-        if (players_info.size() != 2) return false;
+        if (players_info.size() != 2)
+            return false;
 
         boolean ready = true;
 
@@ -63,7 +72,29 @@ public class GoGameService extends GameService {
 
     @Override
     protected void startGame() {
-        // TODO implement
+        GoPlayer[] players = new GoPlayer[2];
+        String[] players_id = new String[2];
+
+        players[0] = new GoRemotePlayer(getClientSocketIO(host_id));
+        players_id[0] = host_id;
+
+        for (String id : players_info.keySet()) {
+            if (id.equals(host_id)) continue;
+            if (getClientSocketIO(id) != null) {
+                players[1] = new GoRemotePlayer(getClientSocketIO(id));
+            } else {
+                // TODO add bot
+            }
+
+            players_id[1] = id;
+        }
+
+        game = new GoGame(players[0], players_id[0], players[1], players_id[1], enemy_colour == 1 ? 0 : 1, this);
+        players[0].setGame(game);
+        players[1].setGame(game);
+
+        game_thread = new Thread(game);
+        game_thread.start();
     }
 
     @Override
@@ -117,6 +148,18 @@ public class GoGameService extends GameService {
         }
 
         return false;
+    }
+
+    @Override
+    public void gameEnded() {
+        super.gameEnded();
+
+        try {
+            game_thread.join();
+        } catch (InterruptedException e) {
+        }
+
+        game = null;
     }
     
 }
