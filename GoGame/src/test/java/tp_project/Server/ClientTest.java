@@ -73,7 +73,7 @@ public class ClientTest {
         t.join();
     }
 
-    @Test(timeout = 3000)
+    @Test(timeout = 300000)
     public void test2() throws IOException, InterruptedException {
         Server server = new Server(PORT);
         assertTrue(server.isValid());
@@ -99,6 +99,7 @@ public class ClientTest {
         while(a2.last_command == null) c2.update();
         assertEquals(1, ((GameServicesInfo) a2.last_command).game_services.size());
 
+        a2.pos_changed = false;
         c2.connect(((GameServicesInfo) a2.last_command).game_services.get(0).ID);
         while(a2.pos_changed == false) c2.update();
         assertEquals(POSITION.GAMESERVICE, c2.getPosition());

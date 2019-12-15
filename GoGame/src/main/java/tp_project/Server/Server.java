@@ -225,8 +225,8 @@ public class Server implements Runnable, GameServiceManager {
             return false;
         if (client.game_ID != null) {
             GameService gs = game_services.get(client.game_ID);
-            if (gs != null && gs.getInfo().host_id.equals(client.ID)) {
-                removeGameService(client.game_ID);
+            if (gs != null) {
+                gs.removePlayer(client.ID);
             }
         }
         sc.keyFor(selector).cancel();

@@ -77,7 +77,6 @@ public abstract class Client {
                         while (socketIO.popCommand() != null) continue;
                         getLocation();
                         socketIO.popCommand();
-
                         return;
                     } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 302) {
                         client_listener.updated();
@@ -191,7 +190,7 @@ public abstract class Client {
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("ready", Boolean.toString(ready));
-        send(cmd, RESPONSETYPE.SERVERCOMMAND, "create");
+        send(cmd, RESPONSETYPE.SERVERCOMMAND, "ready");
 
         return STATUS.OK;
     }
