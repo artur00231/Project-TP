@@ -33,6 +33,12 @@ public class GoClient extends Client {
         super(socketIO, name);
     }
 
+    public GoRemotePlayer getPlayer() {
+        if (getPosition() != POSITION.GAME) return null;
+
+        return new GoRemotePlayer(socketIO);
+    }
+
     @Override
     protected void handleExtendentCommand(ICommand command, String request) {
         if (request.equals("flip") && command.getCommandType().equals("ServerCommand")) {

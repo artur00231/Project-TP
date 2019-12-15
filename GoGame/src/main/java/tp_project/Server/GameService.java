@@ -105,17 +105,15 @@ public abstract class GameService implements GameManager {
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("kicked", host);
         cmd.setCode(301);
-        players.get(player_id).socketIO.send(cmd);
+        if (players.get(player_id).socketIO != null) {
+            players.get(player_id).socketIO.send(cmd);
+        }
 
         return removePlayer(player_id);
     }
 
-    public void setReady(String player_id, boolean ready, String sKey) {
-        if (player_id.equals(host_id) && checkSKey(sKey)) {
-            setPlayerReady(player_id, ready);
-        } else if (player_id.equals(host_id)) {
-            setPlayerReady(player_id, ready);
-        }
+    public void setReady(String player_id, boolean ready) {
+        setPlayerReady(player_id, ready);
 
         if (isGameReady()) {
             startGame();
@@ -136,8 +134,8 @@ public abstract class GameService implements GameManager {
 
         ServerCommand cmd = (ServerCommand)command.getCommand();
         if (cmd.getValue("ready") != null) {
-            setPlayerReady(player_id, Boolean.parseBoolean(cmd.getValue("ready")));
-            sendCode(200, socketIO);
+            setReady(player_id, Boolean.parseBoolean(cmd.getValue("ready")));
+            if (!isGameReady()) sendCode(200, socketIO);
             updated = true;
         } else if (cmd.getValue("exit") != null) {
             removePlayer(player_id);
@@ -172,6 +170,7 @@ public abstract class GameService implements GameManager {
     }
 
     protected void sendCode(int code, SocketIO socketIO) {
+        if (socketIO == null) return;
         ServerCommand cmd = new ServerCommand();
         cmd.setCode(code);
         socketIO.send(cmd);
@@ -183,17 +182,35 @@ public abstract class GameService implements GameManager {
         }
     }
 
+    @Override
     public void gameEnded()
     {
         for (Map.Entry<String, Client> pair : players.entrySet()) {
             manager.registerPlayer(pair.getKey());
         }
+
+        for (Map.Entry<String, Client> pair : players.entrySet()) {
+            sendCode(301, pair.getValue().socketIO);
+        }
     }
 
+    @Override
     public void gameStated()
     {
         for (Map.Entry<String, Client> pair : players.entrySet()) {
             manager.unregisterPlayer(pair.getKey());
         }
+
+        for (Map.Entry<String, Client> pair : players.entrySet()) {
+            sendCode(301, pair.getValue().socketIO);
+        }
+    }
+
+    protected SocketIO getClientSocketIO(String client_id) {
+        if (players.get(client_id) == null) {
+            return null;
+        }
+
+        return players.get(client_id).socketIO;
     }
 }
