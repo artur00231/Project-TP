@@ -1,7 +1,9 @@
 package tp_project.GUI;
 
 import tp_project.GoGame.GoClient;
+import tp_project.GoGame.GoGame;
 import tp_project.GoGame.GoGameServiceInfo;
+import tp_project.Server.GameServiceInfo;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -11,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RoomView extends JPanel {
     enum Action {
@@ -48,12 +51,24 @@ public class RoomView extends JPanel {
         });
     }
 
-    synchronized public void setRoomInfo(GoGameServiceInfo info) {
-        this.room_info = new RoomInfo(info);
+    synchronized public void setRoomInfo(String player_id, GameServiceInfo info) {
+        this.player_id = player_id;
+        this.room_info = new RoomInfo(info, player_id);
         room_id_label.setText(room_info.id);
         player_list.set();
         control_panel.set();
 
+        action_listener.actionPerformed(new ActionEvent(Action.PACK, 0, ""));
+    }
+
+    synchronized public void updateRoomInfo(GoGameServiceInfo info) {
+        for (GoGameServiceInfo.PlayerInfo player_info : info.getPlayersInfo()) {
+            for (Player p : room_info.players) {
+                if (p.id.equals(player_info.ID)) p.is_ready = player_info.ready;
+            }
+        }
+
+        player_list.set();
         action_listener.actionPerformed(new ActionEvent(Action.PACK, 0, ""));
     }
 
@@ -66,25 +81,26 @@ public class RoomView extends JPanel {
         List<Player> players;
         boolean host;
 
-        public RoomInfo(GoGameServiceInfo info) {
-            //TODO
-            this.id = "ROOM ID";
-            this.host = true;
+        public RoomInfo(GameServiceInfo info, String player_id) {
+            this.id = info.ID;
+            this.host = info.host_id.equals(player_id);
 
             players = new ArrayList<>();
 
-            for (GoGameServiceInfo.PlayerInfo player : info.getPlayersInfo()) {
-                players.add(new Player(player.ID, player.ready));
+            for (Map.Entry<String, String> v : info.players.entrySet()) {
+                players.add(new Player(v.getKey(), v.getValue(), false));
             }
         }
     }
 
     public static class Player {
         String id;
+        String name;
         boolean is_ready;
 
-        public Player(String id, boolean is_ready) {
+        public Player(String id, String name, boolean is_ready) {
             this.id = id;
+            this.name = name;
             this.is_ready = is_ready;
         }
     }
@@ -98,14 +114,14 @@ public class RoomView extends JPanel {
                             new EmptyBorder(5, 5, 5, 5)
                     )
             ));
-            NameLabel player_label = new NameLabel(p.id);
+            NameLabel player_label = new NameLabel(p.name);
             this.add(player_label);
             this.add(Box.createRigidArea(new Dimension(10, 0)));
             JLabel l = new JLabel(p.is_ready ? "Ready" : "Not Ready");
             l.setForeground(p.is_ready ? Color.GREEN : Color.RED);
             this.add(l);
             this.add(Box.createGlue());
-            if (room_info.host && p.id.equals(player_id)) {
+            if (room_info.host && !p.id.equals(player_id)) {
                 JButton kick_button = new JButton("Kick");
                 kick_button.addActionListener(e -> {
                     action_listener.actionPerformed(new ActionEvent(Action.KICK, 0, p.id));

@@ -2,10 +2,12 @@ package tp_project.GUI;
 
 import tp_project.GoGame.GoClient;
 import tp_project.GoGame.GoGameServiceInfo;
+import tp_project.GoGame.GoRemotePlayer;
 import tp_project.GoGameLogic.GoGameLogic;
 import tp_project.Network.ICommand;
 import tp_project.Server.Client;
 import tp_project.Server.ClientListener;
+import tp_project.Server.GameServiceInfo;
 import tp_project.Server.GameServicesInfo;
 
 import javax.swing.*;
@@ -42,6 +44,11 @@ class GoClientThread implements Runnable {
 
 public class ClientView {
     private GoClient go_client;
+    private GoRemotePlayer go_player;
+    private GoGameLogic.Player color;
+    private String room_id;
+    private String host_id;
+
     private ActionListener action_listener;
     private Thread t;
     private GoClientThread go_client_thread;
@@ -53,7 +60,6 @@ public class ClientView {
     enum Action {
         ERROR,
         SET_CONTENT_PANE,
-        RETURN,
         DISCONNECTED,
         PACK;
 
@@ -83,7 +89,7 @@ public class ClientView {
             GoClient.STATUS s;
             switch ((ServerView.Action) e.getSource()) {
                 case RETURN:
-                    //action_listener.actionPerformed(new ActionEvent(createAction(Action.RETURN, null), 0, ""));
+                    sendAction(Action.DISCONNECTED, null);
                     while (go_client.exit().equals(GoClient.STATUS.BUSY));
                     break;
                 case CREATE:
@@ -93,7 +99,8 @@ public class ClientView {
                     break;
                 case JOIN:
                     do {
-                        s = go_client.connect(e.getActionCommand());
+                        room_id = e.getActionCommand();
+                        s = go_client.connect(room_id);
                     } while (s.equals(GoClient.STATUS.BUSY));
                     break;
                 case REFRESH:
@@ -164,10 +171,11 @@ public class ClientView {
                     System.out.println("updated");
                     switch (go_client.getPosition()) {
                         case SERVER:
-                            while(go_client.getGameServicesInfo().equals(Client.STATUS.BUSY));
+                            go_client.getGameServicesInfo();
                             break;
                         case GAMESERVICE:
-                            while(go_client.getGoGameServiceInfo().equals(Client.STATUS.BUSY));
+                            if(!go_client.getGameServiceInfo().equals(Client.STATUS.BUSY))
+                                while (go_client.getGoGameServiceInfo().equals(Client.STATUS.BUSY)) go_client.update();
                             break;
                     }
                 }
@@ -180,13 +188,17 @@ public class ClientView {
                             sendAction(Action.DISCONNECTED, null);
                             break;
                         case GAMESERVICE:
-                            while(go_client.getGoGameServiceInfo().equals(Client.STATUS.BUSY));
+                            while(go_client.getGameServiceInfo().equals(Client.STATUS.BUSY)) go_client.update();
+                            while(go_client.getGoGameServiceInfo().equals(Client.STATUS.BUSY)) go_client.update();
                             sendAction(Action.SET_CONTENT_PANE, room_view);
                             break;
                         case SERVER:
                             while(go_client.getGameServicesInfo().equals(Client.STATUS.BUSY));
                             sendAction(Action.SET_CONTENT_PANE, server_view);
                             break;
+                        case GAME:
+                            go_player = go_client.getPlayer();
+                            sendAction(Action.SET_CONTENT_PANE, game_view);
                     }
                 }
 
@@ -198,7 +210,11 @@ public class ClientView {
                             server_view.setRooms((GameServicesInfo) command);
                             break;
                         case "GoGameServiceInfo":
-                            room_view.setRoomInfo((GoGameServiceInfo) command);
+                            room_view.updateRoomInfo((GoGameServiceInfo) command);
+                            break;
+                        case "GameServiceInfo":
+                            room_view.setRoomInfo(go_client.getID(), (GameServiceInfo) command);
+                            break;
                     }
                 }
 
