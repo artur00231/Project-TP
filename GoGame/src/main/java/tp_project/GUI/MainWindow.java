@@ -54,10 +54,6 @@ public class MainWindow
         client_view = new ClientView(e -> {
             ClientView.Action a = (ClientView.Action) e.getSource();
             switch (a) {
-                case RETURN:
-                    client_view.reset();
-                    showMainMenu();
-                    break;
                 case ERROR:
                     JOptionPane.showMessageDialog(window, (String) a.object);
                     showMainMenu();
