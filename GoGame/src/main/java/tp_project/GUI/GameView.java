@@ -1,6 +1,6 @@
 package tp_project.GUI;
 
-import tp_project.GoGameLogic.GoGame;
+import tp_project.GoGameLogic.GoGameLogic;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,17 +14,17 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 public class GameView extends JPanel {
-    private GoGame.Player player_color;
+    private GoGameLogic.Player player_color;
 
-    private GoGame go_game;
+    private GoGameLogic go_game;
     private Board board;
     private int size;
     private JButton pass_button = new JButton("Pass");
     private JButton give_up_button = new JButton("Give up");
     private ControlPanel control_panel = new ControlPanel();
 
-    public GameView(int size, GoGame.Player player_color) {
-        go_game = new GoGame(size);
+    public GameView(int size, GoGameLogic.Player player_color) {
+        go_game = new GoGameLogic(size);
         this.size = size;
         this.player_color = player_color;
 
@@ -65,7 +65,7 @@ public class GameView extends JPanel {
             });
         }
 
-        public void set(GoGame.Cell[][] board) {
+        public void set(GoGameLogic.Cell[][] board) {
             for (int i = 0; i < size; ++i) {
                 for (int j = 0; j < size; ++j) {
                     this.board[i][j].cell_state = board[i][j];
@@ -77,7 +77,7 @@ public class GameView extends JPanel {
         private class Cell extends JPanel{
             int x, y;
             boolean paint_preview;
-            GoGame.Cell cell_state;
+            GoGameLogic.Cell cell_state;
 
             public Cell(int x, int y) {
                 this.x = x;
@@ -88,7 +88,7 @@ public class GameView extends JPanel {
                 this.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseEntered(MouseEvent e) {
-                        if (go_game.isLegal(new GoGame.Move(x, y, player_color))) paint_preview = true;
+                        if (go_game.isLegal(new GoGameLogic.Move(x, y, player_color))) paint_preview = true;
                         repaint();
                     }
 
@@ -100,7 +100,7 @@ public class GameView extends JPanel {
 
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        if (go_game.makeMove(new GoGame.Move(x, y, player_color))) {
+                        if (go_game.makeMove(new GoGameLogic.Move(x, y, player_color))) {
                             player_color = player_color.getOpponent();
                             set(go_game.getBoard());
                             paint_preview = false;
@@ -114,8 +114,8 @@ public class GameView extends JPanel {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
-                if (!this.cell_state.equals(GoGame.Cell.EMPTY)) {
-                    if (this.cell_state.equals(GoGame.Cell.WHITE))
+                if (!this.cell_state.equals(GoGameLogic.Cell.EMPTY)) {
+                    if (this.cell_state.equals(GoGameLogic.Cell.WHITE))
                         g2d.setColor(Color.WHITE);
                     else
                         g2d.setColor(Color.BLACK);
@@ -130,7 +130,7 @@ public class GameView extends JPanel {
                 }
 
                 if (this.paint_preview) {
-                    if (player_color.equals(GoGame.Player.BLACK))
+                    if (player_color.equals(GoGameLogic.Player.BLACK))
                         g2d.setColor(new Color(0, 0, 0, 127));
                     else
                         g2d.setColor(new Color(255, 255, 255, 127));
