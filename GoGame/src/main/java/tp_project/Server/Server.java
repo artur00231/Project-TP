@@ -35,6 +35,7 @@ public class Server implements Runnable, GameServiceManager {
     private boolean kill = false;
     private ServerSocketChannel socket_server;
     private Selector selector;
+    private Object selector_sync = new Object();
     private HashMap<SocketChannel, Client> clients;
     private HashMap<String, GameService> game_services;
     private ArrayList<String> game_services_to_delete;
@@ -92,10 +93,12 @@ public class Server implements Runnable, GameServiceManager {
                 continue;
             }
 
-            if (!checkSelector()) {
-                is_running = false;
-                is_valid = false;
-                continue;
+            synchronized (selector_sync) {
+                if (!checkSelector()) {
+                    is_running = false;
+                    is_valid = false;
+                    continue;
+                }
             }
 
             if (game_services_to_delete.size() > 0) {
@@ -364,10 +367,12 @@ public class Server implements Runnable, GameServiceManager {
 
     @Override
     public void unregisterPlayer(String ID) {
-        for (Map.Entry<SocketChannel, Client> pair : clients.entrySet()) {
-            if (pair.getValue().ID.equals(ID)) {
-                if (pair.getKey().isRegistered()) {
-                    pair.getKey().keyFor(selector).cancel();
+        synchronized (selector_sync) {
+            for (Map.Entry<SocketChannel, Client> pair : clients.entrySet()) {
+                if (pair.getValue().ID.equals(ID)) {
+                    if (pair.getKey().isRegistered()) {
+                        pair.getKey().keyFor(selector).cancel();
+                    }
                 }
             }
         }
@@ -375,14 +380,16 @@ public class Server implements Runnable, GameServiceManager {
 
     @Override
     public void registerPlayer(String ID) {
-        for (Map.Entry<SocketChannel, Client> pair : clients.entrySet()) {
-            if (pair.getValue().ID.equals(ID)) {
-                if (!pair.getKey().isRegistered()) {
-                    try {
-                        pair.getKey().register(selector, SelectionKey.OP_READ);
-                    } catch (ClosedChannelException e) {
-                        //Chanel is cloased
-                        //Ignore it
+        synchronized (selector_sync) {
+            for (Map.Entry<SocketChannel, Client> pair : clients.entrySet()) {
+                if (pair.getValue().ID.equals(ID)) {
+                    if (!pair.getKey().isRegistered()) {
+                        try {
+                            pair.getKey().register(selector, SelectionKey.OP_READ);
+                        } catch (ClosedChannelException e) {
+                            //Chanel is cloased
+                            //Ignore it
+                        }
                     }
                 }
             }
