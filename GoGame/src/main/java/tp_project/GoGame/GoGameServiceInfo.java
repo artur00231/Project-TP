@@ -6,9 +6,9 @@ import tp_project.Network.ICommand;
 
 public class GoGameServiceInfo implements ICommand {
     static public class PlayerInfo {
-        String ID;
-        boolean ready;
-        int colour;
+        public String ID;
+        public boolean ready;
+        public int colour;
     }
     private ArrayList<PlayerInfo> players_info;
 

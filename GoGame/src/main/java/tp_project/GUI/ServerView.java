@@ -2,6 +2,7 @@ package tp_project.GUI;
 
 import tp_project.Server.GameServiceInfo;
 import tp_project.Server.GameServicesInfo;
+import tp_project.Server.Server;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -16,7 +17,8 @@ public class ServerView extends JPanel {
         RETURN,
         CREATE,
         JOIN,
-        REFRESH
+        REFRESH,
+        PACK
     }
 
     private ActionListener action_listener;
@@ -87,18 +89,18 @@ public class ServerView extends JPanel {
     private class RoomItem extends JPanel {
         JPanel room_info = new JPanel();
 
-        RoomItem(String name, int players, int max_players) {
+        RoomItem(String host_name, String room_id, int players, int max_players) {
             this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
             JButton join_button = new JButton("Join");
             join_button.addActionListener(e -> {
-                action_listener.actionPerformed(new ActionEvent(Action.JOIN, 0, name));
+                action_listener.actionPerformed(new ActionEvent(Action.JOIN, 0, room_id));
             });
             join_button.setEnabled(players < max_players);
 
             room_info.setLayout(new GridLayout(0, 2, 2, 5));
             room_info.add(new JLabel("Host name:", JLabel.TRAILING));
-            room_info.add(new JLabel(name));
+            room_info.add(new JLabel(host_name));
             room_info.add(new JLabel("Players:", JLabel.TRAILING));
             room_info.add(new JLabel(players + "/" + max_players));
 
@@ -122,20 +124,15 @@ public class ServerView extends JPanel {
             this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         }
 
-        public void set(List<GameServiceInfo> l) {
+        synchronized public void set(List<GameServiceInfo> l) {
             this.removeAll();
-            //TODO display rooms from server
 
             for (GameServiceInfo info : l) {
-                this.add(new RoomItem(info.host_id, info.players.size(), info.max_players));
+                String host_name = info.players.get(info.host_id);
+                this.add(new RoomItem(host_name, info.ID, info.players.size(), info.max_players));
             }
 
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    repaint();
-                }
-            });
+            action_listener.actionPerformed(new ActionEvent(Action.PACK, 0, ""));
         }
     }
 }
