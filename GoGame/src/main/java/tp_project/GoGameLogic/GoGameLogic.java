@@ -3,7 +3,7 @@ package tp_project.GoGameLogic;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GoGame {
+public class GoGameLogic {
     public enum Cell {
         EMPTY, WHITE, BLACK
     }
@@ -49,7 +49,7 @@ public class GoGame {
     private Player current_player;
     private int size;
 
-    public GoGame(int size) {
+    public GoGameLogic(int size) {
         board = new Cell[size][size];
         current_player = Player.BLACK;
         this.size = size;
@@ -59,6 +59,10 @@ public class GoGame {
                 board[i][j] = Cell.EMPTY;
             }
         }
+    }
+
+    public boolean isMyMove(Player player) {
+        return player.equals(current_player);
     }
 
     public boolean isLegal(Move m) {

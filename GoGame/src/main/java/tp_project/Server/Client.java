@@ -25,7 +25,7 @@ public abstract class Client {
         @Override
         public void error(String request) {}
     };
-    private SocketIO socketIO;
+    protected SocketIO socketIO;
     private String sKey = "XX";
     private String ID = "XX";
     private String name = "XX";
@@ -76,6 +76,7 @@ public abstract class Client {
                         wait_for_response = false;
                         getLocation();
                         socketIO.popCommand();
+                        while (socketIO.popCommand() != null) continue;
                         return;
                     } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 302) {
                         client_listener.updated();
@@ -121,7 +122,9 @@ public abstract class Client {
                         break;
                     }
                 }
-            }
+            } else {
+                socketIO.popCommand();
+            }   
 
         } while (socketIO.getCommand() != null);
     }
@@ -209,8 +212,7 @@ public abstract class Client {
                 send(cmd, RESPONSETYPE.CODE, "exit");
                 break;
             case GAME:
-                //TODO
-                break;
+                return STATUS.WPOS;
         
             default:
                 break;

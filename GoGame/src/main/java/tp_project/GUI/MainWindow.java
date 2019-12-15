@@ -1,6 +1,6 @@
 package tp_project.GUI;
 
-import tp_project.GoGameLogic.GoGame;
+import tp_project.GoGameLogic.GoGameLogic;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -88,7 +88,7 @@ public class MainWindow
             }
         });
 
-        game_view = new GameView(5, GoGame.Player.BLACK);
+        game_view = new GameView(5, GoGameLogic.Player.BLACK);
     }
 
     public int exec() {

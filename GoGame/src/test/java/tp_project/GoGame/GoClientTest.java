@@ -1,12 +1,14 @@
 package tp_project.GoGame;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
 import org.junit.Test;
 
+import tp_project.GoGame.GoMove.TYPE;
 import tp_project.Network.ICommand;
 import tp_project.Server.ClientListener;
 import tp_project.Server.GameServiceInfo;
@@ -244,6 +246,77 @@ public class GoClientTest {
         index = info3.getPlayersInfo().indexOf(info3.getPlayersInfo().stream().filter(x -> x.ready == true).findFirst().get());
         assertEquals(client3.getID(), info3.getPlayersInfo().get(index).ID);
         adapter3.reset();
+        
+        server.kill();
+        t.join();
+    }
+
+    @Test(timeout = 3000)
+    public void test2() throws InterruptedException, IOException {
+        Server server = new Server(PORT);
+        assertTrue(server.isValid());
+        Thread t = new Thread(server);
+        t.start();
+
+        GoClient client1 = GoClient.create(IP, PORT, "A").get();
+        ClientAdapter adapter1 = new ClientAdapter();
+        client1.setClientListener(adapter1);
+        GoClient client2 = GoClient.create(IP, PORT, "B").get();
+        ClientAdapter adapter2 = new ClientAdapter();
+        client2.setClientListener(adapter2);
+
+        assertEquals(POSITION.SERVER, client1.getPosition());
+        assertEquals(POSITION.SERVER, client2.getPosition());
+
+        client1.createGame();
+        while(!adapter1.diff()) client1.update();
+        assertEquals(POSITION.GAMESERVICE, client1.getPosition());
+        adapter1.reset();
+
+        assertEquals(STATUS.WPOS, client2.getGameServiceInfo());
+        client2.getGameServicesInfo();
+        while(!adapter2.diff()) client2.update();
+        GameServicesInfo info = (GameServicesInfo)adapter2.last_command;
+        assertEquals(1, info.game_services.size());
+        adapter2.reset();
+
+        String to_connect = info.game_services.stream().filter(x -> x.host_id.equals(client1.getID())).findFirst().get().ID;
+
+        client2.connect(to_connect);
+        while(adapter2.pos_changed == false) client2.update();
+        assertEquals(POSITION.GAMESERVICE, client2.getPosition());
+
+        while(!adapter1.diff()) client1.update();
+        adapter2.reset();
+        adapter1.reset();
+
+        client2.setReady(true);
+        while(!adapter1.diff()) client1.update();
+        while(!adapter2.diff()) client2.update();
+        adapter2.reset();
+        adapter1.reset();
+
+        client1.setReady(true);
+        while(!adapter1.diff()) client1.update();
+        while(!adapter2.diff()) client2.update();
+        adapter2.reset();
+        adapter1.reset();
+
+        while(client1.getPosition() != POSITION.GAME) client1.update();
+        while(client2.getPosition() != POSITION.GAME) client2.update();
+
+        GoRemotePlayer p = client1.getPlayer();
+        p.makeMove(new GoMove(TYPE.GIVEUP));
+        Thread.sleep(500);
+        p.update();
+        assertFalse(p.isGameRunnig());
+        assertTrue(p.getLastStatus().player_1_giveup = true);
+
+        while(!adapter1.diff()) client1.update();
+        while(!adapter2.diff()) client2.update();
+        while(client1.getPosition() != POSITION.GAMESERVICE) client1.update();
+        while(client2.getPosition() != POSITION.GAMESERVICE) client2.update();
+        
         
         server.kill();
         t.join();

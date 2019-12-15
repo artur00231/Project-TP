@@ -100,6 +100,10 @@ public class Server implements Runnable, GameServiceManager {
                     continue;
                 }
             }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+            }
 
             if (game_services_to_delete.size() > 0) {
                 for (String ID : game_services_to_delete) {
