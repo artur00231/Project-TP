@@ -7,7 +7,7 @@ import java.util.Map;
 import tp_project.Network.Command;
 import tp_project.Network.SocketIO;
 
-public abstract class GameService {
+public abstract class GameService implements GameManager {
     private static class Client {
         public String name;
         public SocketIO socketIO;
@@ -180,6 +180,20 @@ public abstract class GameService {
     protected void updatePlayers() {
         for (Map.Entry<String, Client> pair : players.entrySet()) {
             sendCode(302, pair.getValue().socketIO);
+        }
+    }
+
+    public void gameEnded()
+    {
+        for (Map.Entry<String, Client> pair : players.entrySet()) {
+            manager.registerPlayer(pair.getKey());
+        }
+    }
+
+    public void gameStated()
+    {
+        for (Map.Entry<String, Client> pair : players.entrySet()) {
+            manager.unregisterPlayer(pair.getKey());
         }
     }
 }

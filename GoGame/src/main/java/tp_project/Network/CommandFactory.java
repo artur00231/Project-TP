@@ -2,7 +2,11 @@ package tp_project.Network;
 
 import java.util.ArrayList;
 
+import tp_project.GoGame.GoBoard;
 import tp_project.GoGame.GoGameServiceInfo;
+import tp_project.GoGame.GoMove;
+import tp_project.GoGame.GoStatus;
+import tp_project.GoGame.GoMove.TYPE;
 import tp_project.Server.GameServiceInfo;
 import tp_project.Server.GameServicesInfo;
 import tp_project.Server.ServerCommand;
@@ -20,6 +24,12 @@ public class CommandFactory {
             return new ServerCommand();
         } else if (type.equals("GoGameServiceInfo")) {
             return new GoGameServiceInfo();
+        } else if (type.equals("GoMove")) {
+            return new GoMove(TYPE.PASS);
+        } else if (type.equals("GoStatus")) {
+            return new GoStatus();
+        } else if (type.equals("GoBoard")) {
+            return new GoBoard(1);
         }
         
         return null;
@@ -32,6 +42,9 @@ public class CommandFactory {
         types_names.add("GameServiceInfo");
         types_names.add("GameServicesInfo");
         types_names.add("GoGameServiceInfo");
+        types_names.add("GoMove");
+        types_names.add("GoStatus");
+        types_names.add("GoBoard");
         return types_names.contains(type);
     }
 }
