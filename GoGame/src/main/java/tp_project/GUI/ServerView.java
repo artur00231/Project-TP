@@ -1,17 +1,22 @@
 package tp_project.GUI;
 
+import tp_project.Server.GameServiceInfo;
+import tp_project.Server.GameServicesInfo;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class ServerView extends JPanel {
     public enum Action {
         RETURN,
         CREATE,
-        JOIN
+        JOIN,
+        REFRESH
     }
 
     private ActionListener action_listener;
@@ -34,7 +39,7 @@ public class ServerView extends JPanel {
             action_listener.actionPerformed(new ActionEvent(Action.RETURN, 0, ""));
         });
 
-        refresh_button.addActionListener((e) -> {refresh();});
+        refresh_button.addActionListener((e) -> {action_listener.actionPerformed(new ActionEvent(Action.REFRESH, 0, ""));});
         create_button.addActionListener((e) -> {
             create_room_dialog.setVisible(true);
         });
@@ -51,9 +56,8 @@ public class ServerView extends JPanel {
         this.add(control_panel, BorderLayout.PAGE_END);
     }
 
-    public void refresh() {
-        //TODO get list of rooms from server
-        room_list.set();
+    public void setRooms(GameServicesInfo info) {
+        room_list.set(info.game_services);
     }
 
     private class RoomCreate extends JDialog {
@@ -118,11 +122,20 @@ public class ServerView extends JPanel {
             this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         }
 
-        public void set() {
+        public void set(List<GameServiceInfo> l) {
+            this.removeAll();
             //TODO display rooms from server
-            for (int i = 0; i < 30; ++i) {
-                this.add(new RoomItem("room" + i, 1, 2));
+
+            for (GameServiceInfo info : l) {
+                this.add(new RoomItem(info.host_id, info.players.size(), info.max_players));
             }
+
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    repaint();
+                }
+            });
         }
     }
 }
