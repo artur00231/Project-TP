@@ -1,11 +1,15 @@
 package tp_project.GUI;
 
+import tp_project.GoGame.GoClient;
+import tp_project.GoGame.GoGameServiceInfo;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RoomView extends JPanel {
@@ -15,7 +19,8 @@ public class RoomView extends JPanel {
         NOT_READY,
         LEAVE,
         ADD_BOT,
-        SWITCH_COLORS
+        SWITCH_COLORS,
+        PACK
     }
 
     private ActionListener action_listener;
@@ -30,9 +35,8 @@ public class RoomView extends JPanel {
     private JButton leave_button = new JButton("Leave");
     private JCheckBox ready_check_box = new JCheckBox("Ready");
 
-    public RoomView(String player_id) {
+    public RoomView() {
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-        this.player_id = player_id;
         this.add(room_id_label);
         this.add(new JScrollPane(player_list));
         this.add(control_panel);
@@ -44,11 +48,13 @@ public class RoomView extends JPanel {
         });
     }
 
-    public void setRoomInfo(RoomInfo room_info) {
-        this.room_info = room_info;
+    synchronized public void setRoomInfo(GoGameServiceInfo info) {
+        this.room_info = new RoomInfo(info);
         room_id_label.setText(room_info.id);
         player_list.set();
         control_panel.set();
+
+        action_listener.actionPerformed(new ActionEvent(Action.PACK, 0, ""));
     }
 
     void setActionListener(ActionListener a) {
@@ -60,10 +66,16 @@ public class RoomView extends JPanel {
         List<Player> players;
         boolean host;
 
-        public RoomInfo(String id, List<Player> players, boolean host) {
-            this.id = id;
-            this.players = players;
-            this.host = host;
+        public RoomInfo(GoGameServiceInfo info) {
+            //TODO
+            this.id = "ROOM ID";
+            this.host = true;
+
+            players = new ArrayList<>();
+
+            for (GoGameServiceInfo.PlayerInfo player : info.getPlayersInfo()) {
+                players.add(new Player(player.ID, player.ready));
+            }
         }
     }
 

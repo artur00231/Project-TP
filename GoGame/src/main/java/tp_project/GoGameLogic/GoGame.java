@@ -10,6 +10,7 @@ public class GoGame {
     public enum Player {
         WHITE {
             @Override
+
             public Cell getColor() {
                 return Cell.WHITE;
             }
@@ -98,6 +99,10 @@ public class GoGame {
             boolean white = false;
         }
 
+        public Player getCurrent_player() {
+            return current_player;
+        }
+
         public Score getScore() {
             boolean[][] visited = new boolean[size][size];
             Score score = new Score();
@@ -144,6 +149,10 @@ public class GoGame {
                             _getScore(_x, _y, visited, _score);
                 }
             }
+        }
+
+        public Board pass() {
+            return new Board(this);
         }
 
         public Board makeMove(Move m) {
@@ -272,6 +281,10 @@ public class GoGame {
         board = new Board(size);
         this.size = size;
         previews = new Previews();
+    }
+
+    public Player getCurrentPlayer() {
+        return board.getCurrent_player();
     }
 
     public boolean isLegal(Move m) {

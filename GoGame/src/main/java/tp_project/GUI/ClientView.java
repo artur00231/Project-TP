@@ -1,6 +1,7 @@
 package tp_project.GUI;
 
 import tp_project.GoGame.GoClient;
+import tp_project.GoGame.GoGameServiceInfo;
 import tp_project.GoGameLogic.GoGame;
 import tp_project.Network.ICommand;
 import tp_project.Server.Client;
@@ -52,7 +53,9 @@ public class ClientView {
     enum Action {
         ERROR,
         SET_CONTENT_PANE,
-        RETURN;
+        RETURN,
+        DISCONNECTED,
+        PACK;
 
         Object object;
     }
@@ -70,52 +73,48 @@ public class ClientView {
         action_listener = a;
 
         server_view = new ServerView(e -> {
-            if (!(go_client != null && go_client.getPosition().equals(GoClient.POSITION.SERVER))) {
+            if (go_client == null) {
                 sendAction(Action.ERROR, "Error");
+                return;
+            }
+            if(!go_client.getPosition().equals(GoClient.POSITION.SERVER)) {
+                return;
             }
             GoClient.STATUS s;
             switch ((ServerView.Action) e.getSource()) {
                 case RETURN:
-                    action_listener.actionPerformed(new ActionEvent(createAction(Action.RETURN, null), 0, ""));
+                    //action_listener.actionPerformed(new ActionEvent(createAction(Action.RETURN, null), 0, ""));
                     while (go_client.exit().equals(GoClient.STATUS.BUSY));
                     break;
                 case CREATE:
                     do {
                         s = go_client.createGame();
                     } while (s.equals(GoClient.STATUS.BUSY));
-
-                    if (s.equals(GoClient.STATUS.OK)) {
-                        sendAction(Action.SET_CONTENT_PANE, room_view);
-                    } else {
-                        sendAction(Action.ERROR, "Error");
-                    }
                     break;
                 case JOIN:
                     do {
                         s = go_client.connect(e.getActionCommand());
                     } while (s.equals(GoClient.STATUS.BUSY));
-
-                    if (s.equals(GoClient.STATUS.OK)) {
-                        sendAction(Action.SET_CONTENT_PANE, room_view);
-                    } else {
-                        sendAction(Action.ERROR, "Error");
-                    }
                     break;
                 case REFRESH:
                     do {
                         s = go_client.getGameServicesInfo();
                     } while (s.equals(GoClient.STATUS.BUSY));
-
-                    if (! s.equals(Client.STATUS.OK))
-                        sendAction(Action.ERROR, "Error");
+                    break;
+                case PACK:
+                    action_listener.actionPerformed(new ActionEvent(Action.PACK, 0, ""));
                     break;
             }
         });
 
-        room_view = new RoomView("p1");
+        room_view = new RoomView();
         room_view.setActionListener(e -> {
-            if (go_client != null && go_client.getPosition().equals(GoClient.POSITION.GAMESERVICE)) {
+            if (go_client == null) {
                 sendAction(Action.ERROR, "Error");
+                return;
+            }
+            if (!go_client.getPosition().equals(Client.POSITION.GAMESERVICE)) {
+                return;
             }
             GoClient.STATUS s;
             switch ((RoomView.Action) e.getSource()) {
@@ -123,35 +122,21 @@ public class ClientView {
                     do {
                         s = go_client.kick(e.getActionCommand());
                     } while (s.equals(Client.STATUS.BUSY));
-
-                    if (! s.equals(Client.STATUS.OK))
-                        sendAction(Action.ERROR, "Error");
                     break;
                 case LEAVE:
                     do {
                         s = go_client.exit();
                     } while (s.equals(Client.STATUS.BUSY));
-                    if (s.equals(Client.STATUS.OK)) {
-                        sendAction(Action.SET_CONTENT_PANE, server_view);
-                    } else {
-                        sendAction(Action.ERROR, "Error");
-                    }
                     break;
                 case READY:
                     do {
                         s = go_client.setReady(true);
                     } while (s.equals(Client.STATUS.BUSY));
-                    if (!s.equals(Client.STATUS.OK)) {
-                        sendAction(Action.ERROR, "Error");
-                    }
                     break;
                 case NOT_READY:
                     do {
                         s = go_client.setReady(false);
                     } while (s.equals(Client.STATUS.BUSY));
-                    if (!s.equals(Client.STATUS.OK)) {
-                        sendAction(Action.ERROR, "Error");
-                    }
                     break;
                 case ADD_BOT:
                     //TODO
@@ -160,9 +145,9 @@ public class ClientView {
                     do {
                         s = go_client.flipColours();
                     } while (s.equals(Client.STATUS.BUSY));
-                    if (!s.equals(Client.STATUS.OK)) {
-                        sendAction(Action.ERROR, "Error");
-                    }
+                    break;
+                case PACK:
+                    action_listener.actionPerformed(new ActionEvent(Action.PACK, 0, ""));
                     break;
             }
         });
@@ -176,23 +161,50 @@ public class ClientView {
             go_client.setClientListener(new ClientListener() {
                 @Override
                 public void updated() {
-
+                    System.out.println("updated");
+                    switch (go_client.getPosition()) {
+                        case SERVER:
+                            while(go_client.getGameServicesInfo().equals(Client.STATUS.BUSY));
+                            break;
+                        case GAMESERVICE:
+                            while(go_client.getGoGameServiceInfo().equals(Client.STATUS.BUSY));
+                            break;
+                    }
                 }
 
                 @Override
                 public void positionChanged() {
-
+                    System.out.println("pos changed");
+                    switch (go_client.getPosition()) {
+                        case DISCONNECTED:
+                            sendAction(Action.DISCONNECTED, null);
+                            break;
+                        case GAMESERVICE:
+                            while(go_client.getGoGameServiceInfo().equals(Client.STATUS.BUSY));
+                            sendAction(Action.SET_CONTENT_PANE, room_view);
+                            break;
+                        case SERVER:
+                            while(go_client.getGameServicesInfo().equals(Client.STATUS.BUSY));
+                            sendAction(Action.SET_CONTENT_PANE, server_view);
+                            break;
+                    }
                 }
 
                 @Override
                 public void recived(ICommand command, String request) {
-                    if (command instanceof GameServicesInfo) {
-                        server_view.setRooms((GameServicesInfo) command);
+                    System.out.println("command received");
+                    switch (command.getCommandType()) {
+                        case "GameServicesInfo":
+                            server_view.setRooms((GameServicesInfo) command);
+                            break;
+                        case "GoGameServiceInfo":
+                            room_view.setRoomInfo((GoGameServiceInfo) command);
                     }
                 }
 
                 @Override
                 public void error(String request) {
+                    System.out.println("error");
                     sendAction(Action.ERROR, request);
                 }
             });

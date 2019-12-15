@@ -59,12 +59,19 @@ public class MainWindow
                     showMainMenu();
                     break;
                 case ERROR:
-                    client_view.reset();
                     JOptionPane.showMessageDialog(window, (String) a.object);
+                    showMainMenu();
+                    break;
+                case DISCONNECTED:
+                    System.out.println("disconnected");
+                    client_view.reset();
+                    JOptionPane.showMessageDialog(window, "Disconnected");
                     showMainMenu();
                     break;
                 case SET_CONTENT_PANE:
                     window.setContentPane((JPanel)a.object);
+                    break;
+                case PACK:
                     window.pack();
                     break;
             }
