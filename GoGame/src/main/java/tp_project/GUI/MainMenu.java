@@ -11,6 +11,7 @@ public class MainMenu extends JPanel {
     // Connect menu
     private JTextField connect_ip;
     private JTextField connect_port;
+    private JTextField player_name;
 
     // Start Server Menu
     private JTextField server_port;
@@ -23,12 +24,26 @@ public class MainMenu extends JPanel {
 
     public enum Action {
         EXIT, SERVER, PLAY, tmp1, tmp2, tmp3, tmp4
+
+
     }
 
     private enum Menu {
         MainMenu,
         ConnectMenu,
         StartServerMenu
+    }
+
+    public String getConnectIP() {
+        return connect_ip.getText();
+    }
+
+    public String getConnectPort() {
+        return connect_port.getText();
+    }
+
+    public String getPlayerName() {
+        return player_name.getText();
     }
 
     public MainMenu(Container parent) {
@@ -61,21 +76,6 @@ public class MainMenu extends JPanel {
         plane.add(play_button);
         plane.add(server_button);
 
-        //TODO Delete
-        JButton btn1 = new JButton("ServerView preview");
-        btn1.addActionListener(e -> option_selected.actionPerformed(new ActionEvent(Action.tmp1, 0, "")));
-        plane.add(btn1);
-        JButton btn2 = new JButton("RoomView preview");
-        btn2.addActionListener(e -> option_selected.actionPerformed(new ActionEvent(Action.tmp2, 0, "")));
-        plane.add(btn2);
-        JButton btn3 = new JButton("host RoomView preview");
-        btn3.addActionListener(e -> option_selected.actionPerformed(new ActionEvent(Action.tmp3, 0, "")));
-        plane.add(btn3);
-        JButton btn4 = new JButton("GameView preview");
-        btn4.addActionListener(e -> option_selected.actionPerformed(new ActionEvent(Action.tmp4, 0, "")));
-        plane.add(btn4);
-        //
-
         JButton exit1_button = new JButton("Exit");
         exit1_button.addActionListener(e -> {
             option_selected.actionPerformed(new ActionEvent(Action.EXIT, 0, null));
@@ -96,11 +96,14 @@ public class MainMenu extends JPanel {
 
         connect_ip = new JTextField();
         connect_port = new JTextField();
+        player_name = new JTextField();
 
         plane.add(new JLabel("IP"));
         plane.add(connect_ip);
         plane.add(new JLabel("Port"));
         plane.add(connect_port);
+        plane.add(new JLabel("Player name"));
+        plane.add(player_name);
 
         JButton return_button = new JButton("Return");
         JButton connect_button = new JButton("Connect");

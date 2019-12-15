@@ -1,6 +1,8 @@
 package tp_project.GUI;
 
+import tp_project.GoGame.GoClient;
 import tp_project.GoGameLogic.GoGame;
+import tp_project.Server.Server;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -13,11 +15,18 @@ public class MainWindow
 {
     private JFrame window;
     private MainMenu menu;
-    private ServerView server_view;
-    private RoomView room_view;
-    private GameView game_view;
+
+    private ClientView client_view;
+
+    Server server = new Server(5005);
 
     public MainWindow() {
+        Thread t = new Thread(server);
+        t.start();
+
+        GoClient client = GoClient.create("127.0.0.1", 5005, "test").get();
+        client.createGame();
+
         window = new JFrame("GoGame");
         window.setBounds(new Rectangle(100, 100, 800, 800));
 
@@ -33,31 +42,8 @@ public class MainWindow
                         System.exit(0);
                     break;
                     case PLAY:
-                        window.setContentPane(server_view);
-                        server_view.refresh();
-                        window.pack();
+                        client_view.connect(menu.getConnectIP(), menu.getConnectPort(), menu.getPlayerName());
                         break;
-                    //TODO DELETE
-                    case tmp1:
-                        server_view.refresh();
-                        window.setContentPane(server_view);
-                        window.pack();
-                        break;
-                    case tmp2:
-                        room_view.setRoomInfo(new RoomView.RoomInfo("roomID", Arrays.asList(new RoomView.Player("p0", true), new RoomView.Player("p1", false)), false));
-                        window.setContentPane(room_view);
-                        window.pack();
-                        window.repaint();
-                        break;
-                    case tmp3:
-                        room_view.setRoomInfo(new RoomView.RoomInfo("roomID", Arrays.asList(new RoomView.Player("p1", false), new RoomView.Player("p2", false)), true));
-                        window.setContentPane(room_view);
-                        window.pack();
-                        break;
-                    case tmp4:
-                        window.setContentPane(game_view);
-                        window.pack();
-                    //
                     default:
                         System.out.println(e.getSource());
                     break;
@@ -65,30 +51,24 @@ public class MainWindow
 			}
         });
 
-        server_view = new ServerView(e -> {
-            switch ((ServerView.Action) e.getSource()) {
+        client_view = new ClientView(e -> {
+            ClientView.Action a = (ClientView.Action) e.getSource();
+            switch (a) {
                 case RETURN:
+                    client_view.reset();
                     showMainMenu();
                     break;
-                case CREATE:
-                    System.out.println("Create " + e.getID());
+                case ERROR:
+                    client_view.reset();
+                    JOptionPane.showMessageDialog(window, (String) a.object);
+                    showMainMenu();
                     break;
-                case JOIN:
-                    System.out.println("Join " + e.getActionCommand());
+                case SET_CONTENT_PANE:
+                    window.setContentPane((JPanel)a.object);
+                    window.pack();
                     break;
             }
         });
-
-        room_view = new RoomView("p1");
-        room_view.setActionListener(e -> {
-            switch ((RoomView.Action) e.getSource()) {
-                case LEAVE:
-                    showMainMenu();
-                    break;
-            }
-        });
-
-        game_view = new GameView(5, GoGame.Player.BLACK);
     }
 
     public int exec() {

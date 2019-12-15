@@ -14,7 +14,8 @@ public class RoomView extends JPanel {
         READY,
         NOT_READY,
         LEAVE,
-        ADD_BOT
+        ADD_BOT,
+        SWITCH_COLORS
     }
 
     private ActionListener action_listener;
