@@ -158,7 +158,7 @@ public abstract class GameService implements GameManager {
 
             client.socketIO.send(ping);
         } else if (cmd.getValue("ready") != null) {
-            setPlayerReady(player_id, Boolean.parseBoolean(cmd.getValue("ready")));
+            setReady(player_id, Boolean.parseBoolean(cmd.getValue("ready")));
             updated = true;
         } else {
             updated = updated || handleExtendetCommands(player_id, cmd, socketIO);

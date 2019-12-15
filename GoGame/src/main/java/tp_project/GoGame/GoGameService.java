@@ -53,7 +53,7 @@ public class GoGameService extends GameService {
     protected void setPlayerReady(String player_id, boolean ready) {
         PlayerInfo player_info = players_info.get(player_id);
         if (player_info != null)
-            player_info.ready = true;
+            player_info.ready = ready;
     }
 
     @Override
