@@ -2,7 +2,7 @@ package tp_project.GUI;
 
 import tp_project.GoGame.GoClient;
 import tp_project.GoGame.GoGameServiceInfo;
-import tp_project.GoGameLogic.GoGame;
+import tp_project.GoGameLogic.GoGameLogic;
 import tp_project.Network.ICommand;
 import tp_project.Server.Client;
 import tp_project.Server.ClientListener;
@@ -152,7 +152,7 @@ public class ClientView {
             }
         });
 
-        game_view = new GameView(19, GoGame.Player.BLACK);
+        game_view = new GameView(19, GoGameLogic.Player.BLACK);
     }
 
     public void connect(String IP, String port, String name) {

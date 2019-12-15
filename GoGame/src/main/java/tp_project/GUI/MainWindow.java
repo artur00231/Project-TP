@@ -1,7 +1,7 @@
 package tp_project.GUI;
 
 import tp_project.GoGame.GoClient;
-import tp_project.GoGameLogic.GoGame;
+import tp_project.GoGameLogic.GoGameLogic;
 import tp_project.Server.Server;
 
 import java.awt.Dimension;

@@ -3,7 +3,7 @@ package tp_project.GoGameLogic;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GoGame {
+public class GoGameLogic {
     public enum Cell {
         EMPTY, WHITE, BLACK
     }
@@ -266,7 +266,7 @@ public class GoGame {
 
         public Board getPreview(Move m) {
             if (!computed[m.row][m.col]) {
-                previews[m.row][m.col] = GoGame.this.board.makeMove(m);
+                previews[m.row][m.col] = GoGameLogic.this.board.makeMove(m);
                 computed[m.row][m.col] = true;
             }
             return previews[m.row][m.col];
@@ -277,7 +277,7 @@ public class GoGame {
     private Previews previews;
     private int size;
 
-    public GoGame(int size) {
+    public GoGameLogic(int size) {
         board = new Board(size);
         this.size = size;
         previews = new Previews();
@@ -285,6 +285,10 @@ public class GoGame {
 
     public Player getCurrentPlayer() {
         return board.getCurrent_player();
+    }
+
+    public boolean isMyMove(Player p) {
+        return p.equals(getCurrentPlayer());
     }
 
     public boolean isLegal(Move m) {
