@@ -1,10 +1,19 @@
 package tp_project.GUI;
 
+import tp_project.GoGame.GoBoard;
+import tp_project.GoGame.GoMove;
+import tp_project.GoGame.GoPlayerListener;
+import tp_project.GoGame.GoRemotePlayer;
+import tp_project.GoGame.GoStatus;
+import tp_project.GoGame.GoMove.TYPE;
 import tp_project.GoGameLogic.GoGameLogic;
+import tp_project.GoGameLogic.GoGameLogic.Cell;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -13,8 +22,36 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
+class GoPlayerThread implements Runnable {
+    GoRemotePlayer player;
+    boolean running = true;
+
+    public GoPlayerThread (GoRemotePlayer player) {
+        this.player = player;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            if (!running)
+                return;
+                player.update();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+    }
+
+    public void stop() {
+        running = false;
+    }
+}
+
 public class GameView extends JPanel {
     private GoGameLogic.Player player_color;
+    public enum ACTION { END };
 
     private GoGameLogic go_game;
     private Board board;
@@ -22,11 +59,15 @@ public class GameView extends JPanel {
     private JButton pass_button = new JButton("Pass");
     private JButton give_up_button = new JButton("Give up");
     private ControlPanel control_panel = new ControlPanel();
+    private GoRemotePlayer player;
+    private ActionListener action_listener;
+    private GoPlayerThread thread;
 
-    public GameView(int size, GoGameLogic.Player player_color) {
+    public GameView(GoRemotePlayer player, int size, GoGameLogic.Player player_color, ActionListener a) {
         go_game = new GoGameLogic(size);
         this.size = size;
         this.player_color = player_color;
+        this.player = player;
 
         board = new Board();
         board.set(go_game.getBoard());
@@ -34,6 +75,70 @@ public class GameView extends JPanel {
         this.setLayout(new BorderLayout());
         this.add(board, BorderLayout.CENTER);
         this.add(control_panel, BorderLayout.EAST);
+
+        player.setListener(new GoPlayerListener(){
+        
+            @Override
+            public void updated() {
+                if (!player.isGameRunnig()) {
+                    GoStatus status = player.getLastStatus();
+                    thread.stop();
+                    
+                    if (status.winner.equals(player.getID())) {
+                        JOptionPane.showMessageDialog(null, "You won", "Game ended", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "You lost", "Game ended", JOptionPane.INFORMATION_MESSAGE);
+                    }
+
+                    action_listener.actionPerformed(new ActionEvent(ACTION.END, 0, ""));
+                }
+
+                player.getGameBoard();
+            }
+        
+            @Override
+            public void yourMove() {
+            }
+
+            @Override
+            public void setStatus(GoStatus go_status) {
+            }
+        
+            @Override
+            public void setBoard(GoBoard go_board) {
+                Cell[][] cells = new Cell[size][size];
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < size; j++) {
+                        cells[i][j] = (go_board.getValue(i, j) == go_board.EMPTY ? Cell.EMPTY : (go_board.getValue(i, j) == go_board.BLACK ? Cell.BLACK : Cell.WHITE));
+                    }
+                }
+                board.set(cells);
+            }
+        
+            @Override
+            public void error() {
+                player.getGameBoard();
+            }
+        });
+
+        pass_button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                player.makeMove(new GoMove(TYPE.PASS));
+            }
+        });
+        give_up_button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                player.makeMove(new GoMove(TYPE.GIVEUP));
+            }
+        });
+
+        action_listener = a;
+
+        thread = new GoPlayerThread(player);
+        Thread t = new Thread(thread);
+        t.start();
     }
 
     private class Board extends JPanel{
@@ -88,7 +193,7 @@ public class GameView extends JPanel {
                 this.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseEntered(MouseEvent e) {
-                        if (go_game.isLegal(new GoGameLogic.Move(x, y, player_color))) paint_preview = true;
+                        paint_preview = true;
                         repaint();
                     }
 
@@ -100,11 +205,12 @@ public class GameView extends JPanel {
 
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        if (go_game.makeMove(new GoGameLogic.Move(x, y, player_color))) {
-                            player_color = player_color.getOpponent();
-                            set(go_game.getBoard());
-                            paint_preview = false;
-                        }
+                        GoMove move = new GoMove(TYPE.MOVE);
+                        move.x = x;
+                        move.y = y;
+                        player.makeMove(move);
+                        set(go_game.getBoard());
+                        paint_preview = false;
                     }
                 });
             }

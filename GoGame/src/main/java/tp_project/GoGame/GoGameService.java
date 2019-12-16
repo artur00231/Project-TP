@@ -19,6 +19,7 @@ public class GoGameService extends GameService {
     private GoGame game;
     private Thread game_thread;
     private String host_id;
+    private int game_size = 13;
 
     public GoGameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id,
             GameServiceManager manager) {
@@ -75,21 +76,27 @@ public class GoGameService extends GameService {
         GoPlayer[] players = new GoPlayer[2];
         String[] players_id = new String[2];
 
-        players[0] = new GoRemotePlayer(getClientSocketIO(host_id));
-        players_id[0] = host_id;
+        for (String id : players_info.keySet()) {
+            if (!id.equals(host_id)) continue;
+            if (getClientSocketIO(id) != null) {
+                players[0] = new GoRemotePlayer(getClientSocketIO(id), id);
+            }
+
+            players_id[0] = id;
+        }
 
         for (String id : players_info.keySet()) {
             if (id.equals(host_id)) continue;
             if (getClientSocketIO(id) != null) {
-                players[1] = new GoRemotePlayer(getClientSocketIO(id));
+                players[1] = new GoRemotePlayer(getClientSocketIO(id), id);
             } else {
-                // TODO add bot
+                players[1] = new GoAIPlayer(game_size);
             }
 
             players_id[1] = id;
         }
 
-        game = new GoGame(players[0], players_id[0], players[1], players_id[1], enemy_colour == 1 ? 0 : 1, this);
+        game = new GoGame(game_size, players[0], players_id[0], players[1], players_id[1], enemy_colour == 1 ? 0 : 1, this);
         players[0].setGame(game);
         players[1].setGame(game);
 
@@ -141,9 +148,35 @@ public class GoGameService extends GameService {
                 GoGameServiceInfo info = new GoGameServiceInfo();
                 for (Map.Entry<String, PlayerInfo> pair : players_info.entrySet()) {
                     info.addPlayer(pair.getKey(), pair.getValue().ready, pair.getValue().colour);
+                    info.board_size = game_size;
                 }
 
                 socketIO.send(info);
+            } else if (command.getValue("GoGame").equals("setSize")) {
+                if (command.getValue("size") != null && checkSKey(command.getValue("sKey"))) {
+                    switch (command.getValue("size")) {
+                        case "9":
+                            game_size = 9;
+                            sendCode(200, socketIO);
+                            break;
+                        case "13":
+                            game_size = 13;
+                            sendCode(200, socketIO);
+                            break;
+                        case "19":
+                            game_size = 19;
+                            sendCode(200, socketIO);
+                            break;
+                        default:
+                            sendCode(400, socketIO);
+                    }
+
+                    updatePlayers();
+
+                    System.out.println("Size:" + game_size);
+                } else {
+                    sendCode(400, socketIO);
+                }
             }
         }
 

@@ -11,6 +11,7 @@ import tp_project.Server.Client;
 import tp_project.Server.ServerCommand;
 
 public class GoClient extends Client {
+    private int game_size = 13;
 
     public static Optional<GoClient> create(String IP, int port, String name) {
         try {
@@ -36,7 +37,11 @@ public class GoClient extends Client {
     public GoRemotePlayer getPlayer() {
         if (getPosition() != POSITION.GAME) return null;
 
-        return new GoRemotePlayer(socketIO);
+        return new GoRemotePlayer(socketIO, getID());
+    }
+
+    public int getGameSize() {
+        return game_size;
     }
 
     @Override
@@ -47,6 +52,17 @@ public class GoClient extends Client {
             if (cmd.getCode() != 200) {
                 client_listener.error(request);
             }
+        } else if (request.equals("setSize") && command.getCommandType().equals("ServerCommand")) {
+            ServerCommand cmd = (ServerCommand) command;
+
+            if (cmd.getCode() != 200) {
+                client_listener.error(request);
+            }
+        } else if (request.equals("getGoGameServiceInfo") && command.getCommandType().equals("GoGameServiceInfo")) {
+            GoGameServiceInfo inf = (GoGameServiceInfo) command;
+
+            game_size = inf.board_size;
+            client_listener.recived(inf, request);
         }
     }
 
@@ -72,13 +88,26 @@ public class GoClient extends Client {
         return STATUS.OK;
     }
 
+    public STATUS setGameSize(int size) {
+        if (getPosition() != POSITION.GAMESERVICE) return STATUS.WPOS;
+        if (isWaiting()) return STATUS.BUSY;
+
+        ServerCommand cmd = new ServerCommand();
+        cmd.addValue("GoGame", "setSize");
+        cmd.addValue("size", Integer.toString(size));
+        cmd.addValue("sKey", getSKey());
+        send(cmd, RESPONSETYPE.EXTENDENT, "setSize");
+
+        return STATUS.OK;
+    }
+
     public STATUS getGoGameServiceInfo() {
         if (getPosition() != POSITION.GAMESERVICE) return STATUS.WPOS;
         if (isWaiting()) return STATUS.BUSY;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("GoGame", "getGoGameServiceInfo");
-        send(cmd, RESPONSETYPE.OBJECT, "getGoGameServiceInfo");
+        send(cmd, RESPONSETYPE.EXTENDENT, "getGoGameServiceInfo");
 
         return STATUS.OK;
     }

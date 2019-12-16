@@ -9,4 +9,6 @@ public interface GoPlayer extends Player {
     public void setGame(GoGame game);
 
     public void gameEnded();
+
+    public String getID();
 }

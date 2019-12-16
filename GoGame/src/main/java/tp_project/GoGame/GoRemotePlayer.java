@@ -11,9 +11,11 @@ public class GoRemotePlayer implements GoPlayer {
     private GoPlayerListener listener = null;
     private boolean is_game_runnig = true;
     private GoStatus last_status;
+    private String player_ID;
 
-    public GoRemotePlayer(SocketIO socketIO) {
+    public GoRemotePlayer(SocketIO socketIO, String player_ID) {
         this.socketIO = socketIO;
+        this.player_ID = player_ID;
     }
 
     @Override
@@ -136,9 +138,19 @@ public class GoRemotePlayer implements GoPlayer {
         }
     }
 
+    @Override
+    public void yourMove() {
+        listener.yourMove();
+    }
+
     private boolean send(ICommand command) {
         if (!socketIO.send(command)) return false;
 
         return true;
+    }
+
+    @Override
+    public String getID() {
+        return player_ID;
     }
 }

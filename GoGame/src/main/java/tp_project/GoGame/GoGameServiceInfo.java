@@ -11,6 +11,7 @@ public class GoGameServiceInfo implements ICommand {
         public int colour;
     }
     private ArrayList<PlayerInfo> players_info;
+    public int board_size = 13;
 
     public GoGameServiceInfo() {
         players_info = new ArrayList<>();
@@ -33,6 +34,7 @@ public class GoGameServiceInfo implements ICommand {
     @Override
     public String toText() {
         StringBuilder data = new StringBuilder();
+        data.append(board_size).append(";");
         data.append(players_info.size()).append(";");
 
         for (PlayerInfo player_info : players_info) {
@@ -46,15 +48,16 @@ public class GoGameServiceInfo implements ICommand {
     public void fromText(String text) throws IllegalArgumentException {
         String[] data = text.split(";");
 
-        if (data.length < 1) throw new IllegalArgumentException();
+        if (data.length < 2) throw new IllegalArgumentException();
 
         try {
-            int size = Integer.parseInt(data[0]);
+            board_size = Integer.parseInt(data[0]);
+            int size = Integer.parseInt(data[1]);
             players_info.clear();
 
             for (int i = 0; i < size; i++) {
                 PlayerInfo info = new PlayerInfo();
-                String[] player_data = data[1 + i].split(",");
+                String[] player_data = data[2 + i].split(",");
                 if (player_data.length != 3) throw new IllegalArgumentException();
                 info.ID = player_data[0];
                 info.ready = Boolean.parseBoolean(player_data[1]);

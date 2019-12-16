@@ -151,6 +151,9 @@ public abstract class GameService implements GameManager {
             }
         } else if (cmd.getValue("getServiceInfo") != null) {
             socketIO.send(getInfo());
+        } else if (cmd.getValue("add") != null) {
+            addPlayer("BOT", "0000000000", null);
+            setPlayerReady("0000000000", true);
         } else if (cmd.getValue("ping") != null) {
             ServerCommand ping = new ServerCommand();
             ping.setCode(1);

@@ -11,7 +11,7 @@ public class GoICommandTest {
     @Test
     public void gostatus_test1() {
         GoStatus status = new GoStatus();
-        assertEquals("X;X;X;false;false;false;", status.toText());
+        assertEquals("X;X;X;false;false;false;XX;", status.toText());
 
         status.player1 = "AA";
         status.player2 = "BB";
@@ -19,11 +19,12 @@ public class GoICommandTest {
         status.player_1_giveup = true;
         status.player_2_giveup = false;
         status.game_ended = false;
+        status.winner = "AA";
 
-        assertEquals("AA;BB;BB;true;false;false;", status.toText());
+        assertEquals("AA;BB;BB;true;false;false;AA;", status.toText());
 
-        status.fromText("C;D;E;false;true;false;");
-        assertEquals("C;D;E;false;true;false;", status.toText());
+        status.fromText("C;D;E;false;true;false;BB;");
+        assertEquals("C;D;E;false;true;false;BB;", status.toText());
 
         assertTrue(CommandFactory.isValidType(status.getCommandType()));
     }
