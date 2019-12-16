@@ -9,6 +9,7 @@ import tp_project.Server.Client;
 import tp_project.Server.ClientListener;
 import tp_project.Server.GameServiceInfo;
 import tp_project.Server.GameServicesInfo;
+import tp_project.Server.Client.STATUS;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -95,7 +96,9 @@ public class ClientView {
                 case CREATE:
                     do {
                         s = go_client.createGame();
+                        go_client.update();
                     } while (s.equals(GoClient.STATUS.BUSY));
+                    while (go_client.setGameSize(e.getID()) != STATUS.OK) go_client.update();;
                     break;
                 case JOIN:
                     do {
@@ -146,7 +149,9 @@ public class ClientView {
                     } while (s.equals(Client.STATUS.BUSY));
                     break;
                 case ADD_BOT:
-                    //TODO
+                do {
+                    s = go_client.addBot();
+                } while (s.equals(Client.STATUS.BUSY));
                     break;
                 case SWITCH_COLORS:
                     do {
@@ -158,8 +163,6 @@ public class ClientView {
                     break;
             }
         });
-
-        game_view = new GameView(19, GoGameLogic.Player.BLACK);
     }
 
     public void connect(String IP, String port, String name) {
@@ -197,7 +200,8 @@ public class ClientView {
                             sendAction(Action.SET_CONTENT_PANE, server_view);
                             break;
                         case GAME:
-                            go_player = go_client.getPlayer();
+                            game_view = new GameView(go_client.getPlayer(), go_client.getGameSize(), GoGameLogic.Player.BLACK,
+                                action_listener);
                             sendAction(Action.SET_CONTENT_PANE, game_view);
                     }
                 }

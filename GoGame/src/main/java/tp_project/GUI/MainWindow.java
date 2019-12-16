@@ -66,6 +66,8 @@ public class MainWindow
                     break;
                 case SET_CONTENT_PANE:
                     window.setContentPane((JPanel)a.object);
+                    window.repaint();
+                    window.revalidate();
                     break;
                 case PACK:
                     window.pack();

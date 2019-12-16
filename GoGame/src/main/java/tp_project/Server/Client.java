@@ -234,7 +234,16 @@ public abstract class Client {
         return STATUS.OK;
     }
 
-    //TODO public STATUS addBot(boolean ready);
+    public STATUS addBot() {
+        if (position != POSITION.GAMESERVICE) return STATUS.WPOS;
+        if (isWaiting() != false) return STATUS.BUSY;
+
+        ServerCommand cmd = new ServerCommand();
+        cmd.addValue("add", "bot");
+        socketIO.send(cmd);
+
+        return STATUS.OK;
+    }
 
     public STATUS getLocation() {
         if (position == POSITION.DISCONNECTED) return STATUS.WPOS;

@@ -10,6 +10,7 @@ public class GoStatus implements ICommand {
     public boolean player_1_giveup = false;
     public boolean player_2_giveup = false;
     public boolean game_ended = false;
+    public String winner = "XX";
 
     @Override
     public String toText() {
@@ -20,6 +21,7 @@ public class GoStatus implements ICommand {
         text.append(player_1_giveup).append(";");
         text.append(player_2_giveup).append(";");
         text.append(game_ended).append(";");
+        text.append(winner).append(";");
 
         return text.toString();
     }
@@ -28,7 +30,7 @@ public class GoStatus implements ICommand {
     public void fromText(String text) throws IllegalArgumentException {
         String[] raw_data = text.split(";");
 
-        if (raw_data.length != 6) throw new IllegalArgumentException();
+        if (raw_data.length != 7) throw new IllegalArgumentException();
 
         try {
             player1 = raw_data[0];
@@ -38,6 +40,7 @@ public class GoStatus implements ICommand {
             player_1_giveup = Boolean.parseBoolean(raw_data[3]);
             player_2_giveup = Boolean.parseBoolean(raw_data[4]);
             game_ended = Boolean.parseBoolean(raw_data[5]);
+            winner = raw_data[6];
 
         } catch (Exception exception) {
             throw new IllegalArgumentException();

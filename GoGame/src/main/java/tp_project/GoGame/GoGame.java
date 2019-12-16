@@ -2,6 +2,7 @@ package tp_project.GoGame;
 
 import tp_project.GoGame.GoMove.TYPE;
 import tp_project.GoGameLogic.GoGameLogic;
+import tp_project.GoGameLogic.GoGameLogic.Cell;
 import tp_project.GoGameLogic.GoGameLogic.Player;
 import tp_project.Server.Game;
 import tp_project.Server.GameManager;
@@ -15,15 +16,17 @@ public class GoGame implements Game {
     private GoGameLogic game_logic;
     private GoMove last_move = new GoMove(TYPE.MOVE);
     private GoStatus game_status = new GoStatus();
+    private int size;
 
-    public GoGame(GoPlayer p1, String p1_id, GoPlayer p2, String p2_id, int player1_colour, GameManager manager) {
+    public GoGame(int size, GoPlayer p1, String p1_id, GoPlayer p2, String p2_id, int player1_colour, GameManager manager) {
         player1 = p1;
         game_status.player1 = p1_id;
         player2 = p2;
         game_status.player2 = p2_id;
         this.player1_colour = (player1_colour == 0 ? Player.BLACK : Player.WHITE);
         this.manager = manager;
-        game_logic = new GoGameLogic(13);
+        game_logic = new GoGameLogic(size);
+        this.size = size;
     }
 
     @Override
@@ -59,6 +62,8 @@ public class GoGame implements Game {
         if (move.move_type == TYPE.PASS && last_move.move_type == TYPE.PASS) {
             is_running = false;
             game_status.game_ended = true;
+            player1.update();
+            player2.update();
             return true;
         }
         last_move.fromText(move.toText());
@@ -72,12 +77,39 @@ public class GoGame implements Game {
                 game_status.player_1_giveup = false;
             }
 
+            if (player != player1) {
+                player1.yourMove();
+            } else {
+                player2.yourMove();
+            }
+            player1.update();
+            player2.update();
+
             return true;
         }
 
-        if (move.move_type == TYPE.PASS) return true;
+        if (move.move_type == TYPE.PASS) {
+            if (player != player1) {
+                player1.yourMove();
+            } else {
+                player2.yourMove();
+            }
+            player1.update();
+            player2.update();
+            
+            return true;
+        }
 
-        return game_logic.makeMove(new GoGameLogic.Move(move.x, move.y, player_colour));
+        boolean success = game_logic.makeMove(new GoGameLogic.Move(move.x, move.y, player_colour));
+
+        if (success) {
+            if (player != player1) {
+                player1.update();
+            } else {
+                player2.update();
+            }
+        }
+        return success;
     }
 
     public GoStatus getGameStatus() {
@@ -93,7 +125,17 @@ public class GoGame implements Game {
     }
 
     public GoBoard getBoard() {
-        //TODO
-        return new GoBoard(2);
+        game_logic.getBoard();
+
+        GoBoard board = new GoBoard(size);
+        Cell[][] raw_board = game_logic.getBoard();
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                board.setValue(i, j, raw_board[i][j] == Cell.BLACK ? board.BLACK : (raw_board[i][j] == Cell.WHITE ? board.WHITE : board.EMPTY ));
+            }
+        }
+
+        return board;
     }
 }
