@@ -7,6 +7,7 @@ public class GoAIPlayer implements GoPlayer {
     private boolean is_game_runnig = true;
     private String player_ID;
     private int game_size;
+    private boolean is_my_move = false;
 
     public GoAIPlayer(int game_size) {
         this.player_ID = "BOT";
@@ -34,10 +35,27 @@ public class GoAIPlayer implements GoPlayer {
 
     @Override
     public void update() {
+        if (is_my_move) {
+            doMove();
+            is_my_move = false;
+        }
     }
 
     @Override
     public void yourMove() {
+        is_my_move = true;
+    }
+
+    @Override
+    public String getID() {
+        return player_ID;
+    }
+
+    @Override
+    public void boardUpdated() {
+    }
+
+    private void doMove() {
         GoMove move = new GoMove(TYPE.MOVE);
 
         for (int i = 0; i < game_size; i++) {
@@ -45,14 +63,9 @@ public class GoAIPlayer implements GoPlayer {
                 move.x = i;
                 move.y = j;
                 if (game.makeMove(move, this)) {
-                    break;
+                    return;
                 }
             }
         }
-    }
-
-    @Override
-    public String getID() {
-        return player_ID;
     }
 }

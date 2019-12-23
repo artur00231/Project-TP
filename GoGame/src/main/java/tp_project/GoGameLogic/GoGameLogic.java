@@ -152,7 +152,8 @@ public class GoGameLogic {
         }
 
         public Board pass() {
-            return new Board(this);
+            this.current_player = this.current_player.getOpponent();
+            return this;
         }
 
         public Board makeMove(Move m) {
@@ -295,12 +296,15 @@ public class GoGameLogic {
         return (previews.getPreview(m) != null);
     }
 
+    public void pass() {
+        board.pass();
+    }
+
     public boolean makeMove(Move m) {
         Board next = previews.getPreview(m);
         if (next != null) {
             board = next;
             previews.reset();
-            System.out.println(board.getScore().black + " " + board.getScore().white);
             return true;
         }
         else return false;

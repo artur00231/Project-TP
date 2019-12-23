@@ -105,12 +105,15 @@ public class GoRemotePlayer implements GoPlayer {
                         }
                     }
                 } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 701) {
-                       if (listener != null) listener.updated();
+                       if (listener != null) listener.boardUpdated();
                 } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 702) {
                     if (listener != null) listener.error();
+                } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 704) {
+                    if (listener != null) listener.yourMove();
                 } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 703) {
                     is_game_runnig = false;
                     socketIO.popCommand();
+                    if (listener != null) listener.gameEnded();
                     return;
                 } else if (((ServerCommand) socketIO.getCommand().getCommand()).getValue("ping") != null) {
                     ServerCommand cmd = new ServerCommand();
@@ -140,7 +143,10 @@ public class GoRemotePlayer implements GoPlayer {
 
     @Override
     public void yourMove() {
-        listener.yourMove();
+        send(game.getGameStatus());
+        ServerCommand cmd = new ServerCommand();
+        cmd.setCode(704);
+        send(cmd);
     }
 
     private boolean send(ICommand command) {
@@ -152,5 +158,13 @@ public class GoRemotePlayer implements GoPlayer {
     @Override
     public String getID() {
         return player_ID;
+    }
+
+    @Override
+    public void boardUpdated() {
+        send(game.getGameStatus());
+        ServerCommand cmd = new ServerCommand();
+        cmd.setCode(701);
+        send(cmd);
     }
 }

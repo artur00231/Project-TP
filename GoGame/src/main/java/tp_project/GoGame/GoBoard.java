@@ -13,7 +13,7 @@ public class GoBoard implements ICommand {
 
     public GoBoard(int size) {
         this.size = size;
-
+        
         for (int i = 0; i < size * size; i++) {
             board.add(0);
         }

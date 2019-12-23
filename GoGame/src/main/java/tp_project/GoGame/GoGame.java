@@ -34,6 +34,8 @@ public class GoGame implements Game {
         is_running = true;
         manager.gameStated();
 
+        player1.yourMove();
+
         while (is_running) {
             player1.update();
             player2.update();
@@ -50,20 +52,22 @@ public class GoGame implements Game {
         manager.gameEnded();
     }
 
-    boolean makeMove(GoMove move, GoPlayer player) {
+    public boolean makeMove(GoMove move, GoPlayer player) {
         if (!is_running) return false;
         Player player_colour = player1_colour;
         if (player != player1) {
             player_colour = player_colour.getOpponent();
         }
 
+        System.out.println(player_colour + " try: " + move.toText());
         if (!game_logic.isMyMove(player_colour)) return false;
+        System.out.println(player_colour + " move: " + move.toText());
 
         if (move.move_type == TYPE.PASS && last_move.move_type == TYPE.PASS) {
             is_running = false;
             game_status.game_ended = true;
-            player1.update();
-            player2.update();
+            player1.boardUpdated();
+            player2.boardUpdated();
             return true;
         }
         last_move.fromText(move.toText());
@@ -73,29 +77,27 @@ public class GoGame implements Game {
             game_status.game_ended = true;
             if (player == player1) {
                 game_status.player_1_giveup = true;
+                game_status.winner = player2.getID();
             } else {
-                game_status.player_1_giveup = false;
+                game_status.player_2_giveup = true;
+                game_status.winner = player1.getID();
             }
 
-            if (player != player1) {
-                player1.yourMove();
-            } else {
-                player2.yourMove();
-            }
-            player1.update();
-            player2.update();
+            player1.boardUpdated();
+            player2.boardUpdated();
 
             return true;
         }
 
         if (move.move_type == TYPE.PASS) {
+            game_logic.pass();
             if (player != player1) {
                 player1.yourMove();
             } else {
                 player2.yourMove();
             }
-            player1.update();
-            player2.update();
+            player1.boardUpdated();
+            player2.boardUpdated();
             
             return true;
         }
@@ -104,10 +106,12 @@ public class GoGame implements Game {
 
         if (success) {
             if (player != player1) {
-                player1.update();
+                player1.yourMove();
             } else {
-                player2.update();
+                player2.yourMove();
             }
+            player1.boardUpdated();
+            player2.boardUpdated();
         }
         return success;
     }

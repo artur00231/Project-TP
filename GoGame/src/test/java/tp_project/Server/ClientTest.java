@@ -73,7 +73,7 @@ public class ClientTest {
         t.join();
     }
 
-    @Test(timeout = 300000)
+    @Test(timeout = 3000)
     public void test2() throws IOException, InterruptedException {
         Server server = new Server(PORT);
         assertTrue(server.isValid());
@@ -118,7 +118,7 @@ public class ClientTest {
 
         a2.pos_changed = false;
         c1.kick(player_to_kick);
-        while(a1.updated == false) c1.update();;
+        while(a1.updated == false) c1.update();
 
         while(a2.pos_changed == false) c2.update();
         assertEquals(Client.POSITION.SERVER, c2.getPosition());

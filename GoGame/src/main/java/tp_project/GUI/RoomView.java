@@ -65,6 +65,10 @@ public class RoomView extends JPanel {
         for (GoGameServiceInfo.PlayerInfo player_info : info.getPlayersInfo()) {
             for (Player p : room_info.players) {
                 if (p.id.equals(player_info.ID)) p.is_ready = player_info.ready;
+
+                if (p.id.equals(player_id)) {
+                    ready_check_box.setSelected(p.is_ready);
+                }
             }
         }
 
