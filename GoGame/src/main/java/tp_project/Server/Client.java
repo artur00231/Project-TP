@@ -1,6 +1,7 @@
 package tp_project.Server;
 
 import java.time.Instant;
+import java.util.ArrayList;
 
 import tp_project.Network.ICommand;
 import tp_project.Network.SocketIO;
@@ -10,10 +11,21 @@ public abstract class Client {
     public enum POSITION {
         SERVER, GAMESERVICE, GAME, DISCONNECTED
     };
-
-    public enum STATUS {
-        OK, WPOS, BUSY
+    protected enum RESPONSETYPE {
+        CODE, SERVERCOMMAND, OBJECT, EXTENDENT 
     };
+
+    static public class Request {
+        public ICommand command;
+        public RESPONSETYPE type;
+        public String request_name;
+
+        public Request(ICommand cmd, String name, RESPONSETYPE type) {
+            command = cmd;
+            request_name = name;
+            this.type = type;
+        }
+    }
 
     protected ClientListener client_listener = new ClientListener() {
         @Override
@@ -30,15 +42,16 @@ public abstract class Client {
     private String ID = "XX";
     private String name = "XX";
     private POSITION position;
-    protected enum RESPONSETYPE { CODE, SERVERCOMMAND, OBJECT, EXTENDENT };
     private RESPONSETYPE response_type;
     private boolean wait_for_response = false;
     private String request = "";
+    private ArrayList<Request> requests;
 
 
     protected Client(SocketIO socketIO, String name) {
         this.socketIO = socketIO;
         this.name = name;
+        requests = new ArrayList<>();
 
         connectToServer();
     }
@@ -75,8 +88,8 @@ public abstract class Client {
                     if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 301) {
                         wait_for_response = false;
                         while (socketIO.popCommand() != null) continue;
+                        requests.clear();
                         getLocation();
-                        socketIO.popCommand();
                         return;
                     } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 302) {
                         client_listener.updated();
@@ -89,7 +102,7 @@ public abstract class Client {
                 socketIO.popCommand();
             }
 
-            if (socketIO.getCommand() == null) return;
+            if (socketIO.getCommand() == null) break;
 
             if (wait_for_response)
             {
@@ -127,6 +140,10 @@ public abstract class Client {
             }   
 
         } while (socketIO.getCommand() != null);
+
+        if (!wait_for_response) {
+            sendRequest();
+        }
     }
 
     protected abstract void handleExtendentCommand(ICommand command, String request);
@@ -137,67 +154,66 @@ public abstract class Client {
         return position;
     }
 
-    public STATUS getGameServicesInfo() {
-        if (position != POSITION.SERVER) return STATUS.WPOS;
-        if (isWaiting()) return STATUS.BUSY;
+    public boolean getGameServicesInfo() {
+        if (position != POSITION.SERVER) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("action", "getServicesInfo");
-        send(cmd, RESPONSETYPE.OBJECT, "getServicesInfo");
+        pushRequest(new Request(cmd, "getServicesInfo", RESPONSETYPE.OBJECT));
+        sendRequest();
         
-        return STATUS.OK;
+        return true;
     }
 
-    public STATUS getGameServiceInfo() {
-        if (position != POSITION.GAMESERVICE) return STATUS.WPOS;
-        if (isWaiting()) return STATUS.BUSY;
+    public boolean getGameServiceInfo() {
+        if (position != POSITION.GAMESERVICE) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("getServiceInfo", "true");
-        send(cmd, RESPONSETYPE.OBJECT, "getServiceInfo");
+        pushRequest(new Request(cmd, "getServiceInfo", RESPONSETYPE.OBJECT));
+        sendRequest();
 
-        return STATUS.OK;
+        return true;
     }
 
-    public STATUS kick(String player_id) {
-        if (position != POSITION.GAMESERVICE) return STATUS.WPOS;
-        if (isWaiting()) return STATUS.BUSY;
+    public boolean kick(String player_id) {
+        if (position != POSITION.GAMESERVICE) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("kick", player_id);
         cmd.addValue("sKey", sKey.equals("") ? "XX" : sKey);
-        send(cmd, RESPONSETYPE.CODE, "kick");
+        pushRequest(new Request(cmd, "kick", RESPONSETYPE.CODE));
+        sendRequest();
 
-        return STATUS.OK;
+        return true;
     }
 
-    public STATUS createGame() {
-        if (position != POSITION.SERVER) return STATUS.WPOS;
-        if (isWaiting()) return STATUS.BUSY;
+    public boolean createGame() {
+        if (position != POSITION.SERVER) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("action", "create");
         cmd.addValue("type", getGameName());
         cmd.addValue("name", name);
-        send(cmd, RESPONSETYPE.SERVERCOMMAND, "create");
+        pushRequest(new Request(cmd, "create", RESPONSETYPE.SERVERCOMMAND));
+        sendRequest();
 
-        return STATUS.OK;
+        return true;
     }
 
-    public STATUS setReady(boolean ready) {
-        if (position != POSITION.GAMESERVICE) return STATUS.WPOS;
-        if (isWaiting()) return STATUS.BUSY;
+    public boolean setReady(boolean ready) {
+        if (position != POSITION.GAMESERVICE) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("ready", Boolean.toString(ready));
-        send(cmd, RESPONSETYPE.SERVERCOMMAND, "ready");
+        pushRequest(new Request(cmd, "ready", RESPONSETYPE.CODE));
+        sendRequest();
 
-        return STATUS.OK;
+        return true;
     }
 
-    public STATUS exit() {
-        if (position == POSITION.DISCONNECTED) return STATUS.WPOS;
-        if (isWaiting()) return STATUS.BUSY;
+    public boolean exit() {
+        if (position == POSITION.DISCONNECTED) return false;
 
         ServerCommand cmd = new ServerCommand();
         
@@ -205,58 +221,72 @@ public abstract class Client {
             case SERVER:
                 cmd.addValue("action", "exit");
                 position = POSITION.DISCONNECTED;
-                socketIO.send(cmd);
                 break;
             case GAMESERVICE:
                 cmd.addValue("exit", "true");
-                send(cmd, RESPONSETYPE.CODE, "exit");
+                pushRequest(new Request(cmd, "exit",RESPONSETYPE.CODE));
+                sendRequest();
                 break;
             case GAME:
-                return STATUS.WPOS;
+                return false;
         
             default:
                 break;
         }
 
-        return STATUS.OK;
+        return true;
     }
 
-    public STATUS connect(String game_service_id) {
-        if (position != POSITION.SERVER) return STATUS.WPOS;
-        if (isWaiting() != false) return STATUS.BUSY;
+    public boolean connect(String game_service_id) {
+        if (position != POSITION.SERVER) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("action", "connect");
         cmd.addValue("game", game_service_id);
         cmd.addValue("name", name);
-        send(cmd, RESPONSETYPE.SERVERCOMMAND, "connect");
+        pushRequest(new Request(cmd, "connect", RESPONSETYPE.SERVERCOMMAND));
+        sendRequest();
 
-        return STATUS.OK;
+        return true;
     }
 
-    public STATUS addBot() {
-        if (position != POSITION.GAMESERVICE) return STATUS.WPOS;
-        if (isWaiting() != false) return STATUS.BUSY;
+    public boolean addBot() {
+        if (position != POSITION.GAMESERVICE) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("add", "bot");
-        socketIO.send(cmd);
+        pushRequest(new Request(cmd, "addBot", RESPONSETYPE.CODE));
+        sendRequest();
 
-        return STATUS.OK;
+        return true;
     }
 
-    public STATUS getLocation() {
-        if (position == POSITION.DISCONNECTED) return STATUS.WPOS;
-        if (isWaiting()) return STATUS.BUSY;
+    public boolean getLocation() {
+        if (position == POSITION.DISCONNECTED) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("ping", "true");
-        send(cmd, RESPONSETYPE.SERVERCOMMAND, "ping");
+        pushRequest(new Request(cmd, "ping", RESPONSETYPE.SERVERCOMMAND));
+        sendRequest();
 
-        return STATUS.OK;
+        return true;
     }
 
-    protected boolean send(ICommand command, RESPONSETYPE type, String request) {
+    protected void pushRequest(Request request) {
+        requests.add(request);
+    }
+
+    protected boolean sendRequest() {
+        if (requests.isEmpty()) return true;
+        if (wait_for_response) return true;
+
+        Request request = requests.get(0);
+        requests.remove(0);
+
+        return send(request.command, request.type, request.request_name);
+    }
+
+    private boolean send(ICommand command, RESPONSETYPE type, String request) {
         if (!socketIO.send(command)) return false;
 
         wait_for_response = true;
@@ -266,8 +296,8 @@ public abstract class Client {
         return true;
     }
 
-    protected boolean isWaiting() {
-        return wait_for_response;
+    protected boolean isBuisy() {
+        return wait_for_response || (requests.size() > 0);
     }
 
     private void connectToServer() {
@@ -318,6 +348,12 @@ public abstract class Client {
                 break;
             }
             case "kick": {
+                if (cmd.getCode() != 200) {
+                    client_listener.error(request);
+                }
+                break;
+            }
+            case "addBot": {
                 if (cmd.getCode() != 200) {
                     client_listener.error(request);
                 }

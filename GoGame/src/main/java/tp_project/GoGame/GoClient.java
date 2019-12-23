@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Optional;
 
+import tp_project.GoGame.GoGameServiceInfo.PlayerInfo;
 import tp_project.Network.ICommand;
 import tp_project.Network.SocketIO;
 import tp_project.Server.Client;
@@ -12,6 +13,7 @@ import tp_project.Server.ServerCommand;
 
 public class GoClient extends Client {
     private int game_size = 13;
+    private int colour = -1;
 
     public static Optional<GoClient> create(String IP, int port, String name) {
         try {
@@ -35,13 +37,18 @@ public class GoClient extends Client {
     }
 
     public GoRemotePlayer getPlayer() {
-        if (getPosition() != POSITION.GAME) return null;
+        if (getPosition() != POSITION.GAME)
+            return null;
 
         return new GoRemotePlayer(socketIO, getID());
     }
 
     public int getGameSize() {
         return game_size;
+    }
+
+    public int getColour() {
+        return colour;
     }
 
     @Override
@@ -61,6 +68,11 @@ public class GoClient extends Client {
         } else if (request.equals("getGoGameServiceInfo") && command.getCommandType().equals("GoGameServiceInfo")) {
             GoGameServiceInfo inf = (GoGameServiceInfo) command;
 
+            for (PlayerInfo p_inf : inf.getPlayersInfo()) {
+                if (p_inf.ID.equals(getID())) {
+                    colour = p_inf.colour;
+                }
+            }
             game_size = inf.board_size;
             client_listener.recived(inf, request);
         }
@@ -76,40 +88,40 @@ public class GoClient extends Client {
         return "GoGame";
     }
 
-    public STATUS flipColours() {
-        if (getPosition() != POSITION.GAMESERVICE) return STATUS.WPOS;
-        if (isWaiting()) return STATUS.BUSY;
+    public boolean flipColours() {
+        if (getPosition() != POSITION.GAMESERVICE) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("GoGame", "flip");
         cmd.addValue("sKey", getSKey());
-        send(cmd, RESPONSETYPE.EXTENDENT, "flip");
+        pushRequest(new Request(cmd, "flip", RESPONSETYPE.EXTENDENT));
+        sendRequest();
 
-        return STATUS.OK;
+        return true;
     }
 
-    public STATUS setGameSize(int size) {
-        if (getPosition() != POSITION.GAMESERVICE) return STATUS.WPOS;
-        if (isWaiting()) return STATUS.BUSY;
+    public boolean setGameSize(int size) {
+        if (getPosition() != POSITION.GAMESERVICE) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("GoGame", "setSize");
         cmd.addValue("size", Integer.toString(size));
         cmd.addValue("sKey", getSKey());
-        send(cmd, RESPONSETYPE.EXTENDENT, "setSize");
+        pushRequest(new Request(cmd, "setSize", RESPONSETYPE.EXTENDENT));
+        sendRequest();
 
-        return STATUS.OK;
+        return true;
     }
 
-    public STATUS getGoGameServiceInfo() {
-        if (getPosition() != POSITION.GAMESERVICE) return STATUS.WPOS;
-        if (isWaiting()) return STATUS.BUSY;
+    public boolean getGoGameServiceInfo() {
+        if (getPosition() != POSITION.GAMESERVICE) return false;
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("GoGame", "getGoGameServiceInfo");
-        send(cmd, RESPONSETYPE.EXTENDENT, "getGoGameServiceInfo");
+        pushRequest(new Request(cmd, "getGoGameServiceInfo", RESPONSETYPE.EXTENDENT));
+        sendRequest();
 
-        return STATUS.OK;
+        return true;
     }
     
 }

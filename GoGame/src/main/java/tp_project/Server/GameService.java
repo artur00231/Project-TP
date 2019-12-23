@@ -3,6 +3,7 @@ package tp_project.Server;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import tp_project.Network.Command;
 import tp_project.Network.SocketIO;
@@ -26,7 +27,7 @@ public abstract class GameService implements GameManager {
     protected abstract void setPlayerReady(String player_id, boolean ready);
     protected abstract boolean isGameReady();
     protected abstract void startGame();
-    protected abstract boolean handleExtendetCommands(String client, ServerCommand command, SocketIO socketIO);
+    protected abstract int handleExtendetCommands(String client, ServerCommand command, SocketIO socketIO);
 
     public GameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id, GameServiceManager meanager) {
         this.ID = ID;
@@ -152,8 +153,14 @@ public abstract class GameService implements GameManager {
         } else if (cmd.getValue("getServiceInfo") != null) {
             socketIO.send(getInfo());
         } else if (cmd.getValue("add") != null) {
-            addPlayer("BOT", "0000000000", null);
-            setPlayerReady("0000000000", true);
+            String bot_id = UUID.randomUUID().toString();
+            if (addPlayer("BOT", bot_id, null)) {
+                setReady(bot_id, true);
+                sendCode(200, socketIO);
+            } else {
+                sendCode(400, socketIO);
+            }
+            
         } else if (cmd.getValue("ping") != null) {
             ServerCommand ping = new ServerCommand();
             ping.setCode(1);
@@ -164,7 +171,12 @@ public abstract class GameService implements GameManager {
             setReady(player_id, Boolean.parseBoolean(cmd.getValue("ready")));
             updated = true;
         } else {
-            updated = updated || handleExtendetCommands(player_id, cmd, socketIO);
+            int success = handleExtendetCommands(player_id, cmd, socketIO);
+            updated = updated || (success == 2);
+
+            if (success == 0) {
+                sendCode(400, socketIO);
+            }
         }
 
         if (updated) {
@@ -188,6 +200,20 @@ public abstract class GameService implements GameManager {
     @Override
     public void gameEnded()
     {
+        ArrayList<String> to_delete = new ArrayList<>();
+
+        for (Map.Entry<String, Client> pair : players.entrySet()) {
+            if (pair.getValue().socketIO == null) {
+                to_delete.add(pair.getKey());
+            } else {
+                setPlayerReady(pair.getKey(), false);
+            }
+        }
+
+        for (String id : to_delete) {
+            removePlayer(id);
+        }
+
         for (Map.Entry<String, Client> pair : players.entrySet()) {
             manager.registerPlayer(pair.getKey());
         }

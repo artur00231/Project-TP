@@ -15,7 +15,6 @@ import tp_project.Server.GameServiceInfo;
 import tp_project.Server.GameServicesInfo;
 import tp_project.Server.Server;
 import tp_project.Server.Client.POSITION;
-import tp_project.Server.Client.STATUS;
 
 class ClientAdapter implements ClientListener {
     public ICommand last_command = null;
@@ -101,7 +100,7 @@ public class GoClientTest {
         assertEquals(POSITION.GAMESERVICE, client2.getPosition());
         adapter2.reset();
 
-        assertEquals(STATUS.WPOS, client3.getGameServiceInfo());
+        assertEquals(false, client3.getGameServiceInfo());
         client3.getGameServicesInfo();
         while(!adapter3.diff()) client3.update();
         GameServicesInfo info = (GameServicesInfo)adapter3.last_command;
@@ -155,7 +154,7 @@ public class GoClientTest {
         adapter1.reset();
 
         adapter3.reset();
-        assertEquals(STATUS.WPOS, client3.getGameServiceInfo());
+        assertEquals(false, client3.getGameServiceInfo());
         client3.getGameServicesInfo();
         while(!adapter3.diff()) client3.update();
         info = (GameServicesInfo)adapter3.last_command;
@@ -251,7 +250,7 @@ public class GoClientTest {
         t.join();
     }
 
-    @Test(timeout = 3000)
+    @Test(timeout = 300000)
     public void test2() throws InterruptedException, IOException {
         Server server = new Server(PORT);
         assertTrue(server.isValid());
@@ -273,7 +272,7 @@ public class GoClientTest {
         assertEquals(POSITION.GAMESERVICE, client1.getPosition());
         adapter1.reset();
 
-        assertEquals(STATUS.WPOS, client2.getGameServiceInfo());
+        assertEquals(false, client2.getGameServiceInfo());
         client2.getGameServicesInfo();
         while(!adapter2.diff()) client2.update();
         GameServicesInfo info = (GameServicesInfo)adapter2.last_command;
@@ -302,7 +301,7 @@ public class GoClientTest {
         adapter2.reset();
         adapter1.reset();
 
-        while(client1.getPosition() != POSITION.GAME) client1.update();
+        while(client1.getPosition() != POSITION.GAME) { client1.update(); Thread.sleep(100); }
         while(client2.getPosition() != POSITION.GAME) client2.update();
 
         GoRemotePlayer p = client1.getPlayer();

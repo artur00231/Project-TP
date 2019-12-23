@@ -77,27 +77,9 @@ public class GameView extends JPanel {
         this.add(control_panel, BorderLayout.EAST);
 
         player.setListener(new GoPlayerListener(){
-        
-            @Override
-            public void updated() {
-                if (!player.isGameRunnig()) {
-                    GoStatus status = player.getLastStatus();
-                    thread.stop();
-                    
-                    if (status.winner.equals(player.getID())) {
-                        JOptionPane.showMessageDialog(null, "You won", "Game ended", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(null, "You lost", "Game ended", JOptionPane.INFORMATION_MESSAGE);
-                    }
-
-                    action_listener.actionPerformed(new ActionEvent(ACTION.END, 0, ""));
-                }
-
-                player.getGameBoard();
-            }
-        
             @Override
             public void yourMove() {
+                System.out.println(player.getGameBoard());
             }
 
             @Override
@@ -118,6 +100,25 @@ public class GameView extends JPanel {
             @Override
             public void error() {
                 player.getGameBoard();
+            }
+
+            @Override
+            public void boardUpdated() {
+                player.getGameBoard();
+            }
+
+            @Override
+            public void gameEnded() {
+                GoStatus status = player.getLastStatus();
+                thread.stop();
+                
+                if (status.winner.equals(player.getID())) {
+                    JOptionPane.showMessageDialog(null, "You won", "Game ended", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "You lost", "Game ended", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+                action_listener.actionPerformed(new ActionEvent(ACTION.END, 0, ""));
             }
         });
 
@@ -209,7 +210,6 @@ public class GameView extends JPanel {
                         move.x = x;
                         move.y = y;
                         player.makeMove(move);
-                        set(go_game.getBoard());
                         paint_preview = false;
                     }
                 });

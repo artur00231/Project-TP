@@ -128,7 +128,7 @@ public class GoGameService extends GameService {
         return success;
     }
 
-    protected boolean handleExtendetCommands(String client, ServerCommand command, SocketIO socketIO) {
+    protected int handleExtendetCommands(String client, ServerCommand command, SocketIO socketIO) {
         if (command.getValue("GoGame") != null) {
             if (command.getValue("GoGame").equals("flip")) {
                 if (checkSKey(command.getValue("sKey"))) {
@@ -140,7 +140,7 @@ public class GoGameService extends GameService {
 
                     sendCode(200, socketIO);
                     updatePlayers();
-                    return true;
+                    return 2;
                 } else {
                     sendCode(400, socketIO);
                 }
@@ -171,16 +171,16 @@ public class GoGameService extends GameService {
                             sendCode(400, socketIO);
                     }
 
-                    updatePlayers();
-
                     System.out.println("Size:" + game_size);
+
+                    return 2;
                 } else {
                     sendCode(400, socketIO);
                 }
             }
         }
 
-        return false;
+        return 0;
     }
 
     @Override

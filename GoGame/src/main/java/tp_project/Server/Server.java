@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import tp_project.Network.SocketIO;
@@ -33,6 +35,7 @@ public class Server implements Runnable, GameServiceManager {
     private boolean is_running = false;
     private boolean is_valid = false;
     private boolean kill = false;
+    private boolean clean = false;
     private ServerSocketChannel socket_server;
     private Selector selector;
     private Object selector_sync = new Object();
@@ -40,12 +43,14 @@ public class Server implements Runnable, GameServiceManager {
     private HashMap<String, GameService> game_services;
     private ArrayList<String> game_services_to_delete;
     private int port;
+    private Timer clean_timer;
 
     public Server(int port) {
         this.port = port;
         clients = new HashMap<>();
         game_services = new HashMap<>();
         game_services_to_delete = new ArrayList<>();
+        clean_timer = new Timer();
 
         setup();
     }
@@ -67,6 +72,10 @@ public class Server implements Runnable, GameServiceManager {
                 // Server is being deleted, so its ok
             }
         }
+
+        if (clean) {
+            cleanServer();
+        }
     }
 
     public boolean isValid() {
@@ -83,6 +92,12 @@ public class Server implements Runnable, GameServiceManager {
 
     @Override
     public void run() {
+        clean_timer.scheduleAtFixedRate(new TimerTask(){
+            @Override
+            public void run() {
+                clean = true;
+            }
+        }, 2000, 2000);
         if (!is_valid)
             return;
         is_running = true;
@@ -356,6 +371,22 @@ public class Server implements Runnable, GameServiceManager {
         }
 
         return info;
+    }
+
+    private void cleanServer() {
+        for (Map.Entry<SocketChannel, Client> pair : clients.entrySet()) {
+            Client client = pair.getValue();
+            AVAILABILITY data_status = client.socketIO.isAvailable();
+            if (data_status == SocketIO.AVAILABILITY.YES) {
+                if (client.game_ID == null) {
+                        handleIncomingCommand(client);
+                    } else {
+                        game_services.get(client.game_ID).update(client.ID);
+                    }
+            } else if (data_status == AVAILABILITY.DISCONNECTED) {
+                removeClient(pair.getKey());
+            }
+        }
     }
 
     @Override
