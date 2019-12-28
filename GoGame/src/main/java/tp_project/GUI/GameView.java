@@ -50,14 +50,21 @@ class GoPlayerThread implements Runnable {
 }
 
 public class GameView extends JPanel {
+    private static final long serialVersionUID = -353599257042183805L;
     private GoGameLogic.Player player_color;
     public enum ACTION { END };
 
     private GoGameLogic go_game;
     private Board board;
     private int size;
-    private JButton pass_button = new JButton("Pass");
-    private JButton give_up_button = new JButton("Give up");
+    private JButton pass_button = new JButton("Pass") //pass_button will fill BoxLayout in Y axis
+    { private static final long serialVersionUID = 2522748472460831874L; @Override public Dimension getMaximumSize() { Dimension d = super.getMaximumSize(); d.width = Integer.MAX_VALUE; return d; }};
+    private JButton give_up_button = new JButton("Give up") //pass_button will fill BoxLayout in Y axis
+    { private static final long serialVersionUID = 2901876623633538393L; @Override public Dimension getMaximumSize() { Dimension d = super.getMaximumSize(); d.width = Integer.MAX_VALUE; return d; }};
+    private JLabel your_move_label = new JLabel("Your move", SwingConstants.CENTER) //your_move_label will fill BoxLayout in Y axis
+    { private static final long serialVersionUID = 4542125361357724107L; @Override public Dimension getMaximumSize() { Dimension d = super.getMaximumSize(); d.width = Integer.MAX_VALUE; return d; }};
+    private JLabel points = new JLabel("Score", SwingConstants.CENTER) //points will fill BoxLayout in Y axis
+    { private static final long serialVersionUID = 4864276740641971233L; @Override public Dimension getMaximumSize() { Dimension d = super.getMaximumSize(); d.width = Integer.MAX_VALUE; return d; }};
     private ControlPanel control_panel = new ControlPanel();
     private GoRemotePlayer player;
     private ActionListener action_listener;
@@ -76,14 +83,26 @@ public class GameView extends JPanel {
         this.add(board, BorderLayout.CENTER);
         this.add(control_panel, BorderLayout.EAST);
 
+        switchView(go_game.getCurrentPlayer().equals(player_color));
+
+        your_move_label.setOpaque(true);
+        if (player_color.equals(GoGameLogic.Player.BLACK)) {
+            your_move_label.setBackground(Color.BLACK);
+            your_move_label.setForeground(Color.WHITE);
+        } else {
+            your_move_label.setForeground(Color.BLACK);
+            your_move_label.setBackground(Color.WHITE);
+        }
+
         player.setListener(new GoPlayerListener(){
             @Override
             public void yourMove() {
-                System.out.println(player.getGameBoard());
+                switchView(true);
             }
 
             @Override
             public void setStatus(GoStatus go_status) {
+                setScore(go_status);
             }
         
             @Override
@@ -95,6 +114,7 @@ public class GameView extends JPanel {
                     }
                 }
                 board.set(cells);
+                go_game.setBoard(cells);
             }
         
             @Override
@@ -105,12 +125,13 @@ public class GameView extends JPanel {
             @Override
             public void boardUpdated() {
                 player.getGameBoard();
+                player.getGameStatus();
             }
 
             @Override
             public void gameEnded() {
-                GoStatus status = player.getLastStatus();
                 thread.stop();
+                GoStatus status = player.getLastStatus();
                 
                 if (status.winner.equals(player.getID())) {
                     JOptionPane.showMessageDialog(null, "You won", "Game ended", JOptionPane.INFORMATION_MESSAGE);
@@ -125,7 +146,10 @@ public class GameView extends JPanel {
         pass_button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                player.makeMove(new GoMove(TYPE.PASS));
+                if (go_game.getCurrentPlayer().equals(player_color)) {
+                    player.makeMove(new GoMove(TYPE.PASS));
+                    switchView(false);
+                }
             }
         });
         give_up_button.addActionListener(new ActionListener() {
@@ -143,8 +167,9 @@ public class GameView extends JPanel {
     }
 
     private class Board extends JPanel{
+        private static final long serialVersionUID = -8773343169606093079L;
         JPanel inner_panel = new JPanel();
-        Cell[][] board;
+        Cell[][] _board;
 
         public Board() {
             inner_panel.setLayout(new GridLayout(size, size));
@@ -153,11 +178,11 @@ public class GameView extends JPanel {
             this.setBackground(Color.BLACK);
             this.add(inner_panel);
 
-            board = new Cell[size][size];
+            _board = new Cell[size][size];
             for (int y = 0; y < size; ++y) {
                 for (int x = 0; x < size; ++x) {
-                    board[y][x] = new Cell(x, y);
-                    inner_panel.add(board[y][x]);
+                    _board[y][x] = new Cell(x, y);
+                    inner_panel.add(_board[y][x]);
                 }
             }
             this.addComponentListener(new ComponentAdapter() {
@@ -174,13 +199,14 @@ public class GameView extends JPanel {
         public void set(GoGameLogic.Cell[][] board) {
             for (int i = 0; i < size; ++i) {
                 for (int j = 0; j < size; ++j) {
-                    this.board[i][j].cell_state = board[i][j];
+                    this._board[i][j].cell_state = board[i][j];
                 }
             }
             repaint();
         }
 
         private class Cell extends JPanel{
+            private static final long serialVersionUID = 7425127337130479578L;
             int x, y;
             boolean paint_preview;
             GoGameLogic.Cell cell_state;
@@ -194,7 +220,9 @@ public class GameView extends JPanel {
                 this.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseEntered(MouseEvent e) {
-                        paint_preview = true;
+                        GoMove move = new GoMove(GoMove.TYPE.MOVE);
+                        move.setXY(x, y);
+                        if (go_game.isLegal(move, player_color)) paint_preview = true;
                         repaint();
                     }
 
@@ -209,8 +237,12 @@ public class GameView extends JPanel {
                         GoMove move = new GoMove(TYPE.MOVE);
                         move.x = x;
                         move.y = y;
+                        if (!go_game.isLegal(move, player_color)) return;
                         player.makeMove(move);
+                        go_game.makeMove(move, player_color);
+                        switchView(false);
                         paint_preview = false;
+                        board.set(go_game.getBoard());
                     }
                 });
             }
@@ -247,11 +279,54 @@ public class GameView extends JPanel {
     }
 
     private class ControlPanel extends JPanel {
+        private static final long serialVersionUID = 7356171699838575403L;
+
         public ControlPanel() {
             this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+            this.add(your_move_label);
+            points.setText("<html>Score<br>00-00</html>");
+            this.add(points);
             this.add(Box.createGlue());
             this.add(pass_button);
             this.add(give_up_button);
         }
+    }
+
+    private void switchView(boolean your_move) {
+        if (your_move) {
+            go_game.setCurrentPlayer(player_color);
+            pass_button.setEnabled(true);
+            your_move_label.setEnabled(true);
+        } else {
+            go_game.setCurrentPlayer(player_color.getOpponent());
+            pass_button.setEnabled(false);
+            your_move_label.setEnabled(false);
+        }
+    }
+
+    private void setScore(GoStatus status) {
+        String my_score;
+        String opponent_score;
+        if (status.player1.equals(player.getID())) {
+            my_score = Integer.toString(status.stones_capured_by_player1);
+            opponent_score = Integer.toString(status.stones_capured_by_player2);
+            int length = my_score.length() > opponent_score.length() ? my_score.length() : opponent_score.length();
+            length = length > 1 ? length : 2;
+
+            my_score = String.format("%0" + length + "d", status.stones_capured_by_player1);
+            opponent_score = String.format("%0" + length + "d", status.stones_capured_by_player2);
+        } else {
+            my_score = Integer.toString(status.stones_capured_by_player2);
+            opponent_score = Integer.toString(status.stones_capured_by_player1);
+            int length = my_score.length() > opponent_score.length() ? my_score.length() : opponent_score.length();
+            length = length > 1 ? length : 2;
+
+            my_score = String.format("%0" + length + "d", status.stones_capured_by_player2);
+            opponent_score = String.format("%0" + length + "d", status.stones_capured_by_player1);
+        }
+
+        points.setText("<html>Score<br>" + my_score + "-" + opponent_score + "</html>");
+        this.revalidate();
+        this.repaint();
     }
 }

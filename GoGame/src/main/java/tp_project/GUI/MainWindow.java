@@ -68,6 +68,9 @@ public class MainWindow
                     window.setContentPane((JPanel)a.object);
                     window.repaint();
                     window.revalidate();
+
+                    ((JPanel)a.object).revalidate();
+                    ((JPanel)a.object).repaint();
                     break;
                 case PACK:
                     window.pack();

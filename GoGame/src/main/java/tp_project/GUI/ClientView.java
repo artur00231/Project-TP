@@ -20,7 +20,7 @@ class GoClientThread implements Runnable {
     GoClient go_client;
     boolean running = true;
 
-    public GoClientThread (GoClient go_client) {
+    public GoClientThread(GoClient go_client) {
         this.go_client = go_client;
     }
 
@@ -59,10 +59,7 @@ public class ClientView {
     private GameView game_view;
 
     enum Action {
-        ERROR,
-        SET_CONTENT_PANE,
-        DISCONNECTED,
-        PACK;
+        ERROR, SET_CONTENT_PANE, DISCONNECTED, PACK;
 
         Object object;
     }
@@ -84,29 +81,30 @@ public class ClientView {
                 sendAction(Action.ERROR, "Error");
                 return;
             }
-            if(!go_client.getPosition().equals(GoClient.POSITION.SERVER)) {
+            if (!go_client.getPosition().equals(GoClient.POSITION.SERVER)) {
                 return;
             }
             switch ((ServerView.Action) e.getSource()) {
-                case RETURN:
-                    sendAction(Action.DISCONNECTED, null);
-                    go_client.exit();
-                    break;
-                case CREATE:
-                    go_client.createGame();
-                    while(go_client.getPosition() != POSITION.GAMESERVICE) go_client.update();
-                    go_client.setGameSize(e.getID());
-                    break;
-                case JOIN:
-                    room_id = e.getActionCommand();
-                    go_client.connect(room_id);
-                    break;
-                case REFRESH:
-                    go_client.getGameServicesInfo();
-                    break;
-                case PACK:
-                    action_listener.actionPerformed(new ActionEvent(Action.PACK, 0, ""));
-                    break;
+            case RETURN:
+                sendAction(Action.DISCONNECTED, null);
+                go_client.exit();
+                break;
+            case CREATE:
+                go_client.createGame();
+                while (go_client.getPosition() != POSITION.GAMESERVICE)
+                    go_client.update();
+                go_client.setGameSize(e.getID());
+                break;
+            case JOIN:
+                room_id = e.getActionCommand();
+                go_client.connect(room_id);
+                break;
+            case REFRESH:
+                go_client.getGameServicesInfo();
+                break;
+            case PACK:
+                action_listener.actionPerformed(new ActionEvent(Action.PACK, 0, ""));
+                break;
             }
         });
 
@@ -120,27 +118,27 @@ public class ClientView {
                 return;
             }
             switch ((RoomView.Action) e.getSource()) {
-                case KICK:
-                    go_client.kick(e.getActionCommand());
-                    break;
-                case LEAVE:
-                    go_client.exit();
-                    break;
-                case READY:
-                    go_client.setReady(true);
-                    break;
-                case NOT_READY:
-                    go_client.setReady(false);
-                    break;
-                case ADD_BOT:
-                    go_client.addBot();
-                    break;
-                case SWITCH_COLORS:
-                    go_client.flipColours();
-                    break;
-                case PACK:
-                    action_listener.actionPerformed(new ActionEvent(Action.PACK, 0, ""));
-                    break;
+            case KICK:
+                go_client.kick(e.getActionCommand());
+                break;
+            case LEAVE:
+                go_client.exit();
+                break;
+            case READY:
+                go_client.setReady(true);
+                break;
+            case NOT_READY:
+                go_client.setReady(false);
+                break;
+            case ADD_BOT:
+                go_client.addBot();
+                break;
+            case SWITCH_COLORS:
+                go_client.flipColours();
+                break;
+            case PACK:
+                action_listener.actionPerformed(new ActionEvent(Action.PACK, 0, ""));
+                break;
             }
         });
     }
@@ -153,10 +151,10 @@ public class ClientView {
                 public void updated() {
                     System.out.println("updated");
                     switch (go_client.getPosition()) {
-                        case GAMESERVICE:
-                            go_client.getGameServiceInfo();
-                            go_client.getGoGameServiceInfo();
-                            break;
+                    case GAMESERVICE:
+                        go_client.getGameServiceInfo();
+                        go_client.getGoGameServiceInfo();
+                        break;
                     }
                 }
 
@@ -164,37 +162,43 @@ public class ClientView {
                 public void positionChanged() {
                     System.out.println("pos changed");
                     switch (go_client.getPosition()) {
-                        case DISCONNECTED:
-                            go_client_thread.stop();
-                            sendAction(Action.DISCONNECTED, null);
-                            break;
-                        case GAMESERVICE:
-                            if (!go_client_thread.running) { go_client_thread = new GoClientThread(go_client);
-                                Thread t = new Thread(go_client_thread);
-                                t.start();
-                            }
-                            go_client.getGameServiceInfo();
-                            go_client.getGoGameServiceInfo();
-                            sendAction(Action.SET_CONTENT_PANE, room_view);
-                            break;
-                        case SERVER:
-                            if (!go_client_thread.running) { go_client_thread = new GoClientThread(go_client);
-                                Thread t = new Thread(go_client_thread);
-                                t.start();
-                            }
-                            go_client.getGameServicesInfo();
-                            sendAction(Action.SET_CONTENT_PANE, server_view);
-                            break;
-                        case GAME:
-                            go_client_thread.stop();
-                            game_view = new GameView(go_client.getPlayer(), go_client.getGameSize(), go_client.getColour() == 0 ? GoGameLogic.Player.BLACK : GoGameLogic.Player.WHITE,
+                    case DISCONNECTED:
+                        go_client_thread.stop();
+                        sendAction(Action.DISCONNECTED, null);
+                        break;
+                    case GAMESERVICE:
+                        if (!go_client_thread.running) {
+                            go_client_thread = new GoClientThread(go_client);
+                            Thread t = new Thread(go_client_thread);
+                            t.start();
+                        }
+                        go_client.getGameServiceInfo();
+                        go_client.getGoGameServiceInfo();
+                        sendAction(Action.SET_CONTENT_PANE, room_view);
+                        break;
+                    case SERVER:
+                        if (!go_client_thread.running) {
+                            go_client_thread = new GoClientThread(go_client);
+                            Thread t = new Thread(go_client_thread);
+                            t.start();
+                        }
+                        go_client.getGameServicesInfo();
+                        sendAction(Action.SET_CONTENT_PANE, server_view);
+                        break;
+                    case GAME:
+                        go_client_thread.stop();
+                        game_view = new GameView(go_client.getPlayer(), go_client.getGameSize(),
+                                go_client.getColour() == 0 ? GoGameLogic.Player.BLACK : GoGameLogic.Player.WHITE,
                                 new ActionListener() {
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
-                                        switch ((GameView.ACTION) e.getSource() ) {
-                                            case END:
-                                                while (go_client.getPosition() != POSITION.GAMESERVICE)
-                                                    go_client.update();
+                                        switch ((GameView.ACTION) e.getSource()) {
+                                        case END:
+                                            while (go_client.getPosition() != POSITION.GAMESERVICE)
+                                                go_client.update();
+                                                try {
+                                                    Thread.sleep(50);
+                                                } catch (InterruptedException e1) { }
                                         }
                                     }
                                 });

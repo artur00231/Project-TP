@@ -187,10 +187,10 @@ public class GoGameService extends GameService {
     public void gameEnded() {
         super.gameEnded();
 
-        try {
+        /*try {
             game_thread.join();
         } catch (InterruptedException e) {
-        }
+        }*/
 
         game = null;
     }
