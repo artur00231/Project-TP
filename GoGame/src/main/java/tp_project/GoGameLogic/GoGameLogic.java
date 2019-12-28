@@ -3,6 +3,9 @@ package tp_project.GoGameLogic;
 import java.util.ArrayList;
 import java.util.List;
 
+import tp_project.GoGame.GoBoard;
+import tp_project.GoGame.GoMove;
+
 public class GoGameLogic {
     public enum Cell {
         EMPTY, WHITE, BLACK
@@ -35,15 +38,11 @@ public class GoGameLogic {
         abstract public Cell getColor();
     }
 
-    public static class Move {
-        int row, col;
-        Player player;
-
-        public Move(int x, int y, Player p) {
-            row = y;
-            col = x;
-            player = p;
-        }
+    public static class Score {
+        public int white = 0;
+        public int black = 0;
+        public int stones_capured_by_black;
+        public int stones_capured_by_white;
     }
 
     public static class Board {
@@ -51,6 +50,9 @@ public class GoGameLogic {
         Cell[][] board;
         Cell[][] prev;
         private Player current_player;
+        private int stones_capured_by_black;
+        private int stones_capured_by_white;
+
 
         Cell getCell(int x, int y) {
             return board[y][x];
@@ -76,9 +78,16 @@ public class GoGameLogic {
             }
         }
 
+        public void resetScore(int stones_capured_by_black, int stones_capured_by_white) {
+            this.stones_capured_by_black = stones_capured_by_black;
+            this.stones_capured_by_white = stones_capured_by_white;
+        }
+
         private Board(Board b) {
             this.current_player = b.current_player.getOpponent();
             this.size = b.size;
+            this.stones_capured_by_black = b.stones_capured_by_black;
+            this.stones_capured_by_white = b.stones_capured_by_white;
             board = new Cell[size][size];
             prev = b.getBoard();
             for (int i = 0; i < size; ++i) {
@@ -86,11 +95,6 @@ public class GoGameLogic {
                     board[i][j] = prev[i][j];
                 }
             }
-        }
-
-        public static class Score {
-            int white = 0;
-            int black = 0;
         }
 
         private static class _Score {
@@ -103,9 +107,14 @@ public class GoGameLogic {
             return current_player;
         }
 
-        public Score getScore() {
-            boolean[][] visited = new boolean[size][size];
+        public Score getScore(boolean finished) {
             Score score = new Score();
+            score.stones_capured_by_black = stones_capured_by_black;
+            score.stones_capured_by_white = stones_capured_by_white;
+
+            if (!finished) return score;
+
+            boolean[][] visited = new boolean[size][size];
             for (int i = 0; i < size; ++i) {
                 for (int j = 0; j < size; ++j) {
                     visited[i][j] = false;
@@ -156,20 +165,28 @@ public class GoGameLogic {
             return this;
         }
 
-        public Board makeMove(Move m) {
-            if (m.col < 0 || m.col >= size || m.row < 0 || m.row >= size) return null;
-            if (!m.player.equals(current_player)) return null;
-            if (!board[m.row][m.col].equals(Cell.EMPTY)) return null;
+        public Board makeMove(GoMove move, Player player) {
+            if (!move.move_type.equals(GoMove.TYPE.MOVE)) {
+                if (move.move_type.equals(GoMove.TYPE.PASS)) {
+                    return pass();
+                } else {
+                    return null;
+                }
+            }
+
+            if (move.x < 0 || move.x >= size || move.y < 0 || move.y >= size) return null;
+            if (!player.equals(current_player)) return null;
+            if (!board[move.y][move.x].equals(Cell.EMPTY)) return null;
 
             ArrayList<int[]> to_delete = new ArrayList<>();
             boolean suicide = true;
 
-            for (int[] i : getNeighbours(m.col, m.row)) {
+            for (int[] i : getNeighbours(move.x, move.y)) {
                 int x = i[0], y = i[1];
                 if (board[y][x].equals(Cell.EMPTY)) suicide = false;
                 int b = getBreaths(x, y);
-                if (board[y][x].equals(m.player.getColor()) && b > 1) suicide = false;
-                if (board[y][x].equals(m.player.getOpponent().getColor()) && b == 1) {
+                if (board[y][x].equals(player.getColor()) && b > 1) suicide = false;
+                if (board[y][x].equals(player.getOpponent().getColor()) && b == 1) {
                     suicide = false;
                     to_delete.add(new int[]{x, y});
                 }
@@ -177,10 +194,16 @@ public class GoGameLogic {
             if (suicide) return null;
 
             Board next = new Board(this);
-            next.getBoard()[m.row][m.col] = m.player.getColor();
+            next.getBoard()[move.y][move.x] = player.getColor();
             for (int[] i : to_delete) {
                 int x = i[0], y = i[1];
                 next.remove(x, y);
+            }
+
+            if (current_player.equals(Player.BLACK)) {
+                stones_capured_by_black++;
+            } else {
+                stones_capured_by_white++;
             }
 
             for (int i = 0; i < size; ++i) {
@@ -265,12 +288,15 @@ public class GoGameLogic {
             }
         }
 
-        public Board getPreview(Move m) {
-            if (!computed[m.row][m.col]) {
-                previews[m.row][m.col] = GoGameLogic.this.board.makeMove(m);
-                computed[m.row][m.col] = true;
+        public Board getPreview(GoMove move, Player player) {
+            if (!move.move_type.equals(GoMove.TYPE.MOVE)) return null;
+
+            if (!computed[move.y][move.x]) {
+                previews[move.y][move.x] = GoGameLogic.this.board.makeMove(move, player);
+                computed[move.y][move.x] = true;
             }
-            return previews[m.row][m.col];
+
+            return previews[move.y][move.x];
         }
     }
 
@@ -284,24 +310,22 @@ public class GoGameLogic {
         previews = new Previews();
     }
 
+    public void restartGame(int stones_capured_by_black, int stones_capured_by_white) {
+        board = new Board(size);
+        board.resetScore(stones_capured_by_black, stones_capured_by_white);
+        previews = new Previews();
+    }
+
     public Player getCurrentPlayer() {
         return board.getCurrent_player();
     }
 
-    public boolean isMyMove(Player p) {
-        return p.equals(getCurrentPlayer());
+    public boolean isLegal(GoMove move, Player player) {
+        return (previews.getPreview(move, player) != null);
     }
 
-    public boolean isLegal(Move m) {
-        return (previews.getPreview(m) != null);
-    }
-
-    public void pass() {
-        board.pass();
-    }
-
-    public boolean makeMove(Move m) {
-        Board next = previews.getPreview(m);
+    public boolean makeMove(GoMove move, Player player) {
+        Board next = previews.getPreview(move, player);
         if (next != null) {
             board = next;
             previews.reset();
@@ -312,5 +336,28 @@ public class GoGameLogic {
 
     public Cell[][] getBoard() {
         return board.getBoard();
+    }
+
+    public GoBoard getGoBoard() {
+        GoBoard go_board = new GoBoard(size);
+        Cell[][] arr_board = board.getBoard();
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                go_board.setValue(i, j, arr_board[i][j] == Cell.BLACK ? go_board.BLACK : (arr_board[i][j] == Cell.WHITE ? go_board.WHITE : go_board.EMPTY));
+            }
+        }
+
+        return go_board;
+    }
+
+    public void setBoard(Board board) {
+        Cell[][] prev = this.board.prev;
+        this.board = board;
+        this.board.prev = prev;
+    }
+
+    public Score getGameScore(boolean finished) {
+        return board.getScore(finished);
     }
 }

@@ -60,7 +60,7 @@ public class GoGame implements Game {
         }
 
         System.out.println(player_colour + " try: " + move.toText());
-        if (!game_logic.isMyMove(player_colour)) return false;
+        if (!game_logic.getCurrentPlayer().equals(player_colour)) return false;
         System.out.println(player_colour + " move: " + move.toText());
 
         if (move.move_type == TYPE.PASS && last_move.move_type == TYPE.PASS) {
@@ -89,20 +89,7 @@ public class GoGame implements Game {
             return true;
         }
 
-        if (move.move_type == TYPE.PASS) {
-            game_logic.pass();
-            if (player != player1) {
-                player1.yourMove();
-            } else {
-                player2.yourMove();
-            }
-            player1.boardUpdated();
-            player2.boardUpdated();
-            
-            return true;
-        }
-
-        boolean success = game_logic.makeMove(new GoGameLogic.Move(move.x, move.y, player_colour));
+        boolean success = game_logic.makeMove(move, player_colour);
 
         if (success) {
             if (player != player1) {
@@ -117,7 +104,7 @@ public class GoGame implements Game {
     }
 
     public GoStatus getGameStatus() {
-        if (game_logic.isMyMove(player1_colour)) {
+        if (game_logic.getCurrentPlayer().equals(player1_colour)) {
             game_status.curr_move = game_status.player1;
         } else {
             game_status.curr_move = game_status.player2;
