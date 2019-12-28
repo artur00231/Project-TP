@@ -195,15 +195,16 @@ public class GoGameLogic {
 
             Board next = new Board(this);
             next.getBoard()[move.y][move.x] = player.getColor();
+
+            if (current_player.equals(Player.BLACK)) {
+                next.stones_capured_by_black += to_delete.size();
+            } else {
+                next.stones_capured_by_white += to_delete.size();
+            }
+
             for (int[] i : to_delete) {
                 int x = i[0], y = i[1];
                 next.remove(x, y);
-            }
-
-            if (current_player.equals(Player.BLACK)) {
-                stones_capured_by_black++;
-            } else {
-                stones_capured_by_white++;
             }
 
             for (int i = 0; i < size; ++i) {
@@ -325,6 +326,12 @@ public class GoGameLogic {
     }
 
     public boolean makeMove(GoMove move, Player player) {
+        if (move.move_type.equals(GoMove.TYPE.PASS)) {
+            board.pass();
+            previews.reset();
+            return true;
+        }
+
         Board next = previews.getPreview(move, player);
         if (next != null) {
             board = next;
@@ -355,9 +362,20 @@ public class GoGameLogic {
         Cell[][] prev = this.board.prev;
         this.board = board;
         this.board.prev = prev;
+        previews.reset();
+    }
+
+    public void setBoard(Cell[][] board) {
+        this.board.board = board;
+        previews.reset();
     }
 
     public Score getGameScore(boolean finished) {
         return board.getScore(finished);
+    }
+
+    public void setCurrentPlayer(Player player) {
+        this.board.current_player = player;
+        previews.reset();
     }
 }

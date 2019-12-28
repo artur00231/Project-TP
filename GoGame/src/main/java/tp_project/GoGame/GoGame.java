@@ -59,9 +59,7 @@ public class GoGame implements Game {
             player_colour = player_colour.getOpponent();
         }
 
-        System.out.println(player_colour + " try: " + move.toText());
         if (!game_logic.getCurrentPlayer().equals(player_colour)) return false;
-        System.out.println(player_colour + " move: " + move.toText());
 
         if (move.move_type == TYPE.PASS && last_move.move_type == TYPE.PASS) {
             is_running = false;
@@ -71,6 +69,7 @@ public class GoGame implements Game {
             return true;
         }
         last_move.fromText(move.toText());
+        System.out.println(last_move.toText());
 
         if (move.move_type == TYPE.GIVEUP) {
             is_running = false;
@@ -92,22 +91,42 @@ public class GoGame implements Game {
         boolean success = game_logic.makeMove(move, player_colour);
 
         if (success) {
-            if (player != player1) {
+            if (game_logic.getCurrentPlayer() == player1_colour) {
                 player1.yourMove();
             } else {
                 player2.yourMove();
             }
             player1.boardUpdated();
             player2.boardUpdated();
+        } else {
+            if (game_logic.getCurrentPlayer() == player1_colour) {
+                player1.yourMove();
+            } else {
+                player2.yourMove();
+            }
         }
+
         return success;
     }
 
     public GoStatus getGameStatus() {
+        GoGameLogic.Score score = game_logic.getGameScore(!is_running);
         if (game_logic.getCurrentPlayer().equals(player1_colour)) {
             game_status.curr_move = game_status.player1;
         } else {
             game_status.curr_move = game_status.player2;
+        }
+
+        if (player1_colour.equals(GoGameLogic.Player.BLACK)) {
+            game_status.player1_total_score = score.black;
+            game_status.stones_capured_by_player1 = score.stones_capured_by_black;
+            game_status.player2_total_score = score.white;
+            game_status.stones_capured_by_player2 = score.stones_capured_by_white;
+        } else {
+            game_status.player2_total_score = score.black;
+            game_status.stones_capured_by_player2 = score.stones_capured_by_black;
+            game_status.player1_total_score = score.white;
+            game_status.stones_capured_by_player1 = score.stones_capured_by_white;
         }
 
         game_status.game_ended = !is_running;
