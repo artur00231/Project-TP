@@ -87,7 +87,8 @@ public abstract class Client {
                 if (socketIO.getCommand().getType().equals("ServerCommand")) {
                     if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 301) {
                         wait_for_response = false;
-                        while (socketIO.popCommand() != null) continue;
+                        socketIO.isAvailable();
+                        while (socketIO.popCommand() != null) socketIO.isAvailable();
                         requests.clear();
                         getLocation();
                         return;

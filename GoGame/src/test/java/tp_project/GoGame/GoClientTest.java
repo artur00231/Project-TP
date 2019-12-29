@@ -250,7 +250,7 @@ public class GoClientTest {
         t.join();
     }
 
-    @Test(timeout = 300000)
+    @Test(timeout = 3000)
     public void test2() throws InterruptedException, IOException {
         Server server = new Server(PORT);
         assertTrue(server.isValid());

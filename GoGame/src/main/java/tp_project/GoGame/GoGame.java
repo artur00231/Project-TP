@@ -59,18 +59,6 @@ public class GoGame implements Game {
             player_colour = player_colour.getOpponent();
         }
 
-        if (!game_logic.getCurrentPlayer().equals(player_colour)) return false;
-
-        if (move.move_type == TYPE.PASS && last_move.move_type == TYPE.PASS) {
-            is_running = false;
-            game_status.game_ended = true;
-            player1.boardUpdated();
-            player2.boardUpdated();
-            return true;
-        }
-        last_move.fromText(move.toText());
-        System.out.println(last_move.toText());
-
         if (move.move_type == TYPE.GIVEUP) {
             is_running = false;
             game_status.game_ended = true;
@@ -81,12 +69,20 @@ public class GoGame implements Game {
                 game_status.player_2_giveup = true;
                 game_status.winner = player1.getID();
             }
-
-            player1.boardUpdated();
-            player2.boardUpdated();
-
+            
             return true;
         }
+
+        if (!game_logic.getCurrentPlayer().equals(player_colour)) return false;
+
+        if (move.move_type == TYPE.PASS && last_move.move_type == TYPE.PASS) {
+            is_running = false;
+            game_status.game_ended = true;
+            player1.boardUpdated();
+            player2.boardUpdated();
+            return true;
+        }
+        last_move.fromText(move.toText());
 
         boolean success = game_logic.makeMove(move, player_colour);
 

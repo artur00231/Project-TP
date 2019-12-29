@@ -196,15 +196,15 @@ public class GoGameLogic {
             Board next = new Board(this);
             next.getBoard()[move.y][move.x] = player.getColor();
 
-            if (current_player.equals(Player.BLACK)) {
-                next.stones_capured_by_black += to_delete.size();
-            } else {
-                next.stones_capured_by_white += to_delete.size();
-            }
-
+            
             for (int[] i : to_delete) {
                 int x = i[0], y = i[1];
-                next.remove(x, y);
+                
+                if (current_player.equals(Player.BLACK)) {
+                    next.stones_capured_by_black += next.remove(x, y);
+                } else {
+                    next.stones_capured_by_white += next.remove(x, y);
+                }
             }
 
             for (int i = 0; i < size; ++i) {
@@ -255,14 +255,17 @@ public class GoGameLogic {
             return breaths;
         }
 
-        private void remove(int x, int y) {
-            if (board[y][x].equals(Cell.EMPTY)) return;
+        private int remove(int x, int y) {
+            if (board[y][x].equals(Cell.EMPTY)) return 0;
             Cell color = board[y][x];
             board[y][x] = Cell.EMPTY;
+            int sum = 1;
 
             for (int[] i : getNeighbours(x, y)) {
-                if (board[i[1]][i[0]].equals(color)) remove(i[0], i[1]);
+                if (board[i[1]][i[0]].equals(color)) sum += remove(i[0], i[1]);
             }
+
+            return sum;
         }
     }
 
