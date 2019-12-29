@@ -64,6 +64,10 @@ public class GoRemotePlayer implements GoPlayer {
         send(game.getGameStatus());
         ServerCommand cmd = new ServerCommand();
         cmd.setCode(703);
+
+        socketIO.isAvailable();
+        while (socketIO.popCommand() != null) socketIO.isAvailable();
+
         send(cmd);
     }
 
@@ -162,7 +166,6 @@ public class GoRemotePlayer implements GoPlayer {
 
     @Override
     public void boardUpdated() {
-        send(game.getGameStatus());
         ServerCommand cmd = new ServerCommand();
         cmd.setCode(701);
         send(cmd);
