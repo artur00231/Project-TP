@@ -18,15 +18,7 @@ public class MainWindow
 
     private ClientView client_view;
 
-    Server server = new Server(5005);
-
     public MainWindow() {
-        Thread t = new Thread(server);
-        t.start();
-
-        GoClient client = GoClient.create("127.0.0.1", 5005, "test").get();
-        client.createGame();
-
         window = new JFrame("GoGame");
         window.setBounds(new Rectangle(100, 100, 800, 800));
 
@@ -44,6 +36,8 @@ public class MainWindow
                     case PLAY:
                         client_view.connect(menu.getConnectIP(), menu.getConnectPort(), menu.getPlayerName());
                         break;
+                    case SERVER:
+                        runServer(Integer.parseInt(e.getActionCommand()));
                     default:
                         System.out.println(e.getSource());
                     break;
@@ -89,5 +83,28 @@ public class MainWindow
     public void showMainMenu() {
         window.setSize(new Dimension(300, 500));
         window.setContentPane(menu);
+    }
+
+    private void runServer(int port) {
+        Server server = new Server(port);
+        if (server.isValid()) {
+            Thread t = new Thread(server);
+            t.start();
+
+            JPanel panel = new JPanel();
+            JButton button = new JButton("Stop");
+            panel.add(new JLabel("Server is running"));
+            button.addActionListener(e -> {
+                server.kill();
+                try {
+                    t.join();
+                } catch (Exception ex) {System.exit(-1);}
+                showMainMenu();
+            });
+            panel.add(button);
+            window.setContentPane(panel);
+            window.pack();
+        }
+        else JOptionPane.showConfirmDialog(window, "Failed to start server");
     }
 }

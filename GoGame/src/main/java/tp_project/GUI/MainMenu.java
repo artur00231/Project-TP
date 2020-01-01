@@ -109,7 +109,7 @@ public class MainMenu extends JPanel {
         JButton connect_button = new JButton("Connect");
 
         connect_button.addActionListener(e -> {
-            if (isValidIP(connect_ip.getText()) && isValidPort(connect_port.getText()))
+            if (isValidIP(connect_ip.getText()) && isValidPort(connect_port.getText()) && !player_name.getText().isEmpty())
                 option_selected.actionPerformed(new ActionEvent(Action.PLAY, 0, null));
             else
                 JOptionPane.showMessageDialog(this, "Invalid input");
@@ -150,7 +150,7 @@ public class MainMenu extends JPanel {
         JButton start_button = new JButton("Start Server");
         start_button.addActionListener(e -> {
             if (isValidPort(server_port.getText()))
-                option_selected.actionPerformed(new ActionEvent(Action.SERVER, 0, null));
+                option_selected.actionPerformed(new ActionEvent(Action.SERVER, 0, server_port.getText()));
             else
                 JOptionPane.showMessageDialog(this, "Invalid port");
         });
