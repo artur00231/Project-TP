@@ -37,8 +37,12 @@ public class GoGame implements Game {
         player1.yourMove();
 
         while (is_running) {
-            player1.update();
-            player2.update();
+            if (!player1.update()) {
+                makeMove(new GoMove(TYPE.GIVEUP), player1);
+            }
+            if (!player2.update()) {
+                makeMove(new GoMove(TYPE.GIVEUP), player2);
+            }
 
             try {
                 Thread.sleep(100);
@@ -118,11 +122,27 @@ public class GoGame implements Game {
             game_status.stones_capured_by_player1 = score.stones_capured_by_black;
             game_status.player2_total_score = score.white;
             game_status.stones_capured_by_player2 = score.stones_capured_by_white;
+
+            if (!is_running) {
+                if (score.black > score.white) {
+                    game_status.winner = player1.getID();
+                } else if (score.black < score.white) {
+                    game_status.winner = player2.getID();
+                }
+            }
         } else {
             game_status.player2_total_score = score.black;
             game_status.stones_capured_by_player2 = score.stones_capured_by_black;
             game_status.player1_total_score = score.white;
             game_status.stones_capured_by_player1 = score.stones_capured_by_white;
+
+            if (!is_running) {
+                if (score.white > score.black) {
+                    game_status.winner = player1.getID();
+                } else if (score.white < score.black) {
+                    game_status.winner = player2.getID();
+                }
+            }
         }
 
         game_status.game_ended = !is_running;

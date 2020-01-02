@@ -20,6 +20,7 @@ public class GoGameService extends GameService {
     private Thread game_thread;
     private String host_id;
     private int game_size = 13;
+    private boolean is_game_runnig = false;
 
     public GoGameService(String ID, String sKey, String host, SocketIO host_socketIO, String host_id,
             GameServiceManager manager) {
@@ -72,6 +73,11 @@ public class GoGameService extends GameService {
     }
 
     @Override
+    protected boolean isGameRunnig() {
+        return is_game_runnig;
+    }
+
+    @Override
     protected void startGame() {
         GoPlayer[] players = new GoPlayer[2];
         String[] players_id = new String[2];
@@ -100,6 +106,7 @@ public class GoGameService extends GameService {
         players[0].setGame(game);
         players[1].setGame(game);
 
+        is_game_runnig = true;
         game_thread = new Thread(game);
         game_thread.start();
     }
@@ -193,6 +200,7 @@ public class GoGameService extends GameService {
         }*/
 
         game = null;
+        is_game_runnig = false;
     }
     
 }

@@ -8,7 +8,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -16,6 +15,9 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 
 import tp_project.Network.SocketIO;
 import tp_project.Network.SocketIO.AVAILABILITY;
@@ -32,6 +34,34 @@ public class Server implements Runnable, GameServiceManager {
         }
     }
 
+    private class DelayedGameService implements Delayed {
+        private String ID = "";
+        private long time;
+        public DelayedGameService(String id, long time) {
+            ID = id;
+            this.time = time;
+        }
+        @Override
+        public int compareTo(Delayed o) {
+            if (this.time < ((DelayedGameService)o).time) { 
+                return -1; 
+            } 
+            if (this.time > ((DelayedGameService)o).time) { 
+                return 1; 
+            } 
+            return 0; 
+        }
+        @Override
+        public long getDelay(TimeUnit unit) {
+            long diff = time - System.currentTimeMillis(); 
+            return unit.convert(diff, TimeUnit.MILLISECONDS); 
+        }
+        @Override
+        public String toString() {
+            return ID;
+        }
+    }
+
     private boolean is_running = false;
     private boolean is_valid = false;
     private boolean kill = false;
@@ -41,7 +71,7 @@ public class Server implements Runnable, GameServiceManager {
     private Object selector_sync = new Object();
     private HashMap<SocketChannel, Client> clients;
     private HashMap<String, GameService> game_services;
-    private ArrayList<String> game_services_to_delete;
+    private DelayQueue<DelayedGameService> game_services_to_delete;
     private int port;
     private Timer clean_timer;
 
@@ -49,7 +79,7 @@ public class Server implements Runnable, GameServiceManager {
         this.port = port;
         clients = new HashMap<>();
         game_services = new HashMap<>();
-        game_services_to_delete = new ArrayList<>();
+        game_services_to_delete = new DelayQueue<>();
         clean_timer = new Timer();
 
         setup();
@@ -120,12 +150,17 @@ public class Server implements Runnable, GameServiceManager {
             } catch (InterruptedException e) {
             }
 
-            if (game_services_to_delete.size() > 0) {
-                for (String ID : game_services_to_delete) {
-                    removeGameService(ID);
+            DelayedGameService delayed_game_services = game_services_to_delete.poll();
+            while (delayed_game_services != null) {
+                String game_service_id = delayed_game_services.toString();
+                GameService game_service = game_services.get(game_service_id);
+                if (game_service.isGameRunnig()) {
+                    game_services_to_delete.add(new DelayedGameService(game_service_id, 1000));
+                } else {
+                    removeGameService(game_service_id);
                 }
-
-                game_services_to_delete.clear();
+                
+                delayed_game_services = game_services_to_delete.poll();
             }
         }
 
@@ -142,6 +177,14 @@ public class Server implements Runnable, GameServiceManager {
                 selector.close();
             } catch (IOException e) {
                 // Server is being deleted, so its ok
+            }
+        }
+
+        for (SocketChannel client : clients.keySet()) {
+            if (client.isOpen()) {
+                try {
+                    client.close();
+                } catch (IOException e) {}
             }
         }
     }
@@ -359,7 +402,6 @@ public class Server implements Runnable, GameServiceManager {
 
     private GameServicesInfo getGameServcesInfo(String filter) {
         GameServicesInfo info = new GameServicesInfo();
-
         for (Map.Entry<String, GameService> val : game_services.entrySet()) {
             if (filter != null) {
                 if (val.getValue().getGameName().contains(filter)) {
@@ -433,6 +475,6 @@ public class Server implements Runnable, GameServiceManager {
 
     @Override
     public void deleteLater(String game_service_id) {
-        game_services_to_delete.add(game_service_id);
+        game_services_to_delete.add(new DelayedGameService(game_service_id, 10));
     }
 }

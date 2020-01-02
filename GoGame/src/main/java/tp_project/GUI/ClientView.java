@@ -2,7 +2,6 @@ package tp_project.GUI;
 
 import tp_project.GoGame.GoClient;
 import tp_project.GoGame.GoGameServiceInfo;
-import tp_project.GoGame.GoRemotePlayer;
 import tp_project.GoGameLogic.GoGameLogic;
 import tp_project.Network.ICommand;
 import tp_project.Server.Client;
@@ -16,43 +15,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Optional;
 
-class GoClientThread implements Runnable {
-    GoClient go_client;
-    boolean running = true;
-
-    public GoClientThread(GoClient go_client) {
-        this.go_client = go_client;
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            if (!running)
-                return;
-            go_client.update();
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                return;
-            }
-        }
-    }
-
-    public void stop() {
-        running = false;
-    }
-}
-
 public class ClientView {
     private GoClient go_client;
-    private GoRemotePlayer go_player;
-    private GoGameLogic.Player color;
     private String room_id;
-    private String host_id;
 
     private ActionListener action_listener;
-    private Thread t;
-    private GoClientThread go_client_thread;
+    private Timer update_timer;
 
     private ServerView server_view;
     private RoomView room_view;
@@ -75,6 +43,18 @@ public class ClientView {
 
     public ClientView(ActionListener a) {
         action_listener = a;
+
+        update_timer = new Timer(100, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                go_client.update();
+
+                if (go_client.getPosition() == POSITION.DISCONNECTED) {
+                    sendAction(Action.DISCONNECTED, null);
+                }
+            }
+        });
+        update_timer.setRepeats(true);
 
         server_view = new ServerView(e -> {
             if (go_client == null) {
@@ -155,6 +135,8 @@ public class ClientView {
                         go_client.getGameServiceInfo();
                         go_client.getGoGameServiceInfo();
                         break;
+                    default:
+                        break;
                     }
                 }
 
@@ -163,42 +145,42 @@ public class ClientView {
                     System.out.println("pos changed");
                     switch (go_client.getPosition()) {
                     case DISCONNECTED:
-                        go_client_thread.stop();
+                        update_timer.stop();
                         sendAction(Action.DISCONNECTED, null);
                         break;
                     case GAMESERVICE:
-                        if (!go_client_thread.running) {
-                            go_client_thread = new GoClientThread(go_client);
-                            Thread t = new Thread(go_client_thread);
-                            t.start();
+                        if (!update_timer.isRunning()) {
+                            update_timer.start();
                         }
                         go_client.getGameServiceInfo();
                         go_client.getGoGameServiceInfo();
                         sendAction(Action.SET_CONTENT_PANE, room_view);
                         break;
                     case SERVER:
-                        if (!go_client_thread.running) {
-                            go_client_thread = new GoClientThread(go_client);
-                            Thread t = new Thread(go_client_thread);
-                            t.start();
+                        if (!update_timer.isRunning()) {
+                            update_timer.start();
                         }
                         go_client.getGameServicesInfo();
                         sendAction(Action.SET_CONTENT_PANE, server_view);
                         break;
                     case GAME:
-                        go_client_thread.stop();
+                        update_timer.stop();
                         game_view = new GameView(go_client.getPlayer(), go_client.getGameSize(),
                                 go_client.getColour() == 0 ? GoGameLogic.Player.BLACK : GoGameLogic.Player.WHITE,
                                 new ActionListener() {
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
                                         switch ((GameView.ACTION) e.getSource()) {
-                                        case END:
-                                            while (go_client.getPosition() != POSITION.GAMESERVICE)
-                                                go_client.update();
-                                                try {
-                                                    Thread.sleep(50);
-                                                } catch (InterruptedException e1) { }
+                                            case END:
+                                                while (go_client.getPosition() != POSITION.GAMESERVICE)
+                                                    go_client.update();
+                                                    try {
+                                                        Thread.sleep(50);
+                                                    } catch (InterruptedException e1) { }
+                                                    break;
+                                            case DISCONNECTED:
+                                                sendAction(Action.DISCONNECTED, null);
+                                                break;
                                         }
                                     }
                                 });
@@ -228,14 +210,16 @@ public class ClientView {
                         JOptionPane.showMessageDialog(null, "Bot couldn't be added");
                         return;
                     }
-                    System.out.println("error");
+                    if (request.equals("connect")) {
+                        JOptionPane.showMessageDialog(null, "Couldn't connect to selected room");
+                        go_client.getGameServicesInfo();
+                        return;
+                    }
                     sendAction(Action.ERROR, request);
                 }
             });
 
-            go_client_thread = new GoClientThread(go_client);
-            t = new Thread(go_client_thread);
-            t.start();
+            update_timer.start();
 
             go_client.getGameServicesInfo();
             sendAction(Action.SET_CONTENT_PANE, server_view);
@@ -244,10 +228,6 @@ public class ClientView {
     }
 
     public void reset() {
-        go_client_thread.stop();
-        try {
-            t.join();
-        }
-        catch (Exception e) {};
+        update_timer.stop();
     }
 }

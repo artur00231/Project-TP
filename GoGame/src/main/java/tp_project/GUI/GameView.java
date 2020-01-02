@@ -22,37 +22,10 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
-class GoPlayerThread implements Runnable {
-    GoRemotePlayer player;
-    boolean running = true;
-
-    public GoPlayerThread (GoRemotePlayer player) {
-        this.player = player;
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            if (!running)
-                return;
-                player.update();
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                return;
-            }
-        }
-    }
-
-    public void stop() {
-        running = false;
-    }
-}
-
 public class GameView extends JPanel {
     private static final long serialVersionUID = -353599257042183805L;
     private GoGameLogic.Player player_color;
-    public enum ACTION { END };
+    public enum ACTION { END, DISCONNECTED };
 
     private GoGameLogic go_game;
     private Board board;
@@ -68,7 +41,7 @@ public class GameView extends JPanel {
     private ControlPanel control_panel = new ControlPanel();
     private GoRemotePlayer player;
     private ActionListener action_listener;
-    private GoPlayerThread thread;
+    private Timer update_timer;
 
     public GameView(GoRemotePlayer player, int size, GoGameLogic.Player player_color, ActionListener a) {
         go_game = new GoGameLogic(size);
@@ -130,14 +103,10 @@ public class GameView extends JPanel {
 
             @Override
             public void gameEnded() {
-                thread.stop();
+                update_timer.stop();
                 GoStatus status = player.getLastStatus();
                 
-                if (status.winner.equals(player.getID())) {
-                    JOptionPane.showMessageDialog(null, "You won", "Game ended", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null, "You lost", "Game ended", JOptionPane.INFORMATION_MESSAGE);
-                }
+                showEndMessage(status);
 
                 action_listener.actionPerformed(new ActionEvent(ACTION.END, 0, ""));
             }
@@ -161,9 +130,16 @@ public class GameView extends JPanel {
 
         action_listener = a;
 
-        thread = new GoPlayerThread(player);
-        Thread t = new Thread(thread);
-        t.start();
+        update_timer = new Timer(100, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!player.update()) {
+                    update_timer.stop();
+                    action_listener.actionPerformed(new ActionEvent(ACTION.DISCONNECTED, 0, ""));
+                }
+			}
+        });
+        update_timer.start();
     }
 
     private class Board extends JPanel{
@@ -328,5 +304,38 @@ public class GameView extends JPanel {
         points.setText("<html>Score<br>" + my_score + "-" + opponent_score + "</html>");
         this.revalidate();
         this.repaint();
+    }
+
+    private void showEndMessage(GoStatus status) {
+        boolean won = status.winner.equals(player.getID());
+        boolean draw = status.winner.equals("XX");
+        boolean other_player_giveup = false;
+        boolean giveup = false;
+        int my_points = 0;
+        int other_player_points = 0;
+
+        if (status.player1.equals(player.getID())) {
+            other_player_giveup = status.player_2_giveup;
+            giveup = status.player_1_giveup;
+            my_points = status.player1_total_score;
+            other_player_points = status.player2_total_score;
+        } else {
+            other_player_giveup = status.player_1_giveup;
+            giveup = status.player_2_giveup;
+            my_points = status.player2_total_score;
+            other_player_points = status.player1_total_score;
+        }
+
+        if (other_player_giveup) {
+            JOptionPane.showMessageDialog(null, "You won", "Game ended", JOptionPane.INFORMATION_MESSAGE);
+        } else if (giveup) {
+            JOptionPane.showMessageDialog(null, "You lost", "Game ended", JOptionPane.INFORMATION_MESSAGE);
+        } else if (won) {
+            JOptionPane.showMessageDialog(null, "You won. " + my_points + ":" + other_player_points, "Game ended", JOptionPane.INFORMATION_MESSAGE);
+        } else if (draw){
+            JOptionPane.showMessageDialog(null, "No one won. " + my_points + ":" + other_player_points, "Game ended", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "You lost. " + my_points + ":" + other_player_points, "Game ended", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 }
