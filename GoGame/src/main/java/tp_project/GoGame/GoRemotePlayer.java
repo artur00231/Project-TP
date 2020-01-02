@@ -76,15 +76,15 @@ public class GoRemotePlayer implements GoPlayer {
     }
 
     @Override
-    public void update() {
-        if (!is_game_runnig) return;
+    public boolean update() {
+        if (!is_game_runnig) return false;
 
         SocketIO.AVAILABILITY status = socketIO.isAvailable();
 
         if (status == AVAILABILITY.DISCONNECTED) {
             is_game_runnig = false;
 
-            return;
+            return false;
         }
 
         while (socketIO.getCommand() != null) {
@@ -118,7 +118,7 @@ public class GoRemotePlayer implements GoPlayer {
                     is_game_runnig = false;
                     socketIO.popCommand();
                     if (listener != null) listener.gameEnded();
-                    return;
+                    return false;
                 } else if (((ServerCommand) socketIO.getCommand().getCommand()).getValue("ping") != null) {
                     ServerCommand cmd = new ServerCommand();
                     cmd.setCode(2);
@@ -143,6 +143,8 @@ public class GoRemotePlayer implements GoPlayer {
 
             socketIO.popCommand();
         }
+
+        return true;
     }
 
     @Override

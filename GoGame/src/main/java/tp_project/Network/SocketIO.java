@@ -106,6 +106,8 @@ public class SocketIO {
                     // I hope
                 }
             }
+
+            if (num_of_bytes == -1 && !recived) throw new IOException();
         } catch (IOException e) {
             connection_status.received = false;
             connection_status.is_connected = false;

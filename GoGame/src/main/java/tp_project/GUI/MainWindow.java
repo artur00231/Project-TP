@@ -68,6 +68,8 @@ public class MainWindow
                     break;
                 case PACK:
                     window.pack();
+                    window.repaint();
+                    window.revalidate();
                     break;
             }
         });
@@ -93,7 +95,7 @@ public class MainWindow
 
             JPanel panel = new JPanel();
             JButton button = new JButton("Stop");
-            panel.add(new JLabel("Server is running"));
+            panel.add(new JLabel("Server is running on port: " + port));
             button.addActionListener(e -> {
                 server.kill();
                 try {
@@ -105,6 +107,6 @@ public class MainWindow
             window.setContentPane(panel);
             window.pack();
         }
-        else JOptionPane.showConfirmDialog(window, "Failed to start server");
+        else JOptionPane.showMessageDialog(window, "Failed to start server");
     }
 }

@@ -34,11 +34,13 @@ public class GoAIPlayer implements GoPlayer {
     }
 
     @Override
-    public void update() {
+    public boolean update() {
         if (is_my_move) {
             doMove();
             is_my_move = false;
         }
+
+        return true;
     }
 
     @Override

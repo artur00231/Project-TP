@@ -1,6 +1,7 @@
 package tp_project.Server;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -26,6 +27,7 @@ public abstract class GameService implements GameManager {
     protected abstract boolean isPlayerReady(String player_id);
     protected abstract void setPlayerReady(String player_id, boolean ready);
     protected abstract boolean isGameReady();
+    protected abstract boolean isGameRunnig();
     protected abstract void startGame();
     protected abstract int handleExtendetCommands(String client, ServerCommand command, SocketIO socketIO);
 
@@ -44,7 +46,7 @@ public abstract class GameService implements GameManager {
         return ID;
     }
 
-    public boolean checkSKey(String sKey) {
+    protected boolean checkSKey(String sKey) {
         return this.sKey.equals(sKey);
     }
 
@@ -214,8 +216,16 @@ public abstract class GameService implements GameManager {
             removePlayer(id);
         }
 
-        for (Map.Entry<String, Client> pair : players.entrySet()) {
-            manager.registerPlayer(pair.getKey());
+        boolean done = false;
+        while (!done) {
+            try {
+                for (Map.Entry<String, Client> pair : players.entrySet()) {
+                    manager.registerPlayer(pair.getKey());
+                }
+                done = true;
+            } catch (ConcurrentModificationException exception) { 
+                //Try again
+            }
         }
 
         for (Map.Entry<String, Client> pair : players.entrySet()) {
