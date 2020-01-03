@@ -138,6 +138,9 @@ public class GoGameLogic {
                     visited[i][j] = true;
                 }
             }
+            score.black += stones_capured_by_black;
+            score.white += stones_capured_by_white;
+
             return score;
         }
 
@@ -368,7 +371,10 @@ public class GoGameLogic {
         previews.reset();
     }
 
-    public void setBoard(Cell[][] board) {
+    public void setBoard(Cell[][] board, boolean update_prev) {
+        if (update_prev) {
+            this.board.prev = this.board.board;
+        }
         this.board.board = board;
         previews.reset();
     }

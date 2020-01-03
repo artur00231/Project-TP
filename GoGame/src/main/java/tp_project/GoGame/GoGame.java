@@ -110,7 +110,7 @@ public class GoGame implements Game {
     }
 
     public GoStatus getGameStatus() {
-        GoGameLogic.Score score = game_logic.getGameScore(!is_running);
+        GoGameLogic.Score score = game_logic.getGameScore(true);
         if (game_logic.getCurrentPlayer().equals(player1_colour)) {
             game_status.curr_move = game_status.player1;
         } else {
