@@ -159,6 +159,7 @@ public class GoGameService extends GameService {
                 }
 
                 socketIO.send(info);
+                return 1;
             } else if (command.getValue("GoGame").equals("setSize")) {
                 if (command.getValue("size") != null && checkSKey(command.getValue("sKey"))) {
                     switch (command.getValue("size")) {

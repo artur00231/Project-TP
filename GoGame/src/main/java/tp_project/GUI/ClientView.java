@@ -172,11 +172,7 @@ public class ClientView {
                                     public void actionPerformed(ActionEvent e) {
                                         switch ((GameView.ACTION) e.getSource()) {
                                             case END:
-                                                while (go_client.getPosition() != POSITION.GAMESERVICE)
-                                                    go_client.update();
-                                                    try {
-                                                        Thread.sleep(50);
-                                                    } catch (InterruptedException e1) { }
+                                                    update_timer.start();
                                                     break;
                                             case DISCONNECTED:
                                                 sendAction(Action.DISCONNECTED, null);
