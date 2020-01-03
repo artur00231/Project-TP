@@ -12,6 +12,7 @@ public class GoRemotePlayer implements GoPlayer {
     private boolean is_game_runnig = true;
     private GoStatus last_status;
     private String player_ID;
+    private boolean is_connected = true;
 
     public GoRemotePlayer(SocketIO socketIO, String player_ID) {
         this.socketIO = socketIO;
@@ -83,6 +84,7 @@ public class GoRemotePlayer implements GoPlayer {
 
         if (status == AVAILABILITY.DISCONNECTED) {
             is_game_runnig = false;
+            is_connected = false;
 
             return false;
         }
@@ -171,5 +173,9 @@ public class GoRemotePlayer implements GoPlayer {
         ServerCommand cmd = new ServerCommand();
         cmd.setCode(701);
         send(cmd);
+    }
+
+    public boolean isDisconnected() {
+        return !is_connected;
     }
 }

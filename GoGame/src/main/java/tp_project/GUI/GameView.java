@@ -42,6 +42,7 @@ public class GameView extends JPanel {
     private GoRemotePlayer player;
     private ActionListener action_listener;
     private Timer update_timer;
+    private boolean update_prev_board = true;
 
     public GameView(GoRemotePlayer player, int size, GoGameLogic.Player player_color, ActionListener a) {
         go_game = new GoGameLogic(size);
@@ -87,11 +88,13 @@ public class GameView extends JPanel {
                     }
                 }
                 board.set(cells);
-                go_game.setBoard(cells);
+                go_game.setBoard(cells, update_prev_board);
+                update_prev_board = true;
             }
         
             @Override
             public void error() {
+                update_prev_board = false;
                 player.getGameBoard();
             }
 
@@ -133,7 +136,8 @@ public class GameView extends JPanel {
         update_timer = new Timer(100, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!player.update()) {
+                player.update();
+				if (player.isDisconnected()) {
                     update_timer.stop();
                     action_listener.actionPerformed(new ActionEvent(ACTION.DISCONNECTED, 0, ""));
                 }
@@ -260,7 +264,7 @@ public class GameView extends JPanel {
         public ControlPanel() {
             this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
             this.add(your_move_label);
-            points.setText("<html>Score<br>00-00</html>");
+            points.setText("<html>Score<br>00-00<br>End score<br>00-00</html>");
             this.add(points);
             this.add(Box.createGlue());
             this.add(pass_button);
@@ -282,26 +286,40 @@ public class GameView extends JPanel {
 
     private void setScore(GoStatus status) {
         String my_score;
+        String my_points;
         String opponent_score;
+        String opponent_points;
         if (status.player1.equals(player.getID())) {
-            my_score = Integer.toString(status.stones_capured_by_player1);
-            opponent_score = Integer.toString(status.stones_capured_by_player2);
-            int length = my_score.length() > opponent_score.length() ? my_score.length() : opponent_score.length();
-            length = length > 1 ? length : 2;
+            my_score = Integer.toString(status.player1_total_score);
+            opponent_score = Integer.toString(status.player2_total_score);
+            my_points = Integer.toString(status.stones_capured_by_player1);
+            opponent_points = Integer.toString(status.stones_capured_by_player2);
+            int score_length = my_score.length() > opponent_score.length() ? my_score.length() : opponent_score.length();
+            int points_length = my_points.length() > opponent_points.length() ? my_points.length() : opponent_points.length();
+            score_length = score_length > 1 ? score_length : 2;
+            points_length = points_length > 1 ? points_length : 2;
 
-            my_score = String.format("%0" + length + "d", status.stones_capured_by_player1);
-            opponent_score = String.format("%0" + length + "d", status.stones_capured_by_player2);
+            my_score = String.format("%0" + score_length + "d", status.player1_total_score);
+            opponent_score = String.format("%0" + score_length + "d", status.player2_total_score);
+            my_points = String.format("%0" + points_length + "d", status.stones_capured_by_player1);
+            opponent_points = String.format("%0" + points_length + "d", status.stones_capured_by_player2);
         } else {
-            my_score = Integer.toString(status.stones_capured_by_player2);
-            opponent_score = Integer.toString(status.stones_capured_by_player1);
-            int length = my_score.length() > opponent_score.length() ? my_score.length() : opponent_score.length();
-            length = length > 1 ? length : 2;
+            my_score = Integer.toString(status.player2_total_score);
+            opponent_score = Integer.toString(status.player1_total_score);
+            my_points = Integer.toString(status.stones_capured_by_player2);
+            opponent_points = Integer.toString(status.stones_capured_by_player1);
+            int score_length = my_score.length() > opponent_score.length() ? my_score.length() : opponent_score.length();
+            int points_length = my_points.length() > opponent_points.length() ? my_points.length() : opponent_points.length();
+            score_length = score_length > 1 ? score_length : 2;
+            points_length = points_length > 1 ? points_length : 2;
 
-            my_score = String.format("%0" + length + "d", status.stones_capured_by_player2);
-            opponent_score = String.format("%0" + length + "d", status.stones_capured_by_player1);
+            my_score = String.format("%0" + score_length + "d", status.player2_total_score);
+            opponent_score = String.format("%0" + score_length + "d", status.player1_total_score);
+            my_points = String.format("%0" + points_length + "d", status.stones_capured_by_player2);
+            opponent_points = String.format("%0" + points_length + "d", status.stones_capured_by_player1);
         }
 
-        points.setText("<html>Score<br>" + my_score + "-" + opponent_score + "</html>");
+        points.setText("<html>Score<br>" + my_points + "-" + opponent_points + "<br>End score<br>" + my_score + "-" + opponent_score + "</html>");
         this.revalidate();
         this.repaint();
     }
