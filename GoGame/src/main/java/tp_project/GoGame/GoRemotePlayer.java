@@ -12,11 +12,13 @@ public class GoRemotePlayer implements GoPlayer {
     private boolean is_game_runnig = true;
     private GoStatus last_status;
     private String player_ID;
+    private String player_name;
     private boolean is_connected = true;
 
-    public GoRemotePlayer(SocketIO socketIO, String player_ID) {
+    public GoRemotePlayer(SocketIO socketIO, String player_ID, String player_name) {
         this.socketIO = socketIO;
         this.player_ID = player_ID;
+        this.player_name = player_name;
     }
 
     @Override
@@ -166,6 +168,11 @@ public class GoRemotePlayer implements GoPlayer {
     @Override
     public String getID() {
         return player_ID;
+    }
+
+    @Override
+    public String getName() {
+        return player_name;
     }
 
     @Override

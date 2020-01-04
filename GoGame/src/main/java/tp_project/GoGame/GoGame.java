@@ -1,6 +1,13 @@
 package tp_project.GoGame;
 
+import java.math.BigInteger;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+
 import tp_project.GoGame.GoMove.TYPE;
+import tp_project.GoGameDBObject.HibernateUtil;
 import tp_project.GoGameLogic.GoGameLogic;
 import tp_project.GoGameLogic.GoGameLogic.Cell;
 import tp_project.GoGameLogic.GoGameLogic.Player;
@@ -34,6 +41,14 @@ public class GoGame implements Game {
         is_running = true;
         manager.gameStated();
 
+        tp_project.GoGameDBObject.Game game = new tp_project.GoGameDBObject.Game(player1.getName(), player2.getName());
+        SessionFactory session_factory = HibernateUtil.getInstance();
+        Session session = session_factory.openSession();
+        Transaction transaction = session.beginTransaction();
+        session.persist(game);
+        transaction.commit();
+        session.close();
+
         player1.yourMove();
 
         while (is_running) {
@@ -52,6 +67,14 @@ public class GoGame implements Game {
 
         player1.gameEnded();
         player2.gameEnded();
+
+        session = session_factory.openSession();
+        transaction = session.beginTransaction();
+        game.setGameEnded(true);
+
+        session.update(game);
+        transaction.commit();
+        session.close();
 
         manager.gameEnded();
     }

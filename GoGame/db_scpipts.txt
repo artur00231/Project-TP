@@ -1,0 +1,16 @@
+1.  CREATE
+
+CREATE TABLE gra (
+    ID int NOT NULL auto_increment PRIMARY KEY,
+    ended bool NOT NULL,
+    player1_name varchar(100) NOT NULL,
+    player2_name varchar(100) NOT NULL,
+    time date NOT NULL
+);
+
+2.  USER
+
+CREATE USER 'app'@'localhost';
+SET PASSWORD FOR 'app'@'localhost' = PASSWORD('tajne_haslo');
+GRANT SELECT, INSERT, UPDATE ON GoGame.* TO 'app'@'localhost';
+FLUSH PRIVILEGES;

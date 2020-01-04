@@ -10,7 +10,7 @@ import tp_project.Network.Command;
 import tp_project.Network.SocketIO;
 
 public abstract class GameService implements GameManager {
-    private static class Client {
+    protected static class Client {
         public String name;
         public SocketIO socketIO;
         public Client(String name, SocketIO socketIO) { this.name = name; this.socketIO = socketIO; };
@@ -245,11 +245,11 @@ public abstract class GameService implements GameManager {
         }
     }
 
-    protected SocketIO getClientSocketIO(String client_id) {
+    protected Client getClientInforamtion(String client_id) {
         if (players.get(client_id) == null) {
             return null;
         }
 
-        return players.get(client_id).socketIO;
+        return players.get(client_id);
     }
 }

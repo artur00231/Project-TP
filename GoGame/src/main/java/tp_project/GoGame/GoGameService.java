@@ -84,8 +84,8 @@ public class GoGameService extends GameService {
 
         for (String id : players_info.keySet()) {
             if (!id.equals(host_id)) continue;
-            if (getClientSocketIO(id) != null) {
-                players[0] = new GoRemotePlayer(getClientSocketIO(id), id);
+            if (getClientInforamtion(id).socketIO != null) {
+                players[0] = new GoRemotePlayer(getClientInforamtion(id).socketIO, id, getClientInforamtion(id).name);
             }
 
             players_id[0] = id;
@@ -93,8 +93,8 @@ public class GoGameService extends GameService {
 
         for (String id : players_info.keySet()) {
             if (id.equals(host_id)) continue;
-            if (getClientSocketIO(id) != null) {
-                players[1] = new GoRemotePlayer(getClientSocketIO(id), id);
+            if (getClientInforamtion(id).socketIO != null) {
+                players[1] = new GoRemotePlayer(getClientInforamtion(id).socketIO, id, getClientInforamtion(id).name);
             } else {
                 players[1] = new GoAIPlayer(game_size);
             }

@@ -40,7 +40,7 @@ public class GoClient extends Client {
         if (getPosition() != POSITION.GAME)
             return null;
 
-        return new GoRemotePlayer(socketIO, getID());
+        return new GoRemotePlayer(socketIO, getID(), getName());
     }
 
     public int getGameSize() {
