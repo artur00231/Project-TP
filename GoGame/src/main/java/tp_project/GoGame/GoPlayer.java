@@ -11,4 +11,6 @@ public interface GoPlayer extends Player {
     public void gameEnded();
 
     public String getID();
+
+    public String getName();
 }

@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import tp_project.Network.SocketIO;
 import tp_project.Network.SocketIO.AVAILABILITY;
+import tp_project.GoGameDBObject.HibernateUtil;
 
 public class Server implements Runnable, GameServiceManager {
     private class Client {
@@ -106,6 +107,8 @@ public class Server implements Runnable, GameServiceManager {
         if (clean) {
             cleanServer();
         }
+
+        HibernateUtil.shutdown();
     }
 
     public boolean isValid() {
@@ -187,6 +190,8 @@ public class Server implements Runnable, GameServiceManager {
                 } catch (IOException e) {}
             }
         }
+
+        HibernateUtil.shutdown();
     }
 
     private void removeGameService(String ID) {
@@ -208,6 +213,8 @@ public class Server implements Runnable, GameServiceManager {
         }
 
         is_valid = true;
+        HibernateUtil.getInstance();
+
         return true;
     }
 
