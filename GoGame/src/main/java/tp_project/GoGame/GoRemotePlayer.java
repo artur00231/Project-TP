@@ -14,6 +14,7 @@ public class GoRemotePlayer implements GoPlayer {
     private String player_ID;
     private String player_name;
     private boolean is_connected = true;
+    private boolean is_ready = false;
 
     public GoRemotePlayer(SocketIO socketIO, String player_ID, String player_name) {
         this.socketIO = socketIO;
@@ -91,6 +92,11 @@ public class GoRemotePlayer implements GoPlayer {
             return false;
         }
 
+        if (!is_ready && listener != null) {
+            setRedy();
+            is_ready = true;
+        }
+
         while (socketIO.getCommand() != null) {
             if (socketIO.getCommand().getType().equals("ServerCommand")) {
                 if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 700) {
@@ -118,6 +124,8 @@ public class GoRemotePlayer implements GoPlayer {
                     if (listener != null) listener.error();
                 } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 704) {
                     if (listener != null) listener.yourMove();
+                } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 705) {
+                    if (listener != null) is_ready = true;
                 } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 703) {
                     is_game_runnig = false;
                     socketIO.popCommand();
@@ -184,5 +192,21 @@ public class GoRemotePlayer implements GoPlayer {
 
     public boolean isDisconnected() {
         return !is_connected;
+    }
+
+    @Override
+    public boolean isReady() {
+        if (listener == null) {
+            return is_ready;
+        }
+
+        return true;
+    }
+
+    private void setRedy() {
+        ServerCommand cmd = new ServerCommand();
+        cmd.setCode(705);
+
+        send(cmd);
     }
 }

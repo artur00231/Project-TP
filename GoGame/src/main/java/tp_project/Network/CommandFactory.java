@@ -7,6 +7,7 @@ import tp_project.GoGame.GoGameServiceInfo;
 import tp_project.GoGame.GoMove;
 import tp_project.GoGame.GoStatus;
 import tp_project.GoGame.GoMove.TYPE;
+import tp_project.GoReplay.GoReplayServiceInfo;
 import tp_project.Server.GameServiceInfo;
 import tp_project.Server.GameServicesInfo;
 import tp_project.Server.ServerCommand;
@@ -30,6 +31,8 @@ public class CommandFactory {
             return new GoStatus();
         } else if (type.equals("GoBoard")) {
             return new GoBoard(1);
+        } else if (type.equals("GoReplayServiceInfo")) {
+            return new GoReplayServiceInfo();
         }
         
         return null;
@@ -45,6 +48,7 @@ public class CommandFactory {
         types_names.add("GoMove");
         types_names.add("GoStatus");
         types_names.add("GoBoard");
+        types_names.add("GoReplayServiceInfo");
         return types_names.contains(type);
     }
 }

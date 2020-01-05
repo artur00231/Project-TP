@@ -68,6 +68,7 @@ class ClientAdapter implements ClientListener {
 public class GoClientTest {
     public String IP = "127.0.0.1";
     public int PORT = 5004;
+    private boolean started = false;
 
     @Test(timeout = 3000)
     public void test1() throws InterruptedException, IOException {
@@ -250,7 +251,7 @@ public class GoClientTest {
         t.join();
     }
 
-    @Test(timeout = 3000)
+    @Test(timeout = 6000)
     public void test2() throws InterruptedException, IOException {
         Server server = new Server(PORT);
         assertTrue(server.isValid());
@@ -304,12 +305,28 @@ public class GoClientTest {
         while(client1.getPosition() != POSITION.GAME) { client1.update(); Thread.sleep(100); }
         while(client2.getPosition() != POSITION.GAME) client2.update();
 
-        GoRemotePlayer p = client1.getPlayer();
-        p.makeMove(new GoMove(TYPE.GIVEUP));
-        Thread.sleep(500);
-        p.update();
-        assertFalse(p.isGameRunnig());
-        assertTrue(p.getLastStatus().player_1_giveup = true);
+        GoRemotePlayer p1 = client1.getPlayer();
+        GoPlayerListener l1 = new GoPlayerListener() { public void yourMove() { started = true; } public void boardUpdated() {} public void setBoard(GoBoard go_board) {} public void setStatus(GoStatus go_status) {} public void error() {} public void gameEnded() {}};
+        p1.setListener(l1);
+        GoRemotePlayer p2 = client2.getPlayer();
+        GoPlayerListener l2 = new GoPlayerListener() { public void yourMove() { started = true; } public void boardUpdated() {} public void setBoard(GoBoard go_board) {} public void setStatus(GoStatus go_status) {} public void error() {} public void gameEnded() {}};
+        p1.setListener(l2);
+
+        while (!started) {
+            p1.update();
+            p2.update();
+            Thread.sleep(100);
+        }
+
+        p1.makeMove(new GoMove(TYPE.GIVEUP));
+
+        while (p1.isGameRunnig()) {
+            p1.update();
+            Thread.sleep(100);
+        }
+
+        assertFalse(p1.isGameRunnig());
+        assertTrue(p1.getLastStatus().player_1_giveup = true);
 
         while(!adapter1.diff()) client1.update();
         while(!adapter2.diff()) client2.update();

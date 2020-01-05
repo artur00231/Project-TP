@@ -1,7 +1,7 @@
 package tp_project.GoGameDBObject;
 
-import java.sql.Date;
-import java.time.LocalDate;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,24 +9,29 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-@Entity(name = "gra")
-public class Game {
+
+@Entity(name = "game")
+public class DBGoGame {
     @Column(name = "player1_name")
     private String player1_name = "X";
     @Column(name = "player2_name")
     private String player2_name = "X";
+    @Column(name = "beginning_player")
+    private boolean beginning_player;
     @Column(name = "ended")
     private boolean ended = false;
     @Column(name = "time")
-    private Date game_date;
+    private Timestamp game_date;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    public Game(String player1_name, String player2_name) {
+    public DBGoGame(String player1_name, String player2_name, boolean begin_player1) {
         this.player1_name = player1_name;
         this.player2_name = player2_name;
-        game_date = Date.valueOf(LocalDate.now());
+        beginning_player = begin_player1;
+        game_date = Timestamp.from(Instant.now());
     }
 
     public void setGameEnded(boolean ended) {
@@ -41,11 +46,15 @@ public class Game {
         return player2_name;
     }
 
-    public Date getGameDate() {
+    public Timestamp getGameDate() {
         return game_date;
     }
 
     public boolean isGameEnded() {
         return ended;
+    }
+
+    public int getID() {
+        return id;
     }
 }
