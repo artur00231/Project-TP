@@ -18,7 +18,8 @@ public class GoGame implements Game {
     private GoStatus game_status = new GoStatus();
     private int size;
 
-    public GoGame(int size, GoPlayer p1, String p1_id, GoPlayer p2, String p2_id, int player1_colour, GameManager manager) {
+    public GoGame(int size, GoPlayer p1, String p1_id, GoPlayer p2, String p2_id, int player1_colour,
+            GameManager manager) {
         player1 = p1;
         game_status.player1 = p1_id;
         player2 = p2;
@@ -33,6 +34,15 @@ public class GoGame implements Game {
     public void run() {
         is_running = true;
         manager.gameStated();
+
+        for (int i = 0; (!player1.isReady() || player2.isReady()) && i < 10 * 3; i++) { //Wait wor players max 3 secound
+            player1.update();
+            player2.update();
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {}
+        }
 
         player1.yourMove();
 

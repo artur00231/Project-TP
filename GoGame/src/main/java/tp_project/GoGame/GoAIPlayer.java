@@ -70,4 +70,9 @@ public class GoAIPlayer implements GoPlayer {
             }
         }
     }
+
+    @Override
+    public boolean isReady() {
+        return true;
+    }
 }
