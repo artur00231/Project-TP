@@ -75,4 +75,8 @@ public class GoAIPlayer implements GoPlayer {
     public String getName() {
         return player_ID;
     }
+    
+    public boolean isReady() {
+        return true;
+    }
 }

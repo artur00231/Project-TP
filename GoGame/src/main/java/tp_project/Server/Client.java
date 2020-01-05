@@ -160,6 +160,7 @@ public abstract class Client {
 
         ServerCommand cmd = new ServerCommand();
         cmd.addValue("action", "getServicesInfo");
+        cmd.addValue("filter", getGameFiltr());
         pushRequest(new Request(cmd, "getServicesInfo", RESPONSETYPE.OBJECT));
         sendRequest();
         

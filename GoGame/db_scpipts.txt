@@ -1,11 +1,31 @@
 1.  CREATE
 
-CREATE TABLE gra (
+CREATE TABLE game (
     ID int NOT NULL auto_increment PRIMARY KEY,
     ended bool NOT NULL,
     player1_name varchar(100) NOT NULL,
     player2_name varchar(100) NOT NULL,
-    time date NOT NULL
+    beginning_player bool NOT NULL,
+    time timestamp NOT NULL
+);
+
+CREATE TABLE status (
+    ID int NOT NULL auto_increment PRIMARY KEY,
+    player_1_giveup bool NOT NULL,
+    player_2_giveup bool NOT NULL,
+    winner bool NOT NULL,
+    player1_total_score int NOT NULL,
+    player2_total_score int NOT NULL,
+    stones_capured_by_player1 int NOT NULL,
+    stones_capured_by_player2 int NOT NULL,
+    game_id int NOT NULL
+);
+
+CREATE TABLE board (
+    ID int NOT NULL auto_increment PRIMARY KEY,
+    board varchar(750) NOT NULL,
+    round_number int NOT NULL,
+    game_id int NOT NULL
 );
 
 2.  USER

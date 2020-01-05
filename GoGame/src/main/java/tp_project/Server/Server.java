@@ -104,10 +104,6 @@ public class Server implements Runnable, GameServiceManager {
             }
         }
 
-        if (clean) {
-            cleanServer();
-        }
-
         HibernateUtil.shutdown();
     }
 
@@ -165,6 +161,11 @@ public class Server implements Runnable, GameServiceManager {
                 
                 delayed_game_services = game_services_to_delete.poll();
             }
+
+            if (clean) {
+                cleanServer();
+                clean = false;
+            }
         }
 
         if (socket_server.isOpen()) {
@@ -191,7 +192,8 @@ public class Server implements Runnable, GameServiceManager {
             }
         }
 
-        HibernateUtil.shutdown();
+        ServerCleanup cleanup = new ServerCleanup();
+        cleanup.execClean();
     }
 
     private void removeGameService(String ID) {

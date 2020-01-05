@@ -1,13 +1,10 @@
 package tp_project.GoGame;
 
-import java.math.BigInteger;
-
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-
 import tp_project.GoGame.GoMove.TYPE;
-import tp_project.GoGameDBObject.HibernateUtil;
+import tp_project.GoGameDBObject.DBGoBoard;
+import tp_project.GoGameDBObject.DBGoGame;
+import tp_project.GoGameDBObject.DBGoManager;
+import tp_project.GoGameDBObject.DBGoStatus;
 import tp_project.GoGameLogic.GoGameLogic;
 import tp_project.GoGameLogic.GoGameLogic.Cell;
 import tp_project.GoGameLogic.GoGameLogic.Player;
@@ -24,8 +21,11 @@ public class GoGame implements Game {
     private GoMove last_move = new GoMove(TYPE.MOVE);
     private GoStatus game_status = new GoStatus();
     private int size;
+    private DBGoBoard db_board;
+    private DBGoGame db_game;
 
-    public GoGame(int size, GoPlayer p1, String p1_id, GoPlayer p2, String p2_id, int player1_colour, GameManager manager) {
+    public GoGame(int size, GoPlayer p1, String p1_id, GoPlayer p2, String p2_id, int player1_colour,
+            GameManager manager) {
         player1 = p1;
         game_status.player1 = p1_id;
         player2 = p2;
@@ -34,6 +34,9 @@ public class GoGame implements Game {
         this.manager = manager;
         game_logic = new GoGameLogic(size);
         this.size = size;
+        db_board = new DBGoBoard();
+        db_board.round_number = 0;
+        db_board.row_board = game_logic.getGoBoard().toText();
     }
 
     @Override
@@ -41,13 +44,20 @@ public class GoGame implements Game {
         is_running = true;
         manager.gameStated();
 
-        tp_project.GoGameDBObject.Game game = new tp_project.GoGameDBObject.Game(player1.getName(), player2.getName());
-        SessionFactory session_factory = HibernateUtil.getInstance();
-        Session session = session_factory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.persist(game);
-        transaction.commit();
-        session.close();
+        db_game = new DBGoGame(player1.getName(), player2.getName(), player1_colour.equals(Player.BLACK));
+ 
+        DBGoManager.getInstance().addGame(db_game);
+        DBGoManager.getInstance().addBoard(db_board, db_game);
+        
+
+        for (int i = 0; (!player1.isReady() || player2.isReady()) && i < 10 * 3; i++) { //Wait wor players max 3 secound
+            player1.update();
+            player2.update();
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {}
+        }
 
         player1.yourMove();
 
@@ -68,13 +78,10 @@ public class GoGame implements Game {
         player1.gameEnded();
         player2.gameEnded();
 
-        session = session_factory.openSession();
-        transaction = session.beginTransaction();
-        game.setGameEnded(true);
-
-        session.update(game);
-        transaction.commit();
-        session.close();
+        db_game.setGameEnded(true);
+        DBGoManager.getInstance().updateGame(db_game);
+        getGameStatus();
+        DBGoManager.getInstance().setStatus(new DBGoStatus(game_status, game_status.winner.equals(player1.getID())), db_game);
 
         manager.gameEnded();
     }
@@ -114,6 +121,9 @@ public class GoGame implements Game {
         boolean success = game_logic.makeMove(move, player_colour);
 
         if (success) {
+            db_board = db_board.createNext(game_logic.getGoBoard());
+            DBGoManager.getInstance().addBoard(db_board, db_game);
+
             if (game_logic.getCurrentPlayer() == player1_colour) {
                 player1.yourMove();
             } else {

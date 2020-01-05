@@ -6,6 +6,8 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
+import tp_project.Server.ServerCleanup;
+
 public class HibernateUtil {
     private static StandardServiceRegistry registry = null;
     private static SessionFactory sessionFactory = null;
@@ -34,6 +36,10 @@ public class HibernateUtil {
                 throw e;
             }
         }
+
+        ServerCleanup cleanup = new ServerCleanup();
+        cleanup.addCleaningFuncion(() -> shutdown());
+
         return sessionFactory;
     }
 
