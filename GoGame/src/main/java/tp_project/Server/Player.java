@@ -6,4 +6,6 @@ public interface Player {
     public void yourMove();
 
     public void boardUpdated();
+
+    public boolean isReady();
 }

@@ -102,10 +102,6 @@ public class Server implements Runnable, GameServiceManager {
                 // Server is being deleted, so its ok
             }
         }
-
-        if (clean) {
-            cleanServer();
-        }
     }
 
     public boolean isValid() {
@@ -161,6 +157,11 @@ public class Server implements Runnable, GameServiceManager {
                 }
                 
                 delayed_game_services = game_services_to_delete.poll();
+            }
+
+            if (clean) {
+                cleanServer();
+                clean = false;
             }
         }
 
