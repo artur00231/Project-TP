@@ -129,7 +129,6 @@ public class ClientView {
             go_client.setClientListener(new ClientListener() {
                 @Override
                 public void updated() {
-                    System.out.println("updated");
                     switch (go_client.getPosition()) {
                     case GAMESERVICE:
                         go_client.getGameServiceInfo();

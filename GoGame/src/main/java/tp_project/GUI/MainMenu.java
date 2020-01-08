@@ -23,9 +23,7 @@ public class MainMenu extends JPanel {
     };
 
     public enum Action {
-        EXIT, SERVER, PLAY, tmp1, tmp2, tmp3, tmp4
-
-
+        EXIT, SERVER, PLAY, REPLAY
     }
 
     private enum Menu {
@@ -61,7 +59,7 @@ public class MainMenu extends JPanel {
         JPanel plane = new JPanel();
         plane.setLayout(new GridLayout(0, 1));
 
-        JButton play_button = new JButton("PLAY");
+        JButton play_button = new JButton("CONNECT");
         play_button.addActionListener(e -> {
             setMenu(Menu.ConnectMenu);
         });
@@ -106,15 +104,24 @@ public class MainMenu extends JPanel {
         plane.add(player_name);
 
         JButton return_button = new JButton("Return");
-        JButton connect_button = new JButton("Connect");
+        JButton play_button = new JButton("PLAY");
+        JButton replay_button = new JButton("REPLAY");
 
-        connect_button.addActionListener(e -> {
+        play_button.addActionListener(e -> {
             if (isValidIP(connect_ip.getText()) && isValidPort(connect_port.getText()) && !player_name.getText().isEmpty())
                 option_selected.actionPerformed(new ActionEvent(Action.PLAY, 0, null));
             else
                 JOptionPane.showMessageDialog(this, "Invalid input");
         });
-        connect_button.setFocusable(false);
+        play_button.setFocusable(false);
+
+        replay_button.addActionListener(e -> {
+            if (isValidIP(connect_ip.getText()) && isValidPort(connect_port.getText()) && !player_name.getText().isEmpty())
+                option_selected.actionPerformed(new ActionEvent(Action.REPLAY, 0, null));
+            else
+                JOptionPane.showMessageDialog(this, "Invalid input");
+        });
+        replay_button.setFocusable(false);
 
         return_button.addActionListener(e -> {
             setMenu(Menu.MainMenu);
@@ -123,7 +130,12 @@ public class MainMenu extends JPanel {
         });
         return_button.setFocusable(false);
 
-        connect_menu.add(connect_button, BorderLayout.PAGE_START);
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(1, 2));
+        panel.add(play_button);
+        panel.add(replay_button);
+
+        connect_menu.add(panel, BorderLayout.PAGE_START);
         connect_menu.add(plane, BorderLayout.CENTER);
         connect_menu.add(return_button, BorderLayout.PAGE_END);
         return connect_menu;
