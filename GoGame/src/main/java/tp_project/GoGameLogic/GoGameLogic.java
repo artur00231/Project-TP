@@ -53,17 +53,8 @@ public class GoGameLogic {
         private int stones_capured_by_black;
         private int stones_capured_by_white;
 
-
-        Cell getCell(int x, int y) {
-            return board[y][x];
-        }
-
-        Cell[][] getBoard() {
+        public Cell[][] getBoard() {
             return board;
-        }
-
-        void setCell(int x, int y, Cell c) {
-            board[y][x] = c;
         }
 
         public Board(int size) {
@@ -76,6 +67,12 @@ public class GoGameLogic {
                     board[i][j] = Cell.EMPTY;
                 }
             }
+        }
+
+        public void setBoard(Cell[][] board) {
+            this.prev = this.board;
+            this.board = board;
+            current_player = current_player.getOpponent();
         }
 
         public void resetScore(int stones_capured_by_black, int stones_capured_by_white) {
@@ -106,6 +103,8 @@ public class GoGameLogic {
         public Player getCurrent_player() {
             return current_player;
         }
+
+        public int getSize() {return size;}
 
         public Score getScore(boolean finished) {
             Score score = new Score();
@@ -138,8 +137,8 @@ public class GoGameLogic {
                     visited[i][j] = true;
                 }
             }
-            score.black += stones_capured_by_black;
-            score.white += stones_capured_by_white;
+            //score.black += stones_capured_by_black;
+            //score.white += stones_capured_by_white;
 
             return score;
         }
@@ -164,8 +163,7 @@ public class GoGameLogic {
         }
 
         public Board pass() {
-            this.current_player = this.current_player.getOpponent();
-            return this;
+            return new Board(this);
         }
 
         public Board makeMove(GoMove move, Player player) {
@@ -229,7 +227,7 @@ public class GoGameLogic {
             return neighbours;
         }
 
-        private int getBreaths(int x, int y) {
+        public int getBreaths(int x, int y) {
             boolean[][] visited = new boolean[size][size];
             for (int i = 0; i < size; ++i) {
                 for (int j = 0; j < size; ++j) {
@@ -297,6 +295,7 @@ public class GoGameLogic {
 
         public Board getPreview(GoMove move, Player player) {
             if (!move.move_type.equals(GoMove.TYPE.MOVE)) return null;
+            if (board.getCurrent_player() != player) return null;
 
             if (!computed[move.y][move.x]) {
                 previews[move.y][move.x] = GoGameLogic.this.board.makeMove(move, player);
@@ -333,7 +332,7 @@ public class GoGameLogic {
 
     public boolean makeMove(GoMove move, Player player) {
         if (move.move_type.equals(GoMove.TYPE.PASS)) {
-            board.pass();
+            board = board.pass();
             previews.reset();
             return true;
         }
