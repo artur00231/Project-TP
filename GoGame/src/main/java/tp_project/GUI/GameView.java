@@ -181,7 +181,6 @@ public class GameView extends JPanel {
             for (int i = 0; i < size; ++i) {
                 for (int j = 0; j < size; ++j) {
                     this._board[i][j].cell_state = board[i][j];
-                    this._board[i][j].paint_preview = false;
                 }
             }
             repaint();
@@ -202,9 +201,7 @@ public class GameView extends JPanel {
                 this.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseEntered(MouseEvent e) {
-                        GoMove move = new GoMove(GoMove.TYPE.MOVE);
-                        move.setXY(x, y);
-                        if (go_game.isLegal(move, player_color)) paint_preview = true;
+                        paint_preview = true;
                         repaint();
                     }
 
@@ -249,7 +246,10 @@ public class GameView extends JPanel {
                     if (this.y < size - 1) g2d.draw(new Line2D.Double(p.getX(), p.getY(), p.getX(), this.getHeight()));
                 }
 
-                if (this.paint_preview) {
+                GoMove move = new GoMove(GoMove.TYPE.MOVE);
+                move.setXY(x, y);
+
+                if (this.paint_preview && go_game.isLegal(move, player_color)) {
                     if (player_color.equals(GoGameLogic.Player.BLACK))
                         g2d.setColor(new Color(0, 0, 0, 127));
                     else
