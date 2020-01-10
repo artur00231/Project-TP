@@ -98,6 +98,10 @@ public class GoRemotePlayer implements GoPlayer {
         }
 
         while (socketIO.getCommand() != null) {
+            if (socketIO.getCommand().getCommand() == null) {
+                socketIO.popCommand();
+                continue;
+            }
             if (socketIO.getCommand().getType().equals("ServerCommand")) {
                 if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 700) {
                     if (((ServerCommand) socketIO.getCommand().getCommand()).getValue("get") != null) {

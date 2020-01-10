@@ -1,6 +1,5 @@
 package tp_project.GoGame;
 
-import tp_project.GoGame.GoMove.TYPE;
 import tp_project.GoGameLogic.GoGameLogic;
 
 public class GoAIPlayer implements GoPlayer {
