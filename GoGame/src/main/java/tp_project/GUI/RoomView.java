@@ -44,7 +44,7 @@ public class RoomView extends JPanel {
         this.add(new JScrollPane(player_list));
         this.add(control_panel);
 
-        leave_button.addActionListener(e -> { leave_button.setEnabled(false); action_listener.actionPerformed(new ActionEvent(Action.LEAVE, 0 ,""));});
+        leave_button.addActionListener(e -> { action_listener.actionPerformed(new ActionEvent(Action.LEAVE, 0 ,""));});
         add_bot_button.addActionListener(e -> action_listener.actionPerformed(new ActionEvent(Action.ADD_BOT, 0, "")));
         ready_check_box.addActionListener(e -> {
             action_listener.actionPerformed(new ActionEvent(((JCheckBox) e.getSource()).isSelected() ? Action.READY : Action.NOT_READY, 0, ""));
