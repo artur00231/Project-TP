@@ -1,46 +1,132 @@
 package tp_project.GUI;
 
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-
 import javax.swing.*;
-import java.awt.event.ActionListener;
 
-public class ReplayPicker extends JFXPanel {
+import tp_project.GoGameDBObject.DBGoGame;
+
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Optional;
+import java.util.TimeZone;
+import java.util.Vector;
+
+public class ReplayPicker {
     public enum Action {
         SELECT,
+        GET,
         RETURN
     }
 
-    ActionListener action_listener;
+    private ActionListener action_listener;
+    private JTextField date_input;
+    private JComboBox<String> games_info;
+    private ArrayList<DBGoGame> games;
+    private JPanel main_panel;
+    private JButton select;
 
-    public ReplayPicker(ActionListener a) {
-        action_listener = a;
+    public ReplayPicker() {
+        games = new ArrayList<>();
 
-        DatePicker date_picker = new DatePicker();
+        main_panel = new JPanel();
 
-        ComboBox<String> combo_box = new ComboBox<>(FXCollections.observableArrayList("game 1", "game 2"));
+        setupView();
+    }
 
-        GridPane grid = new GridPane();
-        grid.add(new Label("Date: "), 0, 0);
-        grid.add(date_picker, 1, 0);
+    public void setActionListener(ActionListener action_listener) {
+        this.action_listener = action_listener;
+    }
 
-        grid.add(new Label("Game"), 0, 1);
-        grid.add(combo_box, 1, 1);
+    public Optional<DBGoGame> getValue() {
+        return Optional.ofNullable(games.get(games_info.getSelectedIndex()));
+    }
 
-        grid.add(new Button("SELECT"), 0, 2);
-        grid.add(new Button("RETURN"), 1, 2);
+    public JPanel getView() {
+        return main_panel;
 
-        Platform.runLater(() -> {
-            this.setScene(new Scene(grid));
-        });
+    }
+
+    public void setAvaiableGames(ArrayList<DBGoGame> games) {
+        this.games = games;
+
+        updateView();
+    }
+
+    private void updateView() {
+        Vector<String> games_info_raw = new Vector<>();
+
+        for (DBGoGame game : games) {
+            Date date = new Date(game.getGameDate().getTime());
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            String formattedDate = sdf.format(date);
+            StringBuilder info = new StringBuilder(formattedDate);
+            info.append(" | ");
+            info.append(game.getPlayer1Name());
+            info.append(" vs ");
+            info.append(game.getPlayer2Name());
+
+            games_info_raw.add(info.toString());
+        }
+
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>( games_info_raw );
+        games_info.setModel( model );
+
+        if (games_info_raw.size() == 0) {
+            select.setEnabled(false);
+        } else {
+            select.setEnabled(true);
+        }
+    }
+
+    private void setupView() {
+        select = new JButton("Select");
+        select.addActionListener(
+            e -> action_listener.actionPerformed(new ActionEvent(Action.SELECT, 0, null)));
+        select.setEnabled(false);
+        JButton exit = new JButton("Exit");
+        exit.addActionListener(
+            e -> action_listener.actionPerformed(new ActionEvent(Action.RETURN, 0, null)));
+        JButton check_date = new JButton("Set");
+        check_date.addActionListener(
+            e -> setDate());
+
+        games_info = new JComboBox<>();
+
+        //Curr date
+        Date date = new Date(Instant.now().toEpochMilli());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String formattedDate = sdf.format(date);
+
+        date_input = new JTextField(formattedDate);
+        updateView();
+
+        JPanel center_panel = new JPanel();
+        center_panel.setLayout(new GridLayout(0, 1));
+        center_panel.add(date_input);
+        center_panel.add(check_date);
+        center_panel.add(games_info);
+
+        main_panel.setLayout(new BorderLayout());
+        main_panel.add(select, BorderLayout.PAGE_START);
+        main_panel.add(exit, BorderLayout.PAGE_END);
+        main_panel.add(center_panel, BorderLayout.CENTER);
+    }
+
+    private void setDate() {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            sdf.parse(date_input.getText());
+
+            action_listener.actionPerformed(new ActionEvent(Action.GET, 0, date_input.getText()));
+        } catch (ParseException exception) {
+            JOptionPane.showMessageDialog(null, "Invalid date");
+        }
     }
 }

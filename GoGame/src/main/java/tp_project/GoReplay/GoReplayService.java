@@ -14,7 +14,7 @@ public class GoReplayService extends GameService {
     }
 
     private HashMap<String, PlayerInfo> players_info;
-    //private GoGame game;
+    private GoReplayGame game;
     private Thread game_thread;
     private boolean is_game_runnig = false;
 
@@ -73,36 +73,16 @@ public class GoReplayService extends GameService {
 
     @Override
     protected void startGame() {
-        /*GoPlayer[] players = new GoPlayer[2];
-        String[] players_id = new String[2];
+        String id = players_info.keySet().stream().findAny().get();
 
-        for (String id : players_info.keySet()) {
-            if (!id.equals(host_id)) continue;
-            if (getClientInforamtion(id).socketIO != null) {
-                players[0] = new GoRemotePlayer(getClientInforamtion(id).socketIO, id, getClientInforamtion(id).name);
-            }
+        GoReplayPlayer player = new GoReplayPlayer(getClientInforamtion(id).socketIO, id, getClientInforamtion(id).name);
 
-            players_id[0] = id;
-        }
-
-        for (String id : players_info.keySet()) {
-            if (id.equals(host_id)) continue;
-            if (getClientInforamtion(id).socketIO != null) {
-                players[1] = new GoRemotePlayer(getClientInforamtion(id).socketIO, id, getClientInforamtion(id).name);
-            } else {
-                players[1] = new GoAIPlayer(game_size);
-            }
-
-            players_id[1] = id;
-        }
-
-        game = new GoGame(game_size, players[0], players_id[0], players[1], players_id[1], enemy_colour == 1 ? 0 : 1, this);
-        players[0].setGame(game);
-        players[1].setGame(game);
+        game = new GoReplayGame(player, this);
+        player.setGame(game);
 
         is_game_runnig = true;
         game_thread = new Thread(game);
-        game_thread.start();*/
+        game_thread.start();
     }
 
     @Override

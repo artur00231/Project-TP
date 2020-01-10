@@ -31,6 +31,10 @@ public class GoBoard implements ICommand {
         return board.toArray(new Integer[]{});
     }
 
+    public int getSize() {
+        return size;
+    }
+
     @Override
     public String toText() {
         StringBuilder text = new StringBuilder();

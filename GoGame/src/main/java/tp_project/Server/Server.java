@@ -426,6 +426,7 @@ public class Server implements Runnable, GameServiceManager {
 
     private void cleanServer() {
         for (Map.Entry<SocketChannel, Client> pair : clients.entrySet()) {
+            if (!pair.getKey().isRegistered()) continue;
             Client client = pair.getValue();
             AVAILABILITY data_status = client.socketIO.isAvailable();
             if (data_status == SocketIO.AVAILABILITY.YES) {

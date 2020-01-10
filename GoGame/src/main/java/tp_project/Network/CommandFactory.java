@@ -7,6 +7,9 @@ import tp_project.GoGame.GoGameServiceInfo;
 import tp_project.GoGame.GoMove;
 import tp_project.GoGame.GoStatus;
 import tp_project.GoGame.GoMove.TYPE;
+import tp_project.GoGameDBObject.DBGoGame;
+import tp_project.GoGameDBObject.DBGoGames;
+import tp_project.GoGameDBObject.DBGoStatus;
 import tp_project.GoReplay.GoReplayServiceInfo;
 import tp_project.Server.GameServiceInfo;
 import tp_project.Server.GameServicesInfo;
@@ -33,6 +36,12 @@ public class CommandFactory {
             return new GoBoard(1);
         } else if (type.equals("GoReplayServiceInfo")) {
             return new GoReplayServiceInfo();
+        } else if (type.equals("DBGoGame")) {
+            return new DBGoGame();
+        } else if (type.equals("DBGoGames")) {
+            return new DBGoGames();
+        } else if (type.equals("DBGoStatus")) {
+            return new DBGoStatus();
         }
         
         return null;
@@ -49,6 +58,9 @@ public class CommandFactory {
         types_names.add("GoStatus");
         types_names.add("GoBoard");
         types_names.add("GoReplayServiceInfo");
+        types_names.add("DBGoGame");
+        types_names.add("DBGoGames");
+        types_names.add("DBGoStatus");
         return types_names.contains(type);
     }
 }

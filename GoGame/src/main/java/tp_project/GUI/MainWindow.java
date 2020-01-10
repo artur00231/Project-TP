@@ -1,6 +1,5 @@
 package tp_project.GUI;
 
-import javafx.embed.swing.JFXPanel;
 import tp_project.GoGame.GoClient;
 import tp_project.GoGameLogic.GoGameLogic;
 import tp_project.Server.Server;
@@ -79,10 +78,30 @@ public class MainWindow
         });
 
         replay_client_view = new ReplayClientView(e -> {
-            switch ((ReplayClientView.Action)e.getSource()) {
+            ReplayClientView.Action a = (ReplayClientView.Action) e.getSource();
+            switch (a) {
+                case ERROR:
+                    JOptionPane.showMessageDialog(window, (String) a.object);
+                    showMainMenu();
+                    break;
+                case DISCONNECTED:
+                    replay_client_view.reset();
+                    JOptionPane.showMessageDialog(window, "Disconnected");
+                    showMainMenu();
+                    break;
                 case SET_CONTENT_PANE:
-                    window.setContentPane((JFXPanel)((ReplayClientView.Action) e.getSource()).object);
+                    window.setContentPane((JPanel)a.object);
+                    window.repaint();
+                    window.revalidate();
+
+                    ((JPanel)a.object).revalidate();
+                    ((JPanel)a.object).repaint();
+                    break;
+                case PACK:
                     window.pack();
+                    window.repaint();
+                    window.revalidate();
+                    break;
             }
         });
     }

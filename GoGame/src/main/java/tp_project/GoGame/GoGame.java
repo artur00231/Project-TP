@@ -59,7 +59,11 @@ public class GoGame implements Game {
             } catch (InterruptedException e) {}
         }
 
-        player1.yourMove();
+        if (player1_colour.equals(Player.BLACK)) {
+            player1.yourMove();
+        } else {
+            player2.yourMove();
+        }
 
         while (is_running) {
             if (!player1.update()) {
