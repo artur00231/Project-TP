@@ -91,7 +91,6 @@ public class GameView extends JPanel {
                 }
                 board.set(cells);
                 go_game.setBoard(cells, update_prev_board);
-                update_prev_board = true;
             }
         
             @Override
