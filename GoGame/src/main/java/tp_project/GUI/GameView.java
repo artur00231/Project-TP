@@ -68,6 +68,8 @@ public class GameView extends JPanel {
             your_move_label.setBackground(Color.WHITE);
         }
 
+        revalidate();
+
         player.setListener(new GoPlayerListener(){
             @Override
             public void yourMove() {
@@ -148,7 +150,16 @@ public class GameView extends JPanel {
 
     private class Board extends JPanel{
         private static final long serialVersionUID = -8773343169606093079L;
-        JPanel inner_panel = new JPanel();
+        JPanel inner_panel = new JPanel() {
+            @Override
+            public Dimension getPreferredSize() {
+                super.getPreferredSize();
+                Dimension d = Board.this.getSize();
+                int m = Math.min(d.width, d.height) - 10;
+                m = m - m % size;
+                return new Dimension(m, m);
+            }
+        };
         Cell[][] _board;
 
         public Board() {
@@ -165,21 +176,13 @@ public class GameView extends JPanel {
                     inner_panel.add(_board[y][x]);
                 }
             }
-            this.addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentResized(ComponentEvent e) {
-                    Dimension d = e.getComponent().getSize();
-                    int m = Math.min(d.width, d.height) - 10;
-                    m = m - m % size;
-                    inner_panel.setPreferredSize(new Dimension(m, m));
-                }
-            });
         }
 
         public void set(GoGameLogic.Cell[][] board) {
             for (int i = 0; i < size; ++i) {
                 for (int j = 0; j < size; ++j) {
                     this._board[i][j].cell_state = board[i][j];
+                    this._board[i][j].paint_preview = false;
                 }
             }
             repaint();
