@@ -1,8 +1,12 @@
 package tp_project.GoGame;
 
 import tp_project.GoGame.GoMove.TYPE;
+import tp_project.GoGameLogic.GoGameLogic;
 
 public class GoAIPlayer implements GoPlayer {
+    private GoGameLogic.Board board;
+    MinMax min_max = new MinMax();
+
     private GoGame game;
     private boolean is_game_runnig = true;
     private String player_ID;
@@ -12,6 +16,7 @@ public class GoAIPlayer implements GoPlayer {
     public GoAIPlayer(int game_size) {
         this.player_ID = "BOT";
         this.game_size = game_size;
+        board = new GoGameLogic.Board(game_size);
     }
 
     @Override
@@ -22,6 +27,17 @@ public class GoAIPlayer implements GoPlayer {
     @Override
     public void setGame(GoGame game) {
         this.game = game;
+
+    }
+
+    private void setBoard(GoBoard go_board) {
+        GoGameLogic.Cell[][] cells = new GoGameLogic.Cell[game_size][game_size];
+        for (int i = 0; i < game_size; i++) {
+            for (int j = 0; j < game_size; j++) {
+                cells[i][j] = (go_board.getValue(i, j) == go_board.EMPTY ? GoGameLogic.Cell.EMPTY : (go_board.getValue(i, j) == go_board.BLACK ? GoGameLogic.Cell.BLACK : GoGameLogic.Cell.WHITE));
+            }
+        }
+        board.setBoard(cells);
     }
 
     public boolean isGameRunnig() {
@@ -55,9 +71,14 @@ public class GoAIPlayer implements GoPlayer {
 
     @Override
     public void boardUpdated() {
+        setBoard(game.getBoard());
     }
 
     private void doMove() {
+        GoMove m = min_max.getMove(board);
+        game.makeMove(m, this);
+        return;
+        /*
         GoMove move = new GoMove(TYPE.MOVE);
 
         for (int i = 0; i < game_size; i++) {
@@ -69,6 +90,7 @@ public class GoAIPlayer implements GoPlayer {
                 }
             }
         }
+*/
     }
 
     @Override
