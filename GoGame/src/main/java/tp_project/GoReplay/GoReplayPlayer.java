@@ -1,34 +1,33 @@
-package tp_project.GoGame;
+package tp_project.GoReplay;
 
+import java.sql.Date;
+
+import tp_project.GoGame.GoBoard;
+import tp_project.GoGameDBObject.DBGoGames;
+import tp_project.GoGameDBObject.DBGoStatus;
 import tp_project.Network.ICommand;
 import tp_project.Network.SocketIO;
 import tp_project.Network.SocketIO.AVAILABILITY;
+import tp_project.Server.Player;
 import tp_project.Server.ServerCommand;
 
-public class GoRemotePlayer implements GoPlayer {
+public class GoReplayPlayer implements Player {
     private SocketIO socketIO;
-    private GoGame game;
-    private GoPlayerListener listener = null;
+    private GoReplayGame game;
+    private GoReplayPlayerListener listener = null;
     private boolean is_game_runnig = true;
-    private GoStatus last_status;
-    private String player_ID;
-    private String player_name;
     private boolean is_connected = true;
     private boolean is_ready = false;
 
-    public GoRemotePlayer(SocketIO socketIO, String player_ID, String player_name) {
+    public GoReplayPlayer(SocketIO socketIO, String player_ID, String player_name) {
         this.socketIO = socketIO;
-        this.player_ID = player_ID;
-        this.player_name = player_name;
     }
 
-    @Override
-    public void setListener(GoPlayerListener listener) {
+    public void setListener(GoReplayPlayerListener listener) {
         this.listener = listener;
     }
 
-    @Override
-    public void setGame(GoGame game) {
+    public void setGame(GoReplayGame game) {
         this.game = game;
     }
 
@@ -36,36 +35,41 @@ public class GoRemotePlayer implements GoPlayer {
         return is_game_runnig;
     }
 
-    public boolean makeMove(GoMove move) {
+    public boolean getGamesList(Date date) {
         if (!is_game_runnig) return false;
 
-        send(move);
+        ServerCommand cmd = new ServerCommand();
+        cmd.setCode(700);
+        cmd.addValue("get", "games");
+        cmd.addValue("date", date.toString());
+        send(cmd);
         return true;
     }
 
-    public boolean getGameStatus() {
+    public boolean getBoard(int game_id, int round) {
+        if (!is_game_runnig) return false;
+        
+        ServerCommand cmd = new ServerCommand();
+        cmd.setCode(700);
+        cmd.addValue("get", "board");
+        cmd.addValue("game_id", Integer.toString(game_id));
+        cmd.addValue("round", Integer.toString(round));
+        send(cmd);
+        return true;
+    }
+
+    public boolean getStatus(int game_id) {
         if (!is_game_runnig) return false;
         
         ServerCommand cmd = new ServerCommand();
         cmd.setCode(700);
         cmd.addValue("get", "status");
+        cmd.addValue("game_id", Integer.toString(game_id));
         send(cmd);
         return true;
     }
 
-    public boolean getGameBoard() {
-        if (!is_game_runnig) return false;
-
-        ServerCommand cmd = new ServerCommand();
-        cmd.setCode(700);
-        cmd.addValue("get", "board");
-        send(cmd);
-        return true;
-    }
-
-    @Override
     public void gameEnded() {
-        send(game.getGameStatus());
         ServerCommand cmd = new ServerCommand();
         cmd.setCode(703);
 
@@ -73,10 +77,6 @@ public class GoRemotePlayer implements GoPlayer {
         while (socketIO.popCommand() != null) socketIO.isAvailable();
 
         send(cmd);
-    }
-
-    public GoStatus getLastStatus() {
-        return last_status;
     }
 
     @Override
@@ -98,34 +98,57 @@ public class GoRemotePlayer implements GoPlayer {
         }
 
         while (socketIO.getCommand() != null) {
+            if (socketIO.getCommand().getCommand() == null) {
+                socketIO.popCommand();
+                continue;
+            }
             if (socketIO.getCommand().getType().equals("ServerCommand")) {
                 if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 700) {
                     if (((ServerCommand) socketIO.getCommand().getCommand()).getValue("get") != null) {
                         switch (((ServerCommand) socketIO.getCommand().getCommand()).getValue("get")) {
-                            case "status": {
+                            case "games": {
                                 if (game != null) {
-                                    GoStatus go_status = game.getGameStatus();
-                                    socketIO.send(go_status);
+                                    DBGoGames games = game.getGames(Date.valueOf(((ServerCommand) socketIO.getCommand().getCommand()).getValue("date")));
+                                    socketIO.send(games);
                                 }
                                 break;
                             }
                             case "board": {
                                 if (game != null) {
-                                    GoBoard go_status = game.getBoard();
-                                    socketIO.send(go_status);
+                                    GoBoard board = game.getBoard(Integer.valueOf(((ServerCommand) socketIO.getCommand().getCommand()).getValue("game_id")),
+                                    Integer.valueOf(((ServerCommand) socketIO.getCommand().getCommand()).getValue("round")));
+
+                                    if (board != null) {
+                                        socketIO.send(board);
+                                    } else {
+                                        ServerCommand cmd = new ServerCommand();
+                                        cmd.setCode(702);
+                                        send(cmd);
+                                    }
+                                }
+                                break;
+                            }
+                            case "status": {
+                                if (game != null) {
+                                    DBGoStatus go_status = game.getStatus(Integer.valueOf(((ServerCommand) socketIO.getCommand().getCommand()).getValue("game_id")));
+                                    if (go_status != null) {
+                                        socketIO.send(go_status);
+                                    }  else {
+                                        ServerCommand cmd = new ServerCommand();
+                                        cmd.setCode(702);
+                                        send(cmd);
+                                    }
                                 }
                                 break;
                             }
                         }
                     }
-                } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 701) {
-                       if (listener != null) listener.boardUpdated();
                 } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 702) {
                     if (listener != null) listener.error();
-                } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 704) {
-                    if (listener != null) listener.yourMove();
                 } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 705) {
                     if (game != null) is_ready = true;
+                } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 706) {
+                    if (game != null) game.end();
                 } else if (((ServerCommand) socketIO.getCommand().getCommand()).getCode() == 703) {
                     is_game_runnig = false;
                     socketIO.popCommand();
@@ -137,20 +160,12 @@ public class GoRemotePlayer implements GoPlayer {
                     cmd.addValue("ping", "0");
                     socketIO.send(cmd);
                 }
-            } else if (socketIO.getCommand().getType().equals("GoMove")) {
-                if (game != null) {
-                    boolean success = game.makeMove(((GoMove)socketIO.getCommand().getCommand()), this);
-                    if (!success) {
-                        ServerCommand cmd = new ServerCommand();
-                        cmd.setCode(702);
-                        socketIO.send(cmd);
-                    }
-                }
-            } else if (socketIO.getCommand().getType().equals("GoStatus")) {
-                last_status = (GoStatus) socketIO.getCommand().getCommand();
-                if (listener != null) listener.setStatus((GoStatus) socketIO.getCommand().getCommand());
             } else if (socketIO.getCommand().getType().equals("GoBoard")) {
                 if (listener != null) listener.setBoard((GoBoard) socketIO.getCommand().getCommand());
+            } else if (socketIO.getCommand().getType().equals("DBGoGames")) {
+                if (listener != null) listener.setGames((DBGoGames) socketIO.getCommand().getCommand());
+            } else if (socketIO.getCommand().getType().equals("DBGoStatus")) {
+                if (listener != null) listener.setStatus((DBGoStatus) socketIO.getCommand().getCommand());
             }
 
             socketIO.popCommand();
@@ -161,7 +176,6 @@ public class GoRemotePlayer implements GoPlayer {
 
     @Override
     public void yourMove() {
-        send(game.getGameStatus());
         ServerCommand cmd = new ServerCommand();
         cmd.setCode(704);
         send(cmd);
@@ -171,23 +185,6 @@ public class GoRemotePlayer implements GoPlayer {
         if (!socketIO.send(command)) return false;
 
         return true;
-    }
-
-    @Override
-    public String getID() {
-        return player_ID;
-    }
-
-    @Override
-    public String getName() {
-        return player_name;
-    }
-
-    @Override
-    public void boardUpdated() {
-        ServerCommand cmd = new ServerCommand();
-        cmd.setCode(701);
-        send(cmd);
     }
 
     public boolean isDisconnected() {
@@ -203,10 +200,22 @@ public class GoRemotePlayer implements GoPlayer {
         return true;
     }
 
+    public void exit() {
+        ServerCommand cmd = new ServerCommand();
+        cmd.setCode(706);
+
+        send(cmd);
+    }
+
     private void setRedy() {
         ServerCommand cmd = new ServerCommand();
         cmd.setCode(705);
 
         send(cmd);
+    }
+
+    @Override
+    public void boardUpdated() {
+        //DO NOTHING
     }
 }

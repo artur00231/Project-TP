@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class NetworkDataParser {
     private static NetworkDataParser network_data_parser = null;
     private Pattern pattern;
-    private String raw_data_pattern = "[A-Za-z0-9\\s=,\\\\.\\[\\]{}()-;]";
+    private String raw_data_pattern = "[A-Za-z0-9\\s=,\\\\.\\[\\]{}()-;_]";
     private String raw_pattern = "TBEGIN>>>\"([a-zA-Z]*)\"<<<\\[("+ raw_data_pattern +"*)\\]>>>\"[a-zA-Z]*\"<<<TEND";
 
     private NetworkDataParser() {

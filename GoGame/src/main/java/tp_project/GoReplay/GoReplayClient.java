@@ -32,13 +32,10 @@ public class GoReplayClient extends Client {
         super(socketIO, name);
     }
 
-    /*
-    public GoRemotePlayer getPlayer() {
-        if (getPosition() != POSITION.GAME)
-            return null;
-
-        return new GoRemotePlayer(socketIO, getID(), getName());
-    }*/
+    
+    public GoReplayPlayer getPlayer() {
+        return new GoReplayPlayer(socketIO, getID(), getName());
+    }
 
     @Override
     protected void handleExtendentCommand(ICommand command, String request) {
