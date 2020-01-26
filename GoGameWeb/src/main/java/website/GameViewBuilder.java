@@ -8,6 +8,8 @@ import GoGame.GoStatus;
 public class GameViewBuilder implements IViewBuilder {
     private String err_msg = "";
     private boolean add_err = false;
+    private String info_msg = "";
+    private boolean add_info = false;
 
     @Override
     public void addErrorMessage(String message) {
@@ -47,6 +49,9 @@ public class GameViewBuilder implements IViewBuilder {
             }
         }
 
+        String score = manager.getResource("score");
+        site.append(score);
+
         if (client.getGoPlayerAdapter().is_status) {
             status = (GoStatus) client.getGoPlayerAdapter().last_status;
         }
@@ -56,12 +61,15 @@ public class GameViewBuilder implements IViewBuilder {
             site.append("\n");
         }
 
-        if (add_err) {
+        if (add_err || add_info) {
             site.append("<script>\n");
-            site.append("function err_foo() {\n");
-            site.append("window.alert(\"" + err_msg + "\");\n");
+            site.append("function msg_foo() {\n");
+            if (add_err)
+                site.append("window.alert(\"" + err_msg + "\");\n");
+            if (add_info)
+                site.append("window.alert(\"" + info_msg + "\");\n");
             site.append("}\n");
-            site.append("window.onload=err_foo;\n");
+            site.append("window.onload=msg_foo;\n");
             site.append("</script>\n");
         }
 
@@ -69,11 +77,28 @@ public class GameViewBuilder implements IViewBuilder {
         site.append(manager.getResource("give_up_button"));
         site.append("\n</body>\n</html>");
 
+        site.append("<style>");
+        site.append(manager.getResource("style"));
+        site.append("</style><script>");
+        site.append(manager.getResource("js"));
+        site.append("</script>");
+
         return site.toString();
     }
 
     @Override
     public boolean autoRefresh() {
         return true;
+    }
+
+    @Override
+    public int autoRefreshTime() {
+        return 1;
+    }
+
+    @Override
+    public void addInfoMessage(String message) {
+        add_info = true;
+        info_msg = message;
     }
 }

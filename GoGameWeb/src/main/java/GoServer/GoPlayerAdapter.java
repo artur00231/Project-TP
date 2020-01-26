@@ -53,10 +53,9 @@ public class GoPlayerAdapter implements GoPlayerListener {
         is_status = false;
         is_board = false;
         is_error = false;
-        is_game_ended = false;
     }
     
     public boolean stateChanged() {
-        return is_my_move || is_updated || is_status|| is_board || is_error || is_game_ended;
+        return is_my_move || is_updated || is_status|| is_board || is_error;
     }
 }
