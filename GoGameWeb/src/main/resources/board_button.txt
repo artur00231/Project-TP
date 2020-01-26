@@ -1,3 +1,1 @@
-<form action="/index" method="post">
-  <button name="move" type="submit" value="XXX;YYY">STONE</button>
-</form>
+<div class = "cell" onclick="submit('XXX;YYY')"><div class="hor"></div><div class = "ver"></div><div class = "STONE"></div></div>

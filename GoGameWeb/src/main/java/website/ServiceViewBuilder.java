@@ -114,7 +114,9 @@ public class ServiceViewBuilder implements IViewBuilder {
         site.append(manager.getResource("exit_button"));
         site.append(ready_button);
         site.append(add_bot_button);
-        site.append("\n</body>\n</html>");
+        site.append("\n</body>\n</html><style>");
+        site.append(manager.getResource("style"));
+        site.append("</style>");
 
         return site.toString();
     }

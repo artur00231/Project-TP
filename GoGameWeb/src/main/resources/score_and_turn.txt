@@ -1,0 +1,2 @@
+<span id="move">MOVE</span><br/>
+<span id="score">Score: SCORE</span>

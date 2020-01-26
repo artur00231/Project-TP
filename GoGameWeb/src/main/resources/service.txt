@@ -1,7 +1,7 @@
-<div style="border-style: solid;">
+<div class="service_info">
 	HOST: host_name
-	<br>
-    <form action="/index" method="post">
-		<button name="connect" type="submit" value="service_id">JOIN</button>
-	</form> 
+
+    <form action="/index" method="post" style="display: inline">
+		<button name="connect" type="submit" value="service_id" id="join_button">JOIN</button>
+	</form>
 </div>
