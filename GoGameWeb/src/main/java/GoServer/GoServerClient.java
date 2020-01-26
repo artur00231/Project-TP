@@ -9,6 +9,9 @@ public class GoServerClient {
     private GoClientAdapter go_client_adapter = null;
     private GoRemotePlayer go_player = null;
     private GoPlayerAdapter go_player_adapter = null;
+    private boolean auto_update = true;
+    private boolean render_site = true;
+    private String message = "";
 
 
     public GoServerClient(String ID) {
@@ -35,6 +38,20 @@ public class GoServerClient {
         return go_player_adapter;
     }
 
+    public boolean getAutoUpdate() {
+        return auto_update;
+    }
+
+    public boolean getRender() {
+        return render_site;
+    }
+
+    public String getMessage() {
+        String msg_cpy = new String(message);
+        message = "";
+        return msg_cpy;
+    }
+
 
     public void setGoClient(GoClient client) {
         go_client = client;
@@ -52,5 +69,22 @@ public class GoServerClient {
 
         go_player_adapter = new GoPlayerAdapter();
         go_player.setListener(go_player_adapter);
+    }
+
+    public void removeGoPlayer() {
+        go_player = null;
+        go_player_adapter = null;
+    }
+
+    public void setAutoUpdate(boolean auto_update) {
+        this.auto_update = auto_update;
+    }
+
+    public void setRender(boolean render) {
+        this.render_site = render;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
