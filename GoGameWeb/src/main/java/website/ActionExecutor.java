@@ -182,6 +182,7 @@ public class ActionExecutor {
                 return false;
             }
 
+            client.setRender(false);
             return true;
         }
     
