@@ -11,7 +11,6 @@ import GoServer.GoServerClient;
 import GoServer.GoServerClients;
 import Server.Client.POSITION;
 
-
 public class Index extends HttpServlet {
   private static final long serialVersionUID = 1L;
   private static int num_of_index_servlets = 0;
@@ -27,7 +26,8 @@ public class Index extends HttpServlet {
   }
 
   @Override
-  public void service(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+  public void service(final HttpServletRequest request, final HttpServletResponse response)
+      throws ServletException, IOException {
 
     response.setContentType("text/html");
     PrintWriter pw = response.getWriter();
@@ -40,8 +40,13 @@ public class Index extends HttpServlet {
     GoServerClient client = clients.getClient(request.getSession().getId()).get();
     if (client.getGoClient() != null) {
 
+      try {
+        client.semaphore.acquire();
+      } catch (InterruptedException e) {
+      }
       client.setAutoUpdate(false);
-
+      client.semaphore.release();
+      
       if (client.getGoClient().getPosition() == POSITION.GAME) {
         if (client.getGoPlayer() == null) {
           client.createGoPlayer();
@@ -100,7 +105,12 @@ public class Index extends HttpServlet {
     }
 
     
+    try {
+      client.semaphore.acquire();
+    } catch (InterruptedException e) {
+    }
     client.setAutoUpdate(true);
+    client.semaphore.release();
     pw.close();
   }
 

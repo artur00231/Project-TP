@@ -55,6 +55,10 @@ public class GoServerClients {
             public void run() {
                 synchronized (GoServerClients.class) {
                     for (GoServerClient client : clients.values()) {
+                        try {
+                            client.semaphore.acquire();
+                        } catch (InterruptedException e) {}
+                        
                         if (client.getAutoUpdate() && client.getGoClient() != null) {
                             if (client.getGoClient().getPosition() == POSITION.GAME) {
                                 if (client.getGoPlayer() == null) {
@@ -66,6 +70,8 @@ public class GoServerClients {
                                 client.getGoClient().update();
                             }
                         }
+
+                        client.semaphore.release(); 
                     }
                 }
             }

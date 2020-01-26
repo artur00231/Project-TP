@@ -67,7 +67,7 @@ public class GoRemotePlayer implements GoPlayer {
     }
 
     @Override
-    public boolean update() {
+    public synchronized boolean update() {
         if (!is_game_runnig) return false;
 
         SocketIO.AVAILABILITY status = socketIO.isAvailable();

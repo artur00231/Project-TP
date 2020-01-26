@@ -1,5 +1,7 @@
 package GoServer;
 
+import java.util.concurrent.Semaphore;
+
 import GoGame.GoClient;
 import GoGame.GoRemotePlayer;
 
@@ -13,6 +15,7 @@ public class GoServerClient {
     private boolean render_site = true;
     private String message = "";
 
+    public Semaphore semaphore = new Semaphore(1);
 
     public GoServerClient(String ID) {
         this.ID = ID;

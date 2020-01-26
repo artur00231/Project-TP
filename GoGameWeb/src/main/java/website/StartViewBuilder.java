@@ -33,7 +33,6 @@ public class StartViewBuilder implements IViewBuilder {
             site.append("</script>\n");
         }
 
-
         site.append(manager.getResource("start_form"));
         site.append("\n</body>\n</html>");
 
