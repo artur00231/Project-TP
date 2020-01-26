@@ -1,6 +1,6 @@
-<div style="border-style: solid;">
+<div class="player_info">
 	Player: name
-    <input type="checkbox" disabled="true" checked>READY
-	<br>
+    <input type="checkbox" disabled="true" checked class="ready_checkbox">
+    <span class="ready_label">READY</span>
     kick_button
 </div>

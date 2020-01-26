@@ -62,7 +62,9 @@ public class ServerViewBuilder implements IViewBuilder {
         site.append(manager.getResource("exit_button"));
         site.append(manager.getResource("create_button"));
         site.append(manager.getResource("refresh_button"));
-        site.append("\n</body>\n</html>");
+        site.append("\n</body>\n</html><style>");
+        site.append(manager.getResource("style"));
+        site.append("</style>");
 
         return site.toString();
     }
