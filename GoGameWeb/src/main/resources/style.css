@@ -1,0 +1,31 @@
+.service_info, .player_info {
+	border-style: solid;
+	border-width: 3px;
+	border-radius: 10px;
+	margin-bottom: 5px;
+	padding: 5px;
+	max-width: 500px;
+	position: relative;
+}
+
+
+button {
+	width: 70px;
+	height: 25px;
+}
+
+#kick_button, #join_button {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translate(0, -50%);
+}
+
+.ready_label {
+    color: gray;
+}
+
+.ready_checkbox:checked + .ready_label {
+    color: green;
+}
