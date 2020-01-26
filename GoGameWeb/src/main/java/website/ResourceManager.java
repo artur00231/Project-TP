@@ -46,5 +46,6 @@ public class ResourceManager {
         resources.put("add_bot_button", "src\\main\\resources\\add_bot_button.txt");
         resources.put("give_up_button", "src\\main\\resources\\give_up_button.txt");
         resources.put("pass_button", "src\\main\\resources\\pass_button.txt");
+        resources.put("board_button", "src\\main\\resources\\board_button.txt");
     }
 }

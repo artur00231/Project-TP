@@ -9,15 +9,15 @@ public class BoardBuilder {
 
         board_builder.append("<table style=\"width:100%\">\n");
 
-        for (int y = 1; y < board.size; y++) {
+        for (int y = 0; y < board.size; y++) {
             board_builder.append("<tr>\n");
 
-            for (int x = 1; x < board.size; x++) {
+            for (int x = 0; x < board.size; x++) {
                 board_builder.append("<th>\n");
 
                 String board_button = resource_manager.getResource("board_button");
-                board_button = board_button.replaceAll("XXX", Integer.toString(x));
-                board_button = board_button.replaceAll("YYY", Integer.toString(y));
+                board_button = board_button.replaceAll("XXX", Integer.toString(y));
+                board_button = board_button.replaceAll("YYY", Integer.toString(x));
 
                 if (board.getValue(x, y) == board.BLACK) {
                     board_button = board_button.replaceAll("STONE", "B");
@@ -27,11 +27,12 @@ public class BoardBuilder {
                     board_button = board_button.replaceAll("STONE", "&nbsp;");
                 }
 
+                board_builder.append(board_button);
                 board_builder.append("</th>\n");
             }
 
             board_builder.append("</tr>\n");
-        }
+        };
 
         return board_builder.toString();
     }

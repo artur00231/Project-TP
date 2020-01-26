@@ -2,15 +2,20 @@ package GoServer;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Map.Entry;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
+import Server.Client.POSITION;
+
 public class GoServerClients {
     private static GoServerClients instance = null;
 
     private HashMap<String, GoServerClient> clients;
+    private Timer auto_update_timer;
     
     private class DelayedClient implements Delayed {
         private String ID = "";
@@ -44,6 +49,27 @@ public class GoServerClients {
     private GoServerClients() {
         clients = new HashMap<>();
         clients_to_delete = new DelayQueue<>();
+        auto_update_timer = new Timer();
+        auto_update_timer.scheduleAtFixedRate(new TimerTask(){
+            @Override
+            public void run() {
+                synchronized (GoServerClients.class) {
+                    for (GoServerClient client : clients.values()) {
+                        if (client.getAutoUpdate() && client.getGoClient() != null) {
+                            if (client.getGoClient().getPosition() == POSITION.GAME) {
+                                if (client.getGoPlayer() == null) {
+                                    client.createGoPlayer();
+                                }
+
+                                client.getGoPlayer().update();
+                            } else {
+                                client.getGoClient().update();
+                            }
+                        }
+                    }
+                }
+            }
+        }, 100, 50);
     }
 
     public static GoServerClients getInstance() {
@@ -61,9 +87,15 @@ public class GoServerClients {
     public static void destroy() {
         if (instance != null) {
             for (Entry<String, GoServerClient> pair : instance.clients.entrySet()) {
-                System.out.println(pair.getKey() + ": " + pair.getValue());
+                if (pair.getValue().getGoClient() != null) {
+                    pair.getValue().getGoClient().disconnect();
+                }
             }
+
+            instance.auto_update_timer.cancel();
         }
+
+        instance = null;
     }
 
     public Optional<GoServerClient> getClient(String ID) {
