@@ -49,6 +49,9 @@ public class GameViewBuilder implements IViewBuilder {
             }
         }
 
+        String score = manager.getResource("score");
+        site.append(score);
+
         if (client.getGoPlayerAdapter().is_status) {
             status = (GoStatus) client.getGoPlayerAdapter().last_status;
         }
@@ -73,6 +76,12 @@ public class GameViewBuilder implements IViewBuilder {
         site.append(manager.getResource("pass_button"));
         site.append(manager.getResource("give_up_button"));
         site.append("\n</body>\n</html>");
+
+        site.append("<style>");
+        site.append(manager.getResource("style"));
+        site.append("</style><script>");
+        site.append(manager.getResource("js"));
+        site.append("</script>");
 
         return site.toString();
     }
