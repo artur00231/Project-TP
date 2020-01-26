@@ -3,22 +3,27 @@ package website;
 import javax.servlet.http.HttpServletRequest;
 
 import GoGame.GoClient;
+import GoGame.GoMove;
+import GoGame.GoMove.TYPE;
 import GoServer.GoClientFactory;
 import GoServer.GoServerClient;
+
 public class ActionExecutor {
     public String err_message = "";
-    
+
     public boolean execAction(HttpServletRequest request, GoServerClient client) {
         if (client.getGoClient() == null) {
             return execStartAction(request, client);
         }
 
         switch (client.getGoClient().getPosition()) {
-            case SERVER:
-                return execServerAction(request, client);
-            case GAMESERVICE:
-                return execServiceAction(request, client);
-            default:
+        case SERVER:
+            return execServerAction(request, client);
+        case GAMESERVICE:
+            return execServiceAction(request, client);
+        case GAME:
+            return execGameAction(request, client);
+        default:
         }
 
         return false;
@@ -39,10 +44,11 @@ public class ActionExecutor {
         err_message = "Server internal error";
 
         GoClient go_client = GoClientFactory.createCilent(request.getParameter("name"));
-        if (go_client == null) return false;
+        if (go_client == null)
+            return false;
 
         go_client.update();
-        go_client.update(); //To be sure
+        go_client.update(); // To be sure
 
         client.setGoClient(go_client);
 
@@ -69,7 +75,8 @@ public class ActionExecutor {
                 int size = 0;
                 try {
                     size = Integer.parseInt(request.getParameter("size"));
-                    if (size < 9 || size > 19) throw new NumberFormatException();
+                    if (size < 9 || size > 19)
+                        throw new NumberFormatException();
                 } catch (NumberFormatException exception) {
                     return false;
                 }
@@ -81,7 +88,7 @@ public class ActionExecutor {
 
                 client.getGoClient().setGameSize(size);
                 client.getGoClient().update();
-                client.getGoClient().update(); //To be sure
+                client.getGoClient().update(); // To be sure
 
                 return true;
             } else {
@@ -92,7 +99,7 @@ public class ActionExecutor {
         if (request.getParameter("connect") != null) {
             client.getGoClientAdapter().reset();
             client.getGoClient().connect(request.getParameter("connect"));
-            
+
             while (!client.getGoClientAdapter().isPosChanged()) {
                 client.getGoClient().update();
 
@@ -106,7 +113,7 @@ public class ActionExecutor {
                 return false;
             }
         }
-    
+
         return true;
     }
 
@@ -146,10 +153,12 @@ public class ActionExecutor {
 
             while (!client.getGoClientAdapter().stateChanged()) {
                 client.getGoClient().update();
-    
+
                 if (client.getGoClient().getPosition() == Server.Client.POSITION.DISCONNECTED) {
                     return false;
                 }
+
+                client.setRender(false);
             }
 
             return true;
@@ -176,6 +185,44 @@ public class ActionExecutor {
             return true;
         }
     
+        return
+        
+        true;
+    }
+
+    private boolean execGameAction(HttpServletRequest request, GoServerClient client) {
+        err_message = "Server internal error";
+
+        if (request.getParameter("pass") != null && request.getParameter("pass").equals("pass")) {
+            client.getGoPlayer().makeMove(new GoMove(TYPE.PASS));
+
+            client.setRender(false);
+            return true;
+        }
+
+        if (request.getParameter("give_up") != null && request.getParameter("give_up").equals("give_up")) {
+            client.getGoPlayer().makeMove(new GoMove(TYPE.GIVEUP));
+
+            client.setRender(false);
+            return true;
+        }
+
+        if (request.getParameter("move") != null) {
+            String[] pos = request.getParameter("move").split(";");
+
+            try {
+                GoMove move = new GoMove(TYPE.MOVE);
+                move.setXY(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]));
+                client.getGoPlayer().makeMove(move);
+            } catch (NumberFormatException exception) {
+                err_message = "Invalid input";
+
+                return false;
+            }
+
+            return true;
+        }
+
         return true;
     }
 }
