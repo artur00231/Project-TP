@@ -1,0 +1,7 @@
+<div style="border-style: solid;">
+	HOST: host_name
+	<br>
+    <form action="/index" method="post">
+		<button name="connect" type="submit" value="service_id">JOIN</button>
+	</form> 
+</div>

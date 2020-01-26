@@ -1,0 +1,3 @@
+<form action="/index" method="post">
+  <button name="ready" type="submit" value="ready_state">Ready</button>
+</form> 

@@ -1,0 +1,6 @@
+<div style="border-style: solid;">
+	Player: name
+    <input type="checkbox" disabled="true" checked>READY
+	<br>
+    kick_button
+</div>

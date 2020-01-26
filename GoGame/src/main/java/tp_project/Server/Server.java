@@ -329,7 +329,11 @@ public class Server implements Runnable, GameServiceManager {
             return;
         }
 
-        if (cmd.getValue("action") == null) sendCode(client.socketIO, 400);
+        if (cmd.getValue("action") == null) {
+            client.socketIO.popCommand();;
+            sendCode(client.socketIO, 400);
+            return;
+        } 
 
         switch (cmd.getValue("action")) {
             case "getServicesInfo":

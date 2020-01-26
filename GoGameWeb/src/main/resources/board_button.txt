@@ -1,0 +1,3 @@
+<form action="/index" method="post">
+  <button name="move" type="submit" value="XXX;YYY">STONE</button>
+</form>

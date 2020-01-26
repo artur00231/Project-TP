@@ -1,0 +1,3 @@
+<form action="/index" method="post">
+  <button name="bot" type="submit" value="bot">Add Bot</button>
+</form>

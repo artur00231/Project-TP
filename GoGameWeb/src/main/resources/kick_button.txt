@@ -1,0 +1,3 @@
+<form action="/index" method="post">
+  <button name="kick" type="submit" value="player_id">Kick</button>
+</form> 

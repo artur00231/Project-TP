@@ -7,11 +7,12 @@ import java.util.Random;
 
 public class MinMax {
     Random rand = new Random();
+    private int max_deph = 1;
 
     GoMove getMove(GoGameLogic.Board b) {
         ArrayList<GoMove> m = new ArrayList<>();
         m.add(new GoMove(GoMove.TYPE.PASS));
-        int min = bestScore(b.pass(), 2);
+        int min = bestScore(b.pass(), max_deph);
         System.out.println("Pass: " + min);
 
         for (int i = 0; i < b.getSize(); ++i) {
@@ -21,7 +22,7 @@ public class MinMax {
                 curr_m.y = i;
                 GoGameLogic.Board next = b.makeMove(curr_m, b.getCurrent_player());
                 if (next == null) {System.out.print(" -  "); continue;}
-                int curr = bestScore(next,2);
+                int curr = bestScore(next,max_deph);
                 System.out.print(String.format("%3d ", curr));
                 if (curr < min) {
                     min = curr;
