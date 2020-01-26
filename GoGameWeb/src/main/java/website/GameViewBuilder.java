@@ -50,13 +50,23 @@ public class GameViewBuilder implements IViewBuilder {
         }
 
         String score = manager.getResource("score");
-        site.append(score);
 
         if (client.getGoPlayerAdapter().is_status) {
             status = (GoStatus) client.getGoPlayerAdapter().last_status;
         }
 
         if (board != null && status != null) {
+            
+
+            if (!status.curr_move.equals(client.getGoClient().getID())) {
+                score = score.replaceAll("MOVE", "&nbsp;");
+            } else {
+                score = score.replaceAll("MOVE", "Your move");
+            }
+
+            score = score.replaceAll("SCORE", getScore(status, client.getGoClient().getID()));
+
+            site.append(score);
             site.append(BoardBuilder.buildBoard(board));
             site.append("\n");
         }
@@ -100,5 +110,43 @@ public class GameViewBuilder implements IViewBuilder {
     public void addInfoMessage(String message) {
         add_info = true;
         info_msg = message;
+    }
+
+    private String getScore(GoStatus status, String player_ID) {
+        String my_score;
+        String my_points;
+        String opponent_score;
+        String opponent_points;
+        if (status.player1.equals(player_ID)) {
+            my_score = Integer.toString(status.player1_total_score);
+            opponent_score = Integer.toString(status.player2_total_score);
+            my_points = Integer.toString(status.stones_capured_by_player1);
+            opponent_points = Integer.toString(status.stones_capured_by_player2);
+            int score_length = my_score.length() > opponent_score.length() ? my_score.length() : opponent_score.length();
+            int points_length = my_points.length() > opponent_points.length() ? my_points.length() : opponent_points.length();
+            score_length = score_length > 1 ? score_length : 2;
+            points_length = points_length > 1 ? points_length : 2;
+
+            my_score = String.format("%0" + score_length + "d", status.player1_total_score);
+            opponent_score = String.format("%0" + score_length + "d", status.player2_total_score);
+            my_points = String.format("%0" + points_length + "d", status.stones_capured_by_player1);
+            opponent_points = String.format("%0" + points_length + "d", status.stones_capured_by_player2);
+        } else {
+            my_score = Integer.toString(status.player2_total_score);
+            opponent_score = Integer.toString(status.player1_total_score);
+            my_points = Integer.toString(status.stones_capured_by_player2);
+            opponent_points = Integer.toString(status.stones_capured_by_player1);
+            int score_length = my_score.length() > opponent_score.length() ? my_score.length() : opponent_score.length();
+            int points_length = my_points.length() > opponent_points.length() ? my_points.length() : opponent_points.length();
+            score_length = score_length > 1 ? score_length : 2;
+            points_length = points_length > 1 ? points_length : 2;
+
+            my_score = String.format("%0" + score_length + "d", status.player2_total_score);
+            opponent_score = String.format("%0" + score_length + "d", status.player1_total_score);
+            my_points = String.format("%0" + points_length + "d", status.stones_capured_by_player2);
+            opponent_points = String.format("%0" + points_length + "d", status.stones_capured_by_player1);
+        }
+
+        return "Score<br>" + my_points + "-" + opponent_points + "<br>End score<br>" + my_score + "-" + opponent_score;
     }
 }
