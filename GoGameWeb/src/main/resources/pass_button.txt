@@ -1,0 +1,3 @@
+<form action="/index" method="post">
+  <button name="pass" type="submit" value="pass">Pass</button>
+</form> 

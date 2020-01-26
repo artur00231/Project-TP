@@ -1,0 +1,8 @@
+<form action="/index" method="post">
+    <button name="create" value="create">Create</button>
+    <select name="size">
+    <option value="9" selected="selected">9</option>
+    <option value="13">13</option>
+    <option value="19">19</option>
+    </select>
+</form>

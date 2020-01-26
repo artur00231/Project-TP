@@ -1,0 +1,3 @@
+<form action="/index" method="post">
+  <button name="exit" type="submit" value="exit">Exit</button>
+</form>

@@ -1,0 +1,3 @@
+<form action="/index" method="post">
+  <button name="give_up" type="submit" value="give_up">Give up</button>
+</form> 
