@@ -74,6 +74,8 @@ public class GoServerClients {
                         client.semaphore.release(); 
                     }
                 }
+
+                prolongAndDelete("");
             }
         }, 100, 50);
     }
@@ -106,22 +108,7 @@ public class GoServerClients {
 
     public Optional<GoServerClient> getClient(String ID) {
 
-        synchronized (GoServerClients.class) {
-            clients_to_delete.removeIf(x -> x.ID.equals(ID));
-            clients_to_delete.add(new DelayedClient(ID, 20000));
-
-            DelayedClient delayed_client = clients_to_delete.poll();
-            while (delayed_client != null) {
-                GoServerClient client = clients.get(delayed_client.ID);
-                if (client != null && client.getGoClient() != null) {
-                    client.getGoClient().disconnect();
-                }
-
-                clients.remove(delayed_client.ID);
-                delayed_client = clients_to_delete.poll();
-            }
-
-        }
+        prolongAndDelete(ID);
 
         return Optional.ofNullable(clients.get(ID));
     }
@@ -135,5 +122,24 @@ public class GoServerClients {
         }
 
         return client;
+    }
+
+    private synchronized void prolongAndDelete(String ID) {
+
+        if (!ID.equals("")) {
+            clients_to_delete.removeIf(x -> x.ID.equals(ID));
+            clients_to_delete.add(new DelayedClient(ID, 20000));
+        }
+
+        DelayedClient delayed_client = clients_to_delete.poll();
+        while (delayed_client != null) {
+            GoServerClient client = clients.get(delayed_client.ID);
+            if (client != null && client.getGoClient() != null) {
+                client.getGoClient().disconnect();
+            }
+
+            clients.remove(delayed_client.ID);
+            delayed_client = clients_to_delete.poll();
+        }
     }
 }
